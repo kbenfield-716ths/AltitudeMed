@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>High Altitude Medicine — Case Engine</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+  --bg: #06090f;
+  --surface: #0d1520;
+  --surface2: #141f30;
+  --border: #1e2d42;
+  --border2: #2e4560;
+  --text: #e8f4ff;
+  --text-dim: #7a9abb;
+  --text-mid: #aecde8;
+  --accent: #5cc5ff;
+  --green: #3eeaa8;
+  --warn: #f5a840;
+  --danger: #ff4d6a;
+  --purple: #b466ff;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 16px;
+}
+
+.viewport-scaler {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.app {
+  width: 1200px;
+  height: 720px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform-origin: top left;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+
+/* ── HEADER ─────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.55rem 1.2rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.header-brand { display: flex; align-items: center; gap: 0.65rem; }
+
+.header-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.header-sub {
+  font-size: 0.72rem;
+  color: var(--text-mid);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.header-spacer { flex: 1; }
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  text-decoration: none;
+  border: 1px solid var(--border2);
+  padding: 0.28rem 0.7rem;
+  transition: all 0.2s;
+}
+.back-link:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ── MAIN BODY ──────────────────────────────────── */
+.main-body {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── CASE SIDEBAR ───────────────────────────────── */
+.case-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-head {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 0.75rem 1rem 0.4rem;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.case-list {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  padding: 0.25rem 0 0.5rem;
+}
+
+.case-card {
+  margin: 0.25rem 0.6rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.18s;
+  background: transparent;
+}
+.case-card:hover { border-color: var(--border2); background: rgba(255,255,255,0.03); }
+.case-card.active { border-color: var(--accent); background: rgba(92,197,255,0.06); }
+
+.case-card-topic {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.topic-badge {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.45rem;
+  border-radius: 3px;
+}
+.topic-badge.ams   { background: rgba(245,168,64,0.15);  color: var(--warn);   border: 1px solid rgba(245,168,64,0.3); }
+.topic-badge.hace  { background: rgba(255,77,106,0.12);  color: var(--danger); border: 1px solid rgba(255,77,106,0.3); }
+.topic-badge.hape  { background: rgba(180,102,255,0.12); color: var(--purple); border: 1px solid rgba(180,102,255,0.3); }
+.topic-badge.pharm { background: rgba(92,197,255,0.12);  color: var(--accent); border: 1px solid rgba(92,197,255,0.3); }
+
+.diff-badge {
+  margin-left: auto;
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  font-family: 'Space Mono', monospace;
+}
+.diff-badge.beginner { color: var(--green); }
+.diff-badge.intermediate { color: var(--warn); }
+.diff-badge.advanced { color: var(--danger); }
+
+.case-card-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-mid);
+  line-height: 1.3;
+  margin-bottom: 0.2rem;
+}
+
+.case-card-meta {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-family: 'Space Mono', monospace;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0.4rem 0.8rem;
+}
+
+/* ── MAIN CHAT AREA ─────────────────────────────── */
+.chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── IDLE / WELCOME SCREEN ──────────────────────── */
+.idle-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.idle-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(92,197,255,0.08);
+  border: 1px solid rgba(92,197,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+}
+
+.idle-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.idle-desc {
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  max-width: 420px;
+  line-height: 1.6;
+}
+
+.idle-hint {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  font-family: 'Space Mono', monospace;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  line-height: 1.5;
+}
+
+/* ── ACTIVE CASE VIEW ───────────────────────────── */
+.case-view {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.case-view.visible { display: flex; }
+
+/* Stage progress bar */
+.stage-bar {
+  display: flex;
+  align-items: center;
+  padding: 0.55rem 1.2rem;
+  gap: 0.5rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.stage-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  transition: all 0.3s;
+  font-family: 'Space Mono', monospace;
+}
+.stage-item.active {
+  color: var(--accent);
+  background: rgba(92,197,255,0.1);
+  border: 1px solid rgba(92,197,255,0.25);
+}
+.stage-item.done {
+  color: var(--green);
+}
+.stage-item.done::before {
+  content: '✓ ';
+  font-size: 0.65rem;
+}
+
+.stage-arrow {
+  color: var(--border2);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.stage-spacer { flex: 1; }
+
+.new-case-btn {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid var(--border2);
+  padding: 0.28rem 0.65rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.06em;
+}
+.new-case-btn:hover { color: var(--text); border-color: var(--text-dim); }
+
+/* Messages container */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.msg-row {
+  display: flex;
+  gap: 0.75rem;
+  max-width: 820px;
+}
+.msg-row.student {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.msg-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+.msg-avatar.attending {
+  background: rgba(92,197,255,0.1);
+  border: 1px solid rgba(92,197,255,0.2);
+}
+.msg-avatar.student {
+  background: rgba(62,234,168,0.1);
+  border: 1px solid rgba(62,234,168,0.2);
+}
+
+.msg-bubble {
+  padding: 0.65rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  line-height: 1.6;
+  max-width: 680px;
+}
+.msg-row:not(.student) .msg-bubble {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-top-left-radius: 2px;
+}
+.msg-row.student .msg-bubble {
+  background: rgba(62,234,168,0.07);
+  border: 1px solid rgba(62,234,168,0.18);
+  color: var(--text);
+  border-top-right-radius: 2px;
+}
+
+.msg-label {
+  font-size: 0.65rem;
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.3rem;
+}
+.msg-row:not(.student) .msg-label { color: var(--accent); }
+.msg-row.student .msg-label { color: var(--green); text-align: right; }
+
+/* Typing indicator */
+.typing-indicator {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+.typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.65rem 0.9rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  border-top-left-radius: 2px;
+}
+.typing-dots span {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  animation: bounce 1.2s infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* Debrief panel */
+.debrief-panel {
+  display: none;
+  flex-direction: column;
+  gap: 0;
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.debrief-panel.visible { display: flex; }
+.debrief-inner { padding: 0.75rem 1.2rem; }
+.debrief-title {
+  font-size: 0.7rem;
+  font-family: 'Space Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--green);
+  margin-bottom: 0.3rem;
+}
+
+/* Input bar */
+.input-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 1.2rem;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.input-bar input {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.88rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.input-bar input::placeholder { color: var(--text-dim); }
+.input-bar input:focus { border-color: var(--accent); }
+
+.send-btn {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.18s;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+.send-btn:hover { background: #8ed6ff; }
+.send-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.hint-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 1.2rem 0.4rem;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.hint-chip {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  padding: 0.18rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.hint-chip:hover { color: var(--text-mid); border-color: var(--border2); }
+
+/* Error notice */
+.error-banner {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.2rem;
+  background: rgba(255,77,106,0.1);
+  border-top: 1px solid rgba(255,77,106,0.3);
+  font-size: 0.78rem;
+  color: var(--danger);
+  flex-shrink: 0;
+}
+.error-banner.visible { display: flex; }
+
+/* Config notice */
+.config-notice {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--surface2);
+  border: 1px solid var(--warn);
+  border-radius: 8px;
+  padding: 1.5rem 2rem;
+  text-align: center;
+  max-width: 420px;
+  z-index: 10;
+}
+.config-notice.visible { display: block; }
+.config-notice-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--warn);
+  margin-bottom: 0.6rem;
+  font-family: 'Space Mono', monospace;
+}
+.config-notice-body {
+  font-size: 0.82rem;
+  color: var(--text-mid);
+  line-height: 1.6;
+}
+.config-notice code {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--accent);
+}
+
+/* Mountain SVG in header */
+.mountain-icon { width:32px; height:26px; flex-shrink:0; }
+</style>
+</head>
+<body>
+
+<div class="viewport-scaler">
+  <div class="app">
+
+    <!-- ─── HEADER ─── -->
+    <header class="header">
+      <div class="header-brand">
+        <svg class="mountain-icon" viewBox="0 0 48 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 36L30 8L42 36H18Z" fill="#1e3a5f" stroke="#5cc5ff" stroke-width="1.5"/>
+          <path d="M2 36L14 14L26 36H2Z" fill="#152a40" stroke="#3a6a8f" stroke-width="1.2"/>
+          <path d="M27 18L30 8L33 18" stroke="#a0d8ff" stroke-width="1.2" stroke-linecap="round"/>
+          <circle cx="6" cy="10" r="2.5" fill="#f4d04a" opacity="0.9"/>
+          <path d="M6 10 L6 4" stroke="#f4d04a" stroke-width="0.8" opacity="0.6"/>
+        </svg>
+        <div>
+          <div class="header-title">High Altitude Medicine</div>
+          <div class="header-sub">Case Engine · Socratic Learning</div>
+        </div>
+      </div>
+      <div class="header-spacer"></div>
+      <a href="altitudephys.html" class="back-link">← Physiology Module</a>
+    </header>
+
+    <!-- ─── MAIN BODY ─── -->
+    <div class="main-body">
+
+      <!-- ─── CASE SIDEBAR ─── -->
+      <aside class="case-sidebar">
+        <div class="sidebar-head">Case Library</div>
+        <div class="case-list" id="caseList">
+          <!-- Populated by JS -->
+        </div>
+      </aside>
+
+      <!-- ─── CHAT AREA ─── -->
+      <main class="chat-area" id="chatArea">
+
+        <!-- Config notice (shown when PROXY_URL not set) -->
+        <div class="config-notice" id="configNotice">
+          <div class="config-notice-title">⚠ Proxy URL Not Configured</div>
+          <div class="config-notice-body">
+            Open <code>case-engine.html</code> and set <code>PROXY_URL</code> at the top of the
+            script to your Vercel deployment URL.<br><br>
+            See <code>SETUP.md</code> for step-by-step instructions.
+          </div>
+        </div>
+
+        <!-- Idle / welcome screen -->
+        <div class="idle-screen" id="idleScreen">
+          <div class="idle-icon">🩺</div>
+          <div class="idle-title">Clinical Case Simulator</div>
+          <div class="idle-desc">
+            Select a case from the library to begin. You will be presented with a clinical
+            scenario and must take history, arrive at a diagnosis, and propose treatment —
+            just as you would on the mountain.
+          </div>
+          <div class="idle-hint">
+            Ask questions · State your diagnosis · Propose treatment · Type <strong>"debrief"</strong> to finish
+          </div>
+        </div>
+
+        <!-- Active case view (hidden until case starts) -->
+        <div class="case-view" id="caseView">
+          <!-- Stage progress -->
+          <div class="stage-bar">
+            <div class="stage-item active" id="stage-history">History</div>
+            <div class="stage-arrow">›</div>
+            <div class="stage-item" id="stage-diagnosis">Diagnosis</div>
+            <div class="stage-arrow">›</div>
+            <div class="stage-item" id="stage-treatment">Treatment</div>
+            <div class="stage-arrow">›</div>
+            <div class="stage-item" id="stage-debrief">Debrief</div>
+            <div class="stage-spacer"></div>
+            <button class="new-case-btn" onclick="resetToIdle()">New Case</button>
+          </div>
+
+          <!-- Message feed -->
+          <div class="messages" id="messages"></div>
+
+          <!-- Error banner -->
+          <div class="error-banner" id="errorBanner">
+            <span>⚠</span>
+            <span id="errorText">Connection error. Check that your Vercel proxy is deployed and PROXY_URL is correct.</span>
+          </div>
+
+          <!-- Input bar -->
+          <div class="input-bar">
+            <input
+              type="text"
+              id="userInput"
+              placeholder="Ask a question, state your diagnosis, or propose treatment…"
+              onkeydown="handleKey(event)"
+            />
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send</button>
+          </div>
+
+          <!-- Quick-action hint chips -->
+          <div class="hint-row">
+            <span style="font-size:0.62rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-right:0.2rem;">Quick:</span>
+            <span class="hint-chip" onclick="quickSend('What are the vital signs?')">Vitals?</span>
+            <span class="hint-chip" onclick="quickSend('What does the lung exam reveal?')">Lung exam</span>
+            <span class="hint-chip" onclick="quickSend('What is the SpO₂ trend over the past 24 hours?')">SpO₂ trend</span>
+            <span class="hint-chip" onclick="quickSend('What is the neurological exam?')">Neuro exam</span>
+            <span class="hint-chip" onclick="quickSend('What medications has the patient taken?')">Medications</span>
+            <span class="hint-chip" onclick="quickSend('debrief')">Request debrief</span>
+          </div>
+        </div>
+
+      </main>
+    </div><!-- end main-body -->
+  </div><!-- end app -->
+</div><!-- end viewport-scaler -->
+
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  CONFIGURATION — update PROXY_URL after deploying to Vercel
+// ═══════════════════════════════════════════════════════════════════
+const PROXY_URL = 'https://YOUR_PROJECT.vercel.app/api/chat';
+//                  ^ Replace this with your actual Vercel URL
+
+// ═══════════════════════════════════════════════════════════════════
+//  CASE LIBRARY
+//  Each case has a system prompt that shapes Claude's behaviour.
+//  The [STAGE:xxx] tag in Claude's response updates the progress bar.
+// ═══════════════════════════════════════════════════════════════════
+const CASES = [
+  {
+    id: 'ams-moderate',
+    title: 'Headache at High Camp',
+    topic: 'AMS',
+    difficulty: 'Beginner',
+    location: '3,440 m · Namche',
+    system: `You are an attending physician running a Socratic clinical case simulation for a medical student learning altitude medicine. Your role is to present a case, answer their questions as a clinical data source, and guide them to arrive at the diagnosis and treatment plan themselves — without telling them directly.
+
+CASE DETAILS (do not volunteer all at once — reveal as the student asks):
+- Patient: 28-year-old female recreational trekker
+- Location: Namche Bazaar, Nepal, 3,440 m
+- Ascent: Flew Kathmandu (1,400 m) to Lukla (2,860 m) yesterday morning, trekked to Namche today
+- Chief complaint: Headache and fatigue since arriving in Namche, feeling off
+- Vitals: SpO₂ 91%, HR 86, RR 16, BP 118/74, Temp 36.8°C
+- Exam: Awake and oriented, mild frontal headache 6/10, no nausea currently but lost appetite at dinner, slept poorly last night, no vomiting, no ataxia, no confusion, lungs clear, no peripheral edema
+- True diagnosis: Moderate Acute Mountain Sickness (Lake Louise Score 4–5)
+- Correct treatment: Rest at current altitude, do NOT ascend until symptom-free for 24 h, oral hydration, acetaminophen or ibuprofen for headache, consider low-dose acetazolamide 125 mg BID to hasten acclimatization. Descent only required if symptoms worsen to HACE criteria.
+
+INTERACTION RULES:
+1. BEGIN by presenting: patient demographics, location, and chief complaint. Include SpO₂ on initial presentation. Do NOT front-load all findings.
+2. Answer clinical questions with realistic findings — be a cooperative case presenter.
+3. Do NOT state the diagnosis or treatment unprompted. Guide the student Socratically.
+4. When the student names a diagnosis: if wrong, give a targeted Socratic nudge (e.g., "Her SpO₂ is 91% — what does that tell you about her degree of hypoxia? Is this consistent with HAPE?"). If correct, confirm and prompt them to move to treatment.
+5. When the student proposes treatment: evaluate it specifically against WMS Guidelines. Note what is correct, what is missing, and what would be harmful (e.g., ascending would be dangerous).
+6. Keep responses to 2–4 sentences. Be clinical, not conversational. No markdown bullets in responses — write in prose.
+7. When the student types "debrief" or requests a case review, provide a structured plain-text debrief: what they got right, what they missed, key WMS guideline points. Keep it under 150 words.
+8. Start every response with exactly one of these stage tags (no space after colon): [STAGE:history] [STAGE:diagnosis] [STAGE:treatment] [STAGE:debrief]
+   - Use [STAGE:history] while the student is taking history
+   - Switch to [STAGE:diagnosis] when the student first offers a diagnosis attempt
+   - Switch to [STAGE:treatment] once the correct diagnosis is confirmed
+   - Switch to [STAGE:debrief] when you deliver the debrief
+   The tag must be the very first thing in your response. Strip it from what you display — it is parsed by the UI.`,
+  },
+  {
+    id: 'hace-severe',
+    title: 'The Confused Climber',
+    topic: 'HACE',
+    difficulty: 'Intermediate',
+    location: '4,800 m · Lobuche',
+    system: `You are an attending physician running a Socratic clinical case simulation for a medical student learning altitude medicine. Your role is to present a case, answer their questions as a clinical data source, and guide them to arrive at the diagnosis and treatment plan themselves — without telling them directly.
+
+CASE DETAILS (do not volunteer all at once — reveal as the student asks):
+- Patient: 34-year-old male experienced mountaineer on a guided Everest Base Camp + Island Peak expedition
+- Location: Lobuche, 4,800 m
+- Ascent history: Arrived at this altitude on Day 3 of a planned 6-day acclimatization rotation. Had headache since Day 1 (rated 5/10) but took ibuprofen and continued ascending per guide's schedule. Developed nausea and vomiting yesterday afternoon.
+- Chief complaint (as reported by tentmates): Found confused and unsteady when trying to get up to urinate at 4 AM
+- Vitals: SpO₂ 79%, HR 104, RR 24, BP 148/92, Temp 37.2°C
+- Exam: GCS 13 (E4 V3 M6 — confused), ataxic gait (cannot walk heel-to-toe), bilateral papilledema on fundoscopic exam if asked, no focal neurological deficits, lungs clear bilaterally, no peripheral edema
+- SpO₂ trend: Day 1 = 87%, Day 2 = 83%, Day 3 overnight = 79%
+- True diagnosis: High Altitude Cerebral Edema (HACE) — progressive AMS that was ignored and not treated with descent
+- Correct treatment: IMMEDIATE descent (minimum 1,000 m, ideally until symptoms resolve), dexamethasone 8 mg loading dose IM/PO then 4 mg every 6 hours, supplemental O₂ if available, portable hyperbaric chamber (Gamow bag) if descent is delayed — but descent is the definitive treatment. Do NOT give acetazolamide as primary treatment for HACE.
+
+INTERACTION RULES:
+1. BEGIN by presenting: the tentmates found this patient confused and unsteady at 4 AM, give location and basic demographics. Include SpO₂ on initial presentation.
+2. Answer clinical questions with realistic findings. Papilledema requires the student to specifically ask for fundoscopic exam.
+3. Do NOT state the diagnosis or treatment unprompted.
+4. When the student names AMS (not HACE): ask "Given his GCS of 13 and ataxic gait, does this meet criteria for simple AMS or has this progressed further? What do the WMS guidelines say about ataxia?"
+5. When diagnosis of HACE is confirmed, prompt for a complete management plan — emphasize urgency.
+6. If the student suggests acetazolamide as primary treatment for HACE: "Acetazolamide is used for AMS prophylaxis and treatment — what does the WMS guideline say about its role in established HACE versus dexamethasone?"
+7. Keep responses 2–4 sentences, clinical prose, no markdown bullets.
+8. On debrief: highlight the failure to descend when AMS was first recognised as the critical error; note the SpO₂ trend as an early warning sign.
+9. Start every response with exactly one stage tag as the very first content: [STAGE:history] [STAGE:diagnosis] [STAGE:treatment] [STAGE:debrief]`,
+  },
+  {
+    id: 'hape-early',
+    title: 'Dry Cough at Thorong La',
+    topic: 'HAPE',
+    difficulty: 'Intermediate',
+    location: '4,200 m · Manang',
+    system: `You are an attending physician running a Socratic clinical case simulation for a medical student learning altitude medicine. Your role is to present a case, answer their questions as a clinical data source, and guide them to arrive at the diagnosis and treatment plan themselves — without telling them directly.
+
+CASE DETAILS (do not volunteer all at once — reveal as the student asks):
+- Patient: 31-year-old male competitive trail runner attempting the Annapurna Circuit
+- Location: Manang, 3,520 m (acclimatization day before crossing Thorong La at 5,416 m)
+- Ascent: Flew to Pokhara, bused to Besisahar (760 m), trekked Manang in 3 days — faster than recommended
+- Chief complaint: Dry unproductive cough for 24 hours, had to stop on today's acclimatization hike due to dyspnea
+- Vitals: SpO₂ 82% (was 89% on arrival here yesterday), HR 114, RR 26, BP 144/90, Temp 37.0°C
+- Exam: Bilateral fine crackles audible at lung bases (requires the student to ask for lung exam), mild lip cyanosis, no headache, no confusion, no ataxia, alert and oriented, no peripheral edema
+- Additional: Dry cough started as mild tickle, progressed to persistent. Denies pink frothy sputum at this point (early HAPE). No prior history of HAPE.
+- True diagnosis: Early-to-Moderate HAPE
+- Correct treatment: IMMEDIATE descent (at least 1,000 m — absolutely no crossing of Thorong La tomorrow), supplemental O₂ targeting SpO₂ >90%, nifedipine 30 mg extended-release OR 10 mg immediate-release PO (repeat 10 mg IR in 15 min if needed), portable hyperbaric chamber if descent is delayed. Tadalafil 10 mg BID is an alternative if nifedipine unavailable. Salmeterol is no longer recommended as primary. Dexamethasone is NOT first-line for HAPE (it is for HACE).
+- TRAP: Students often confuse HAPE and HACE treatments. Nifedipine = HAPE. Dexamethasone = HACE.
+
+INTERACTION RULES:
+1. BEGIN by presenting: the patient's dyspnea stopping him during a hike, location, demographics. Include SpO₂.
+2. The crackles must be specifically elicited by asking for lung exam.
+3. Do NOT state the diagnosis unprompted.
+4. If the student focuses on AMS/headache: "Notably, he has no headache. Given the pulmonary findings, what altitude illness primarily involves the lungs?"
+5. If the student recommends dexamethasone as primary HAPE treatment: "Dexamethasone is the corticosteroid used in which altitude emergency? How does the mechanism of HAPE differ from HACE — and what does that mean for pharmacological management?"
+6. If the student says he can try to cross Thorong La tomorrow: "What would happen to his pulmonary pressures at 5,416 m given his current SpO₂ of 82%? What does the WMS guideline say about activity in HAPE?"
+7. Keep responses 2–4 sentences, clinical prose, no bullets.
+8. On debrief: emphasize the HAPE vs HACE drug distinction and the importance of lung exam in all altitude illness presentations.
+9. Start every response with exactly one stage tag as the very first content: [STAGE:history] [STAGE:diagnosis] [STAGE:treatment] [STAGE:debrief]`,
+  },
+  {
+    id: 'diamox-dilemma',
+    title: 'The Diamox Dilemma',
+    topic: 'Pharm',
+    difficulty: 'Advanced',
+    location: '3,800 m · Tengboche',
+    system: `You are an attending physician running a Socratic clinical case simulation for a medical student learning altitude medicine. Your role is to present a case, answer their questions as a clinical data source, and guide them to arrive at the correct assessment without telling them directly.
+
+CASE DETAILS (do not volunteer all at once — reveal as the student asks):
+- Patient: 38-year-old male trekker, currently at Tengboche (3,860 m), Day 2 at this altitude
+- Medications: Started prophylactic acetazolamide 250 mg BID 24 hours before arrival, as recommended
+- Chief complaint: Tingling in fingers and toes bilaterally (started last night), increased urination, mild headache rated 3/10, "feels a bit off" — concerned he has AMS and wants to know if he should stop acetazolamide and descend
+- Vitals: SpO₂ 93%, HR 78, RR 16, BP 122/78, Temp 36.8°C
+- Exam: Alert, oriented, no nausea, no vomiting, no ataxia, lungs clear, no facial/peripheral edema, headache is frontal 3/10 — no photophobia, could be tension-type
+- Additional history if asked: He drinks carbonated beverages and says they taste "flat" — classic sign of acetazolamide's carbonic anhydrase inhibition. He also mentions that beer tasted terrible last night.
+- True diagnosis: Acetazolamide side effects — NOT AMS requiring treatment change
+  - Paresthesias (tingling hands and feet): classic, benign carbonic anhydrase inhibitor side effect
+  - Polyuria: expected, also from carbonic anhydrase inhibition → bicarbonate diuresis
+  - Mild headache 3/10 without nausea/vomiting/ataxia does NOT meet WMS criteria for moderate-severe AMS
+  - Flat-tasting carbonated drinks: pathognomonic carbonic anhydrase inhibition
+  - Lake Louise Score: headache 1 + no other symptoms = score 1 (mild AMS only; does NOT require descent or medication change)
+- Correct management: Continue acetazolamide, reassure patient, maintain hydration, may take ibuprofen or acetaminophen for headache if needed. Do NOT descend, do NOT stop acetazolamide.
+
+INTERACTION RULES:
+1. BEGIN by presenting: a trekker concerned about tingling and wondering if he should stop his Diamox.
+2. This is a diagnostic differentiation case — the teaching point is distinguishing drug side effects from disease.
+3. Do NOT reveal that his symptoms are side effects. Let the student work through it.
+4. If the student says he should stop acetazolamide and descend: "His SpO₂ is 93% and Lake Louise Score is 1. What does the WMS guideline specify as criteria requiring descent or acetazolamide discontinuation? Do paresthesias appear in the WMS criteria for AMS?"
+5. If the student asks about the taste of carbonated drinks and recognises it: affirm this is a key clue.
+6. If the student correctly identifies drug side effects vs AMS: confirm and move to management — which should be reassurance + continue acetazolamide.
+7. Keep responses 2–4 sentences, clinical prose, no bullets.
+8. On debrief: emphasize knowing the acetazolamide side effect profile (paresthesias, polyuria, dysgeusia for carbonated drinks, photosensitivity) and the WMS Lake Louise criteria threshold.
+9. Start every response with exactly one stage tag as the very first content: [STAGE:history] [STAGE:diagnosis] [STAGE:treatment] [STAGE:debrief]`,
+  },
+  {
+    id: 'hape-susceptible',
+    title: 'The HAPE-Susceptible Return',
+    topic: 'HAPE',
+    difficulty: 'Advanced',
+    location: '3,600 m · Val d\'Isère',
+    system: `You are an attending physician running a Socratic clinical case simulation for a medical student learning altitude medicine. Your role is to present a case, answer their questions as a clinical data source, and guide them to arrive at the diagnosis and treatment plan themselves — without telling them directly.
+
+CASE DETAILS (do not volunteer all at once — reveal as the student asks):
+- Patient: 45-year-old female ski guide, Val d'Isère, France (3,600 m resort altitude), presenting overnight with respiratory symptoms
+- Relevant history (reveal only if asked): She had a documented HAPE episode 9 years ago at 3,200 m while skiing in Colorado. She is aware of her HAPE-susceptibility. She was NOT on nifedipine prophylaxis this trip, which was a management error.
+- Ascent: Lives at sea level (Geneva), flew in yesterday, started guiding immediately. No acclimatisation day.
+- Chief complaint: Woke at 2 AM with chest tightness and fatigue, noticed SpO₂ of 87% on her personal oximeter (her baseline at this altitude should be ~94%)
+- Vitals: SpO₂ 86%, HR 98, RR 22, BP 138/86, Temp 36.9°C
+- Exam: Subtle crackles right lower lobe > left lower lobe (requires asking), mild exertional dyspnea climbing stairs, no headache, no confusion, alert and oriented, no peripheral edema, no pink frothy sputum
+- True diagnosis: Early HAPE in a known HAPE-susceptible individual
+- Correct treatment: Supplemental O₂ (titrate SpO₂ >90%), nifedipine 30 mg extended-release, prepare for descent to valley (descent to ~1,200 m), evacuation if no improvement; ALSO critical teaching point: she should have been on prophylactic nifedipine 20–30 mg extended-release BID starting the day before ascent given her prior HAPE history.
+- Advanced teaching point: In HAPE-susceptible individuals, WMS guidelines recommend nifedipine prophylaxis AND a slow ascent protocol. Sildenafil (50 mg q8h) or tadalafil (10 mg BID) are alternatives for prophylaxis.
+
+INTERACTION RULES:
+1. BEGIN by presenting: female ski guide with chest tightness overnight and SpO₂ of 87% on her personal oximeter, in a ski resort at 3,600 m.
+2. Her HAPE-susceptibility history must be specifically elicited by the student (ask about prior altitude illness).
+3. The crackles require a lung exam request.
+4. If the student does not ask about prior altitude illness history: present the case normally. If they arrive at HAPE without knowing the prior history, give the history as part of the debrief.
+5. Once diagnosis is confirmed, ensure the student addresses: (a) acute treatment, AND (b) the failure of prophylaxis — what SHOULD have been prescribed before this trip?
+6. If the student does not mention prophylaxis failure: specifically prompt "Given her known HAPE susceptibility, what could have prevented this episode, per WMS guidelines?"
+7. Keep responses 2–4 sentences, clinical prose, no bullets.
+8. On debrief: highlight the prophylaxis failure as the central preventable error, and reinforce nifedipine/sildenafil/tadalafil prophylaxis options for HAPE-susceptible individuals.
+9. Start every response with exactly one stage tag as the very first content: [STAGE:history] [STAGE:diagnosis] [STAGE:treatment] [STAGE:debrief]`,
+  },
+];
+
+// ═══════════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════════
+let currentCase   = null;
+let conversation  = [];   // [{role:'user'|'assistant', content:string}]
+let currentStage  = 'history';
+let isLoading     = false;
+
+// ═══════════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════════
+function init() {
+  renderCaseList();
+  checkProxyConfig();
+  scaleApp();
+  window.addEventListener('resize', scaleApp);
+}
+
+function checkProxyConfig() {
+  if (PROXY_URL.includes('YOUR_PROJECT')) {
+    document.getElementById('configNotice').classList.add('visible');
+  }
+}
+
+function renderCaseList() {
+  const list = document.getElementById('caseList');
+  list.innerHTML = CASES.map(c => `
+    <div class="case-card" id="card-${c.id}" onclick="startCase('${c.id}')">
+      <div class="case-card-topic">
+        <span class="topic-badge ${c.topic.toLowerCase()}">${c.topic}</span>
+        <span class="diff-badge ${c.difficulty.toLowerCase()}">${c.difficulty}</span>
+      </div>
+      <div class="case-card-title">${c.title}</div>
+      <div class="case-card-meta">${c.location}</div>
+    </div>
+    ${c.id !== CASES[CASES.length-1].id ? '' : ''}
+  `).join('<div class="sidebar-divider"></div>');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  CASE MANAGEMENT
+// ═══════════════════════════════════════════════════════════════════
+function startCase(caseId) {
+  if (PROXY_URL.includes('YOUR_PROJECT')) return;
+
+  currentCase  = CASES.find(c => c.id === caseId);
+  conversation = [];
+  currentStage = 'history';
+
+  // Update sidebar active state
+  document.querySelectorAll('.case-card').forEach(el => el.classList.remove('active'));
+  document.getElementById('card-' + caseId)?.classList.add('active');
+
+  // Show case view
+  document.getElementById('idleScreen').style.display = 'none';
+  document.getElementById('configNotice').classList.remove('visible');
+  const cv = document.getElementById('caseView');
+  cv.classList.add('visible');
+
+  // Clear messages
+  document.getElementById('messages').innerHTML = '';
+  document.getElementById('errorBanner').classList.remove('visible');
+  resetStages();
+
+  // Trigger the first message from the attending
+  fetchAttending('[Begin the case. Present the patient and chief complaint.]', true);
+}
+
+function resetToIdle() {
+  currentCase  = null;
+  conversation = [];
+  currentStage = 'history';
+  document.querySelectorAll('.case-card').forEach(el => el.classList.remove('active'));
+  document.getElementById('caseView').classList.remove('visible');
+  document.getElementById('idleScreen').style.display = '';
+  document.getElementById('errorBanner').classList.remove('visible');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  MESSAGING
+// ═══════════════════════════════════════════════════════════════════
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function quickSend(text) {
+  document.getElementById('userInput').value = text;
+  sendMessage();
+}
+
+async function sendMessage() {
+  if (!currentCase || isLoading) return;
+
+  const input = document.getElementById('userInput');
+  const text  = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  appendMessage('student', text);
+  conversation.push({ role: 'user', content: text });
+
+  await fetchAttending(text, false);
+}
+
+async function fetchAttending(userText, isInit) {
+  if (isLoading) return;
+  isLoading = true;
+
+  const sendBtn = document.getElementById('sendBtn');
+  const input   = document.getElementById('userInput');
+  sendBtn.disabled = true;
+  input.disabled   = true;
+
+  // Add typing indicator
+  const typingEl = addTypingIndicator();
+
+  try {
+    const messages = isInit
+      ? [{ role: 'user', content: userText }]
+      : conversation;
+
+    const res = await fetch(PROXY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: currentCase.system,
+        messages,
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const raw  = data?.content?.[0]?.text ?? '';
+
+    // Parse stage tag
+    const stageMatch = raw.match(/^\[STAGE:(\w+)\]/);
+    const stage      = stageMatch ? stageMatch[1] : currentStage;
+    const content    = raw.replace(/^\[STAGE:\w+\]\s*/, '').trim();
+
+    // Update stage
+    if (stage && stage !== currentStage) {
+      advanceStage(stage);
+    }
+
+    removeTypingIndicator(typingEl);
+    appendMessage('attending', content);
+    conversation.push({ role: 'assistant', content: raw });
+
+  } catch (err) {
+    removeTypingIndicator(typingEl);
+    showError('Could not reach the proxy. Check PROXY_URL and Vercel deployment. (' + err.message + ')');
+  } finally {
+    isLoading  = false;
+    sendBtn.disabled = false;
+    input.disabled   = false;
+    input.focus();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  DOM HELPERS
+// ═══════════════════════════════════════════════════════════════════
+function appendMessage(role, content) {
+  const feed = document.getElementById('messages');
+
+  const row = document.createElement('div');
+  row.className = 'msg-row' + (role === 'student' ? ' student' : '');
+
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-avatar ' + (role === 'attending' ? 'attending' : 'student');
+  avatar.textContent = role === 'attending' ? '🩺' : '🧑‍⚕️';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+
+  const label = document.createElement('div');
+  label.className = 'msg-label';
+  label.textContent = role === 'attending' ? 'Attending' : 'You';
+
+  const text = document.createElement('div');
+  text.textContent = content;
+
+  bubble.appendChild(label);
+  bubble.appendChild(text);
+  row.appendChild(avatar);
+  row.appendChild(bubble);
+  feed.appendChild(row);
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function addTypingIndicator() {
+  const feed = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'typing-indicator';
+  wrap.innerHTML = `
+    <div class="msg-avatar attending">🩺</div>
+    <div class="typing-dots">
+      <span></span><span></span><span></span>
+    </div>
+  `;
+  feed.appendChild(wrap);
+  feed.scrollTop = feed.scrollHeight;
+  return wrap;
+}
+
+function removeTypingIndicator(el) {
+  if (el && el.parentNode) el.parentNode.removeChild(el);
+}
+
+function showError(msg) {
+  const banner = document.getElementById('errorBanner');
+  document.getElementById('errorText').textContent = msg;
+  banner.classList.add('visible');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  STAGE MANAGEMENT
+// ═══════════════════════════════════════════════════════════════════
+const STAGE_ORDER = ['history', 'diagnosis', 'treatment', 'debrief'];
+
+function resetStages() {
+  STAGE_ORDER.forEach(s => {
+    const el = document.getElementById('stage-' + s);
+    if (el) { el.classList.remove('active', 'done'); }
+  });
+  document.getElementById('stage-history')?.classList.add('active');
+  currentStage = 'history';
+}
+
+function advanceStage(newStage) {
+  const oldIdx = STAGE_ORDER.indexOf(currentStage);
+  const newIdx = STAGE_ORDER.indexOf(newStage);
+  if (newIdx <= oldIdx) return;
+
+  // Mark all passed stages as done
+  for (let i = oldIdx; i < newIdx; i++) {
+    const el = document.getElementById('stage-' + STAGE_ORDER[i]);
+    if (el) { el.classList.remove('active'); el.classList.add('done'); }
+  }
+
+  // Mark new stage as active
+  const el = document.getElementById('stage-' + newStage);
+  if (el) { el.classList.remove('done'); el.classList.add('active'); }
+
+  currentStage = newStage;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  VIEWPORT SCALING — same pattern as altitudephys.html
+// ═══════════════════════════════════════════════════════════════════
+function scaleApp() {
+  const app    = document.querySelector('.app');
+  const scaler = document.querySelector('.viewport-scaler');
+  const vw     = window.innerWidth;
+  const vh     = window.innerHeight;
+  const scale  = Math.min(vw / 1200, vh / 720);
+
+  app.style.transform = `scale(${scale})`;
+
+  const scaledW = 1200 * scale;
+  const scaledH = 720  * scale;
+  scaler.style.alignItems     = scaledH < vh ? 'center'     : 'flex-start';
+  scaler.style.justifyContent = scaledW < vw ? 'center'     : 'flex-start';
+}
+
+// ── Boot ──
+init();
+</script>
+</body>
+</html>
