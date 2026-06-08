@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>High Altitude Medicine — Interactive Learning</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --c-blue:   oklch(0.52 0.17 222);
+      --c-green:  oklch(0.52 0.14 152);
+      --c-amber:  oklch(0.68 0.14 82);
+      --c-orange: oklch(0.60 0.17 46);
+      --c-red:    oklch(0.50 0.20 18);
+      --bg:       oklch(0.975 0.010 224);
+    }
+    html, body { font-family: "DM Sans", system-ui, sans-serif; background: var(--bg); color: oklch(0.18 0.025 240); min-height: 100vh; font-size: 15px; -webkit-font-smoothing: antialiased; }
+    .site-header { background: #fff; border-bottom: 1px solid #e4e8ee; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 8px rgba(0,0,0,0.06); }
+    .header-inner { max-width: 980px; margin: 0 auto; padding: 0 24px; display: flex; align-items: stretch; gap: 0; }
+    .site-logo { display: flex; flex-direction: column; justify-content: center; padding: 12px 0; margin-right: 28px; flex-shrink: 0; }
+    .site-logo .title { font-size: 14.5px; font-weight: 800; color: oklch(0.18 0.025 240); letter-spacing: -0.01em; }
+    .site-logo .subtitle { font-size: 10.5px; font-weight: 500; color: oklch(0.55 0.015 240); letter-spacing: 0.04em; text-transform: uppercase; margin-top: 1px; }
+    .tab-nav { display: flex; gap: 0; flex: 1; overflow-x: auto; scrollbar-width: none; }
+    .tab-nav::-webkit-scrollbar { display: none; }
+    .tab-btn { padding: 0 16px; border: none; background: none; font-family: inherit; font-size: 13px; font-weight: 600; color: oklch(0.55 0.015 240); cursor: pointer; position: relative; transition: color 0.18s; display: flex; align-items: center; gap: 6px; white-space: nowrap; min-height: 52px; }
+    .tab-btn:hover { color: oklch(0.18 0.025 240); }
+    .tab-btn.active { color: oklch(0.18 0.025 240); }
+    .tab-btn.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2.5px; background: var(--active-color, var(--c-blue)); border-radius: 2px 2px 0 0; }
+    .tab-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .content-wrap { max-width: 980px; margin: 0 auto; padding: 32px 24px 60px; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .tab-panel { animation: fadeIn 0.22s ease; }
+    input[type=range] { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px; background: linear-gradient(to right, var(--c-blue) 0%, var(--c-blue) var(--pct, 0%), #e0e4ea var(--pct, 0%), #e0e4ea 100%); outline: none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 2.5px solid var(--c-blue); cursor: pointer; box-shadow: 0 1px 6px rgba(0,0,0,0.15); transition: box-shadow 0.2s; }
+    input[type=range]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 5px rgba(56,132,255,0.15); }
+    #tweaks-panel { display: none; position: fixed; bottom: 24px; right: 24px; background: #fff; border: 1px solid #e0e4ea; border-radius: 14px; padding: 18px 20px; width: 240px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); z-index: 200; font-size: 13px; }
+    #tweaks-panel h3 { font-size: 13px; font-weight: 700; margin-bottom: 14px; }
+    .tweak-row { margin-bottom: 12px; }
+    .tweak-label { font-size: 11px; font-weight: 700; color: oklch(0.55 0.015 240); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+    .tweak-options { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tweak-opt { padding: 4px 10px; border-radius: 8px; border: 1.5px solid #e0e4ea; background: #fff; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; color: #555; }
+    .tweak-opt.selected { border-color: var(--c-blue); background: oklch(0.95 0.05 222); color: var(--c-blue); }
+    @media (max-width: 640px) { .tab-btn { padding: 0 10px; font-size: 12px; } .site-logo { margin-right: 10px; } .content-wrap { padding: 18px 14px 48px; } }
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <div class="site-logo">
+      <div class="title">High Altitude Medicine</div>
+      <div class="subtitle">Interactive Learning · Wilderness Medicine</div>
+    </div>
+    <nav class="tab-nav" id="tab-nav"></nav>
+  </div>
+</header>
+<main class="content-wrap"><div id="root"></div></main>
+
+<div id="tweaks-panel">
+  <h3>Tweaks</h3>
+  <div class="tweak-row">
+    <div class="tweak-label">Font Size</div>
+    <div class="tweak-options" id="tweak-fontsize">
+      <button class="tweak-opt" data-val="14">Small</button>
+      <button class="tweak-opt selected" data-val="15">Default</button>
+      <button class="tweak-opt" data-val="17">Large</button>
+    </div>
+  </div>
+  <div class="tweak-row">
+    <div class="tweak-label">Accent</div>
+    <div class="tweak-options" id="tweak-accent">
+      <button class="tweak-opt selected" data-val="oklch(0.52 0.17 222)">Blue</button>
+      <button class="tweak-opt" data-val="oklch(0.50 0.17 280)">Indigo</button>
+      <button class="tweak-opt" data-val="oklch(0.48 0.17 170)">Teal</button>
+    </div>
+  </div>
+</div>
+
+<!-- INLINE QUIZ DATA -->
+<script>
+window.ALTITUDE_QUIZ = [
+  {
+    id: 1, category: "Physiology",
+    stem: "A mountaineer arrives at a camp where the measured barometric pressure is 380 mmHg. Body temperature is 37°C (water vapor pressure = 47 mmHg). Which of the following correctly calculates the inspired partial pressure of oxygen (PiO₂)?",
+    options: [
+      { id: "A", text: "0.2093 × 380 = 79.5 mmHg" },
+      { id: "B", text: "0.2093 × (380 − 47) = 69.7 mmHg" },
+      { id: "C", text: "0.2093 × (760 − 47) = 149.3 mmHg" },
+      { id: "D", text: "380 / 760 × 159 = 79.5 mmHg" },
+      { id: "E", text: "47 × 0.2093 = 9.8 mmHg" }
+    ],
+    correct: "B",
+    explanation: "PiO₂ = FiO₂ × (PB − PH₂O). Water vapor at body temperature is 47 mmHg and must be subtracted from total PB before multiplying by FiO₂. At this camp: 0.2093 × (380 − 47) = 0.2093 × 333 ≈ 69.7 mmHg. Option A omits the water vapor correction. Option C uses sea-level PB instead of the altitude PB."
+  },
+  {
+    id: 2, category: "Physiology",
+    stem: "A trekker at 4,500 m undergoes acclimatization over 5 days. Her PaCO₂ falls from 40 to 28 mmHg due to hyperventilation. Which renal response best restores acid-base balance toward normal?",
+    options: [
+      { id: "A", text: "Increased bicarbonate reabsorption in the proximal tubule" },
+      { id: "B", text: "Increased hydrogen ion secretion in the collecting duct" },
+      { id: "C", text: "Bicarbonate excretion in the urine" },
+      { id: "D", text: "Increased chloride reabsorption to balance lost anions" },
+      { id: "E", text: "Increased ammonium synthesis and excretion" }
+    ],
+    correct: "C",
+    explanation: "Hyperventilation causes respiratory alkalosis (↓PaCO₂ → ↑pH). The kidneys compensate by excreting HCO₃⁻ in the urine, lowering serum bicarbonate and partially restoring pH. This is precisely the mechanism acetazolamide exploits: by inhibiting carbonic anhydrase it forces HCO₃⁻ excretion → mild metabolic acidosis → continued ventilatory drive without alkalosis feedback. Options A and B would worsen the alkalosis."
+  },
+  {
+    id: 3, category: "Physiology",
+    stem: "After 6 weeks at 5,000 m, a climber's hematocrit rises from 44% to 58%. Which best explains the initial stimulus for this change?",
+    options: [
+      { id: "A", text: "Increased EPO production from hepatocytes in response to hypoxia" },
+      { id: "B", text: "Increased EPO from renal peritubular interstitial cells via HIF-1α/HIF-2α activation" },
+      { id: "C", text: "Hemoconcentration from plasma volume contraction" },
+      { id: "D", text: "Decreased red cell destruction at altitude" },
+      { id: "E", text: "Increased GI iron absorption stimulated by low ferritin" }
+    ],
+    correct: "B",
+    explanation: "Hypoxia activates HIF-1α/HIF-2α (hypoxia-inducible factors) in renal peritubular interstitial cells — the primary source of EPO in adults (the liver produces <10%). EPO peaks within 24–48 hours of altitude exposure and then normalizes as hematocrit rises. Option A incorrectly identifies the liver as the primary source. Option C (hemoconcentration) can acutely raise hematocrit but cannot explain a sustained 14-point rise over weeks of acclimatization."
+  },
+  {
+    id: 4, category: "Physiology",
+    stem: "Which mechanism is the MOST direct cause of elevated pulmonary artery pressures seen in high-altitude climbers?",
+    options: [
+      { id: "A", text: "Polycythemia-mediated increase in blood viscosity" },
+      { id: "B", text: "Hypoxic pulmonary vasoconstriction (HPV)" },
+      { id: "C", text: "Increased cardiac output from sympathetic activation" },
+      { id: "D", text: "Nitric oxide depletion from pulmonary endothelium" },
+      { id: "E", text: "Reduced alveolar surface area due to hyperinflation" }
+    ],
+    correct: "B",
+    explanation: "HPV (Euler-Liljestrand reflex) is the primary mechanism: low alveolar PO₂ causes smooth muscle constriction in small pulmonary arteries. Initially adaptive (redirecting blood from poorly ventilated units), at altitude this becomes a global, sustained response that markedly elevates pulmonary artery pressure. This creates the hemodynamic substrate for HAPE in susceptible individuals. All other options contribute but are secondary. Critically, the trigger is low alveolar PO₂ — not low PaO₂."
+  },
+  {
+    id: 5, category: "Physiology",
+    stem: "A climber at 5,500 m has a PiO₂ of 80 mmHg. Through acclimatization her PaCO₂ has fallen to 22 mmHg. Using the alveolar gas equation (PAO₂ = PiO₂ − PaCO₂ / R, R = 0.8), what is her alveolar PO₂?",
+    options: [
+      { id: "A", text: "30.0 mmHg" },
+      { id: "B", text: "42.5 mmHg" },
+      { id: "C", text: "52.5 mmHg" },
+      { id: "D", text: "58.0 mmHg" },
+      { id: "E", text: "62.5 mmHg" }
+    ],
+    correct: "C",
+    explanation: "PAO₂ = 80 − (22 / 0.8) = 80 − 27.5 = 52.5 mmHg. The power of hyperventilation: if she were NOT acclimatized (PaCO₂ still 40 mmHg), PAO₂ would be only 80 − 50 = 30 mmHg (option A). By halving PaCO₂, she nearly doubles her alveolar PO₂. Hyperventilation is the most immediately powerful adaptation to altitude — this is why acetazolamide, which drives ventilation, is so effective."
+  },
+  {
+    id: 6, category: "Physiology",
+    stem: "Tibetan high-altitude natives maintain similar aerobic capacity to Andean natives at the same altitude, yet have notably lower hemoglobin concentrations. Which explanation is best supported by current evidence?",
+    options: [
+      { id: "A", text: "Tibetans have higher baseline EPO and greater O₂ carrying capacity per RBC" },
+      { id: "B", text: "Tibetans have blunted HPV, reducing pulmonary vascular resistance" },
+      { id: "C", text: "EPAS1 and EGLN1 gene variants alter HIF signaling, enhancing O₂ delivery without polycythemia" },
+      { id: "D", text: "Tibetans have larger tidal volumes due to increased chest wall compliance" },
+      { id: "E", text: "Andean natives have maladaptive polycythemia (Monge disease) explaining the difference" }
+    ],
+    correct: "C",
+    explanation: "Tibetan high-altitude adaptation involves EPAS1 (HIF-2α) and EGLN1 (PHD2) genetic variants — the strongest signals of natural selection in the human genome. These shift O₂ delivery toward enhanced vasodilation (elevated NO) and improved microcirculation rather than polycythemia, avoiding the viscosity and thrombosis risks of high hematocrit. Monge disease (Option E) describes pathological polycythemia and is a distinct entity, not simply 'higher normal.'"
+  },
+  {
+    id: 7, category: "AMS & HACE",
+    stem: "A 24-year-old man hikes from 2,500 m to 4,200 m in one day. The following morning he reports moderate headache (5/10), nausea without vomiting, and fatigue. Physical exam is unremarkable; tandem gait is normal. What is the correct diagnosis and management?",
+    options: [
+      { id: "A", text: "Dehydration; oral fluids and continue ascent" },
+      { id: "B", text: "Acute mountain sickness (AMS); halt ascent, acclimatize, treat symptoms" },
+      { id: "C", text: "HACE; immediate descent" },
+      { id: "D", text: "Viral illness; symptomatic management only" },
+      { id: "E", text: "AMS; dexamethasone and continue ascent immediately" }
+    ],
+    correct: "B",
+    explanation: "This meets Lake Louise Criteria for AMS: headache + ≥1 of (fatigue, GI symptoms, dizziness, poor sleep) after ascent, without another explanation. Management: halt ascent, acclimatize at current altitude, treat symptoms (ibuprofen/acetaminophen for headache, ondansetron for nausea). HACE requires ataxia or altered consciousness — absent here. Dexamethasone (E) is not first-line for mild AMS; it masks symptoms without treating cause. Descend if symptoms worsen. WMS 2019: AMS when LLS ≥3 with headache.",
+    wms_ref: "WMS 2019: Halt ascent for AMS; descent if not improving within 24h"
+  },
+  {
+    id: 8, category: "AMS & HACE",
+    stem: "A climber planning to ascend from 3,400 m to 5,500 m over 3 days asks about acetazolamide prophylaxis. Which best describes its mechanism in this context?",
+    options: [
+      { id: "A", text: "Inhibits HPV, reducing pulmonary artery pressure" },
+      { id: "B", text: "Inhibits carbonic anhydrase → HCO₃⁻ excretion → metabolic acidosis → sustained ventilatory drive" },
+      { id: "C", text: "Directly stimulates peripheral chemoreceptors" },
+      { id: "D", text: "Reduces cerebral vasodilation by inhibiting COX-2" },
+      { id: "E", text: "Decreases CSF production, lowering ICP" }
+    ],
+    correct: "B",
+    explanation: "Acetazolamide inhibits carbonic anhydrase in renal tubules, forcing HCO₃⁻ excretion. This creates metabolic acidosis that persists despite the respiratory alkalosis of hyperventilation — so the peripheral chemoreceptors (responding to pH/CO₂) continue driving ventilation without the usual negative feedback. The net effect: accelerated acclimatization, higher SpO₂, better sleep. Option E (CSF reduction) is a real effect but not the primary prophylactic mechanism. Dose: 125–250 mg BID starting 1–2 days before ascent.",
+    wms_ref: "WMS 2019: Acetazolamide 125–250 mg BID, preferred prophylactic agent"
+  },
+  {
+    id: 9, category: "AMS & HACE",
+    stem: "A 38-year-old woman at 4,800 m develops worsening headache despite 24 hours at altitude, vomiting, progressive unsteadiness on her feet, and confusion about the current date. What is the priority intervention?",
+    options: [
+      { id: "A", text: "Supplemental O₂ at 2 L/min; reassess in 4 hours" },
+      { id: "B", text: "Acetazolamide 250 mg BID and strict rest" },
+      { id: "C", text: "Dexamethasone 8 mg loading dose + immediate descent + O₂ if available" },
+      { id: "D", text: "Gamow bag only, without descent" },
+      { id: "E", text: "IV furosemide and fluid restriction" }
+    ],
+    correct: "C",
+    explanation: "This is HACE: AMS + ataxia + altered consciousness. HACE is a medical emergency. WMS priority: (1) Descent — even 300–1,000 m can be life-saving and is the definitive treatment; (2) Dexamethasone 8 mg loading dose (IM/IV/PO) to reduce vasogenic edema; (3) O₂ if available. The Gamow bag simulates descent and is an adjunct when actual descent is impossible — never a substitute. Acetazolamide is too slow for active HACE. Furosemide is NOT recommended (patients are often volume-depleted).",
+    wms_ref: "WMS 2019: HACE → immediate descent; dexamethasone 8 mg load, then 4 mg q6h"
+  },
+  {
+    id: 10, category: "AMS & HACE",
+    stem: "Brain MRI of a climber with HACE would most characteristically show which pattern?",
+    options: [
+      { id: "A", text: "Diffusion-restricted cytotoxic edema in the cortical grey matter" },
+      { id: "B", text: "Vasogenic edema in white matter, especially the splenium of corpus callosum" },
+      { id: "C", text: "Symmetric signal change in the basal ganglia" },
+      { id: "D", text: "Cerebellar tonsillar herniation without cortical signal change" },
+      { id: "E", text: "Subarachnoid hemorrhage with communicating hydrocephalus" }
+    ],
+    correct: "B",
+    explanation: "HACE characteristically shows T2/FLAIR hyperintensity in white matter — especially the splenium of the corpus callosum — reflecting vasogenic edema from blood-brain barrier disruption. This is distinct from the diffusion-restricted cytotoxic edema of ischemic stroke. Microhemorrhages (petechiae) may also appear in severe cases. Critically, these MRI changes are often reversible with descent and treatment, consistent with the vasogenic (blood-brain barrier leak) mechanism rather than irreversible cell death."
+  },
+  {
+    id: 11, category: "AMS & HACE",
+    stem: "Beyond general anti-inflammatory effects, which mechanism is most relevant to dexamethasone's efficacy in treating HACE?",
+    options: [
+      { id: "A", text: "Reduces erythropoietin production, lowering hematocrit" },
+      { id: "B", text: "Stabilizes blood-brain barrier tight junctions and downregulates VEGF, reducing vasogenic edema" },
+      { id: "C", text: "Stimulates the hypoxic ventilatory response" },
+      { id: "D", text: "Causes cerebral vasoconstriction, directly lowering ICP" },
+      { id: "E", text: "Inhibits COX-2, reducing prostaglandin-mediated vasodilation" }
+    ],
+    correct: "B",
+    explanation: "Dexamethasone reduces cerebral vasogenic edema by: (1) stabilizing BBB tight junctions, reducing permeability; (2) downregulating VEGF expression (a key mediator of barrier disruption at altitude). It does NOT treat the underlying cause (hypoxia) — hence symptoms can recur at altitude once the drug wears off ('dexamethasone rebound'). This is why dexamethasone is a bridge to descent, not a definitive treatment. It should not be used to push ascent after symptom resolution.",
+    wms_ref: "WMS 2019: Dexamethasone masks symptoms — descent remains mandatory"
+  },
+  {
+    id: 12, category: "AMS & HACE",
+    stem: "Per WMS guidelines, what is the clinical definition of HACE in the field?",
+    options: [
+      { id: "A", text: "Headache + SpO₂ < 80% at altitude" },
+      { id: "B", text: "Lake Louise Score ≥ 6 with vomiting" },
+      { id: "C", text: "AMS symptoms plus truncal ataxia and/or altered mental status" },
+      { id: "D", text: "Papilledema on fundoscopy with headache" },
+      { id: "E", text: "T2 FLAIR white matter changes on MRI with headache" }
+    ],
+    correct: "C",
+    explanation: "WMS 2019 defines HACE clinically (no imaging required) as: AMS symptoms PLUS either (1) truncal ataxia — tested by tandem gait (cannot walk heel-to-toe without stumbling) — or (2) altered mental status. The tandem gait test is critical: a climber who cannot perform it at altitude has HACE until proven otherwise. This field diagnosis triggers emergency descent immediately. MRI findings (E) confirm the diagnosis but are not required and not available in the field.",
+    wms_ref: "WMS 2019: HACE = AMS + ataxia and/or altered consciousness"
+  },
+  {
+    id: 13, category: "HAPE",
+    stem: "A 45-year-old fit mountain guide rapidly ascends to 4,200 m. On day 2 he notes decreased exercise tolerance and a dry cough, now progressing to pink frothy sputum. Lungs reveal bilateral crackles. His SpO₂ is 68%; others at the same altitude are at 82%. Most likely diagnosis?",
+    options: [
+      { id: "A", text: "Community-acquired pneumonia" },
+      { id: "B", text: "High-altitude pulmonary edema (HAPE)" },
+      { id: "C", text: "Acute mountain sickness with bronchospasm" },
+      { id: "D", text: "Pulmonary embolism" },
+      { id: "E", text: "High-altitude cough from cold, dry air (pharyngeal irritation)" }
+    ],
+    correct: "B",
+    explanation: "Classic HAPE: progressive dyspnea, dry → productive cough with pink frothy sputum, bilateral crackles, and SpO₂ disproportionately low relative to altitude peers. Key points: (1) HAPE typically occurs in the first 2–4 days at a new altitude; (2) high physical fitness is NOT protective — many HAPE victims are elite athletes; (3) pink frothy sputum = protein-rich alveolar exudate from pulmonary capillary stress failure; (4) peer SpO₂ comparison is a rapid field tool. CXR would show bilateral patchy infiltrates, often right-sided initially.",
+    wms_ref: "WMS 2019: HAPE is the most common cause of altitude-related death"
+  },
+  {
+    id: 14, category: "HAPE",
+    stem: "The pathophysiology of HAPE is best described as:",
+    options: [
+      { id: "A", text: "Cardiogenic pulmonary edema from left ventricular dysfunction" },
+      { id: "B", text: "Inflammatory capillary leak from activated alveolar macrophages" },
+      { id: "C", text: "Heterogeneous HPV → regional overperfusion → non-cardiogenic capillary stress failure" },
+      { id: "D", text: "Diffuse alveolar damage from hypoxia-induced type II pneumocyte apoptosis" },
+      { id: "E", text: "Pulmonary venous hypertension from hypoxia-induced diastolic dysfunction" }
+    ],
+    correct: "C",
+    explanation: "HAPE is non-cardiogenic pulmonary edema. HPV is heterogeneous: some vascular beds constrict more than others, forcing blood through less-constricted (lower resistance) regions at high pressure. This overperfusion exceeds capillary wall tensile strength → mechanical 'stress failure' → protein-rich fluid leaks into alveoli. Early BAL shows high protein but low inflammatory cells, distinguishing it from pneumonia. PCWP is normal or low (not cardiogenic). Inflammation (Option B) develops secondarily and is not the primary mechanism.",
+    wms_ref: null
+  },
+  {
+    id: 15, category: "HAPE",
+    stem: "A trekker develops HAPE at 4,500 m. Immediate descent is impossible due to weather. What is the most appropriate immediate pharmacologic intervention per WMS guidelines?",
+    options: [
+      { id: "A", text: "Furosemide 40 mg IV" },
+      { id: "B", text: "Nifedipine 30 mg extended-release + supplemental oxygen" },
+      { id: "C", text: "Dexamethasone 8 mg IM" },
+      { id: "D", text: "Acetazolamide 250 mg BID" },
+      { id: "E", text: "Morphine 4 mg IV for anxiolysis and preload reduction" }
+    ],
+    correct: "B",
+    explanation: "When descent is impossible: (1) Supplemental O₂ is the most critical intervention (target SpO₂ ≥90%); (2) Nifedipine 30 mg XR (or 10 mg IR + 30 mg XR) reduces pulmonary artery pressure by blunting HPV — directly addressing the hemodynamic mechanism; (3) Gamow bag if available. Furosemide (A) is explicitly NOT recommended by WMS — HAPE patients are often volume-depleted and diuresis does not target the mechanism. Dexamethasone treats HACE, not HAPE. Morphine is not a field treatment.",
+    wms_ref: "WMS 2019: Nifedipine 30 mg XR; tadalafil and salmeterol are alternatives"
+  },
+  {
+    id: 16, category: "HAPE",
+    stem: "Which is the single strongest risk factor for HAPE on future ascents?",
+    options: [
+      { id: "A", text: "Male sex" },
+      { id: "B", text: "Rapid ascent rate" },
+      { id: "C", text: "Prior episode of HAPE" },
+      { id: "D", text: "History of moderate AMS on previous trips" },
+      { id: "E", text: "Physical deconditioning" }
+    ],
+    correct: "C",
+    explanation: "Prior HAPE is the strongest individual predictor. These individuals have a HAPE-susceptible phenotype: exaggerated pulmonary vasoconstriction in response to hypoxia, with higher resting and exercise pulmonary artery pressures at altitude compared to non-susceptible individuals. This susceptibility appears heritable. Rapid ascent (B) is a major modifiable risk factor. Male sex (A) confers ~5:1 predilection but is weaker than prior episode. Physical fitness (E) is NOT protective — HAPE-S individuals who are athletes are still susceptible.",
+    wms_ref: null
+  },
+  {
+    id: 17, category: "Treatment",
+    stem: "A climber with no sulfonamide allergy plans Kilimanjaro (5,895 m) via a 7-day route. She requests acetazolamide prophylaxis. What are the correct prescribing instructions per WMS guidelines?",
+    options: [
+      { id: "A", text: "125 mg once daily starting the morning of ascent" },
+      { id: "B", text: "125–250 mg twice daily, starting 1–2 days before ascent, continuing 2 days past highest point" },
+      { id: "C", text: "500 mg twice daily starting day of ascent" },
+      { id: "D", text: "250 mg once daily only if symptoms develop" },
+      { id: "E", text: "125 mg twice daily indefinitely throughout the expedition" }
+    ],
+    correct: "B",
+    explanation: "WMS 2019: Acetazolamide 125–250 mg BID for prophylaxis. Start 1–2 days before ascent (allows renal compensation to begin before hypoxic stress). Continue until 2 days after reaching highest altitude. Lower dose (125 mg BID) has equivalent efficacy with fewer side effects (polyuria, paresthesias, carbonated beverages taste flat). 500 mg BID (C) is excessive. Contraindications: sulfonamide allergy (ask specifically about sulfa drugs, not penicillin), severe renal impairment, pregnancy.",
+    wms_ref: "WMS 2019: 125–250 mg BID; start 1–2 days pre-ascent"
+  },
+  {
+    id: 18, category: "Treatment",
+    stem: "A Gamow bag is pressurized to 2 PSI above ambient at 5,000 m for a HACE patient when descent is impossible. Which mechanism accounts for its therapeutic benefit?",
+    options: [
+      { id: "A", text: "High humidity inside the bag improves mucociliary clearance" },
+      { id: "B", text: "Increased PB within the bag simulates descent, raising PiO₂" },
+      { id: "C", text: "Near-100% oxygen inside the bag elevates FiO₂" },
+      { id: "D", text: "Reduced temperature in the bag decreases cerebral metabolic demand" },
+      { id: "E", text: "Mechanical compression collapses dilated cerebral vessels, lowering ICP" }
+    ],
+    correct: "B",
+    explanation: "The Gamow bag simulates descent by increasing PB around the patient: higher PB → higher PiO₂ → higher PAO₂ → improved SpO₂. At 5,000 m, 2 PSI (~103 mmHg) increase simulates approximately 1,500–2,000 m of descent. FiO₂ remains ~21% (not 100%) unless supplemental O₂ is added separately — the mechanism is entirely through raising PB, not changing gas composition. Treatment is temporary (1–2 hours per session); it is a bridge to actual descent, not a replacement. Requires a pump operator while patient is inside.",
+    wms_ref: "WMS 2019: Portable hyperbaric chambers simulate 1,500 m descent"
+  },
+  {
+    id: 19, category: "Treatment",
+    stem: "For which condition is dexamethasone specifically the FIRST-LINE pharmacotherapy (not adjunct, not prophylaxis)?",
+    options: [
+      { id: "A", text: "Mild AMS with headache as sole symptom" },
+      { id: "B", text: "HAPE with SpO₂ 80% at 4,500 m, descent impossible" },
+      { id: "C", text: "HACE with ataxia and altered mental status" },
+      { id: "D", text: "Prophylaxis in a climber with sulfonamide allergy planning a rapid ascent" },
+      { id: "E", text: "High-altitude retinal hemorrhage with visual symptoms" }
+    ],
+    correct: "C",
+    explanation: "Dexamethasone is first-line for HACE: 8 mg loading dose, then 4 mg every 6 hours (IV/IM/PO). For mild AMS (A): NSAIDs/antiemetics preferred; dexamethasone masks symptoms without treating cause. For HAPE (B): nifedipine + O₂ are first-line; dexamethasone is not standard HAPE treatment (occasionally used in HACE-HAPE overlap). For prophylaxis with sulfonamide allergy (D): dexamethasone can be used in high-risk scenarios but has more side effects and is second-line to avoiding rapid ascent.",
+    wms_ref: "WMS 2019: Dexamethasone 8 mg initial dose for HACE treatment"
+  },
+  {
+    id: 20, category: "Treatment",
+    stem: "A 52-year-old experienced mountaineer with two prior HAPE episodes plans an expedition to 5,500 m with a rapid ascent profile. Which agent has the strongest evidence for HAPE prophylaxis in susceptible individuals?",
+    options: [
+      { id: "A", text: "Acetazolamide 250 mg BID" },
+      { id: "B", text: "Dexamethasone 4 mg BID" },
+      { id: "C", text: "Nifedipine 30 mg XR once or twice daily" },
+      { id: "D", text: "Aspirin 325 mg daily" },
+      { id: "E", text: "Sildenafil 50 mg TID" }
+    ],
+    correct: "C",
+    explanation: "Nifedipine 30 mg XR (once or twice daily) is the preferred agent for HAPE prophylaxis in HAPE-susceptible individuals. It reduces pulmonary artery pressure by blunting HPV, directly targeting the mechanism. Alternatives: tadalafil 10 mg BID (phosphodiesterase inhibitor, reduces PAP via NO pathway), salmeterol 125 mcg BID inhaled (enhances alveolar fluid clearance). Acetazolamide (A) effectively prevents AMS/HACE but has limited efficacy specifically for HAPE. Sildenafil (E) is used off-label but has less evidence than nifedipine.",
+    wms_ref: "WMS 2019: Nifedipine 30 mg XR for HAPE prophylaxis in susceptible individuals"
+  }
+];
+
+</script>
+
+<!-- INLINE COMPONENTS -->
+<script type="text/babel">
+
+// Physiology Tab — Altitude slider + discover equations + alveolus + O2 curve
+
+const WAYPOINTS = [
+  { alt: 0,    label: "Sea Level",       sublabel: "New York" },
+  { alt: 1609, label: "Denver",          sublabel: "Mile High City" },
+  { alt: 2400, label: "Ski Resort",      sublabel: "Typical ski area" },
+  { alt: 3500, label: "High Camp",       sublabel: "Common trek camp" },
+  { alt: 4300, label: "EBC Approach",    sublabel: "Namche Bazaar region" },
+  { alt: 5364, label: "Everest Base",    sublabel: "5,364 m" },
+  { alt: 7000, label: "Death Zone",      sublabel: "7,000 m" },
+  { alt: 8849, label: "Everest Summit",  sublabel: "8,849 m" },
+];
+
+function calcPB(alt) { return Math.round(760 * Math.exp(-alt / 8150)); }
+function calcPiO2(pb) { return Math.round(0.2093 * (pb - 47)); }
+function calcPaCO2(alt) { return Math.max(15, Math.round(40 - alt * 0.0028)); }
+function calcPAO2(piO2, paCO2) { return Math.round(piO2 - paCO2 / 0.8); }
+function calcSpO2(pao2) {
+  const p50 = 27, n = 2.7;
+  return Math.min(99, Math.max(40, Math.round(Math.pow(pao2, n) / (Math.pow(p50, n) + Math.pow(pao2, n)) * 100)));
+}
+function altColor(alt) {
+  if (alt < 1500) return "var(--c-green)";
+  if (alt < 3500) return "var(--c-amber)";
+  if (alt < 5500) return "var(--c-orange)";
+  return "var(--c-red)";
+}
+
+// ─── Alveolus / Capillary Exchange Diagram ───────────────────────────────────
+
+function AlveolusSection({ alt }) {
+  const pb   = calcPB(alt);
+  const piO2 = calcPiO2(pb);
+  const paCO2 = calcPaCO2(alt);
+  const paO2  = calcPAO2(piO2, paCO2);
+  const spO2  = calcSpO2(paO2);
+  const col   = altColor(alt);
+
+  // O2 gradient drives arrow size (sea level gradient ≈ 149-100 = 49; at alt much less)
+  const o2Gradient = Math.max(5, paO2 - 40); // simplified venous PO2 ~40
+  const arrowOpacity = Math.min(1, 0.3 + (o2Gradient / 80) * 0.7);
+
+  return (
+    <div style={{ background: "#fff", borderRadius: 16, padding: "22px 24px", border: "1px solid #e8ecf0", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", marginBottom: 24 }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: "#8a96a3", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4 }}>Alveolar-Capillary Gas Exchange</div>
+      <div style={{ fontSize: 13.5, color: "#555", marginBottom: 18 }}>
+        Visualizing how O₂ moves from air → alveolus → blood at {alt.toLocaleString()} m
+      </div>
+
+      {/* Inspired air bar */}
+      <div style={{ background: "oklch(0.96 0.03 220)", borderRadius: 10, padding: "10px 16px", marginBottom: 10, display: "flex", gap: 24, alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: "#8a96a3", textTransform: "uppercase", letterSpacing: "0.06em", minWidth: 100 }}>Inspired Air</div>
+        <div style={{ fontSize: 13.5 }}>PB = <strong style={{ color: col }}>{pb} mmHg</strong></div>
+        <div style={{ fontSize: 13.5 }}>PiO₂ = <strong style={{ color: col }}>{piO2} mmHg</strong></div>
+        <div style={{ fontSize: 13.5, color: "#888" }}>FiO₂ = 20.93% (unchanged at any altitude)</div>
+      </div>
+
+      {/* Arrow down into alveolus */}
+      <div style={{ display: "flex", justifyContent: "center", color: col, fontSize: 18, marginBottom: 4 }}>↓</div>
+
+      {/* Main exchange area */}
+      <div style={{ display: "flex", gap: 0, borderRadius: 12, overflow: "hidden", border: "1px solid #e0e8f0" }}>
+
+        {/* Alveolus */}
+        <div style={{ flex: 1, background: "oklch(0.95 0.05 225)", padding: "18px 16px" }}>
+          <div style={{ fontSize: 10, fontWeight: 800, color: "var(--c-blue)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>Alveolus</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+            <Stat label="PAO₂" value={`${paO2} mmHg`} color={col}
+              note={paO2 < 60 ? "⚠ Steep curve territory" : paO2 < 80 ? "Moderate hypoxia" : "Normal range"} />
+            <Stat label="PACO₂" value={`${paCO2} mmHg`} color="var(--c-blue)"
+              note={paCO2 < 30 ? "↓ Hyperventilation" : "Normal"} />
+            <Stat label="A-a gradient" value={`${Math.max(0, piO2 - paO2)} mmHg`} color="#888"
+              note="PiO₂ − PAO₂; reflects diffusion + V/Q" />
+          </div>
+        </div>
+
+        {/* Exchange membrane + arrows */}
+        <div style={{ width: 72, background: "#f5f5f5", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, padding: "12px 4px", position: "relative" }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: "#bbb", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "center", marginBottom: 4 }}>Membrane</div>
+          {/* O2 arrow */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "var(--c-blue)", opacity: arrowOpacity }}>O₂</div>
+            <div style={{ fontSize: 20, color: "var(--c-blue)", opacity: arrowOpacity, lineHeight: 1 }}>→</div>
+          </div>
+          {/* Membrane line */}
+          <div style={{ width: 40, height: 2, background: "#d0d8e0", borderRadius: 1 }} />
+          {/* CO2 arrow */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+            <div style={{ fontSize: 20, color: "var(--c-orange)", lineHeight: 1 }}>←</div>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "var(--c-orange)" }}>CO₂</div>
+          </div>
+        </div>
+
+        {/* Capillary */}
+        <div style={{ flex: 1, background: "oklch(0.96 0.04 18)", padding: "18px 16px" }}>
+          <div style={{ fontSize: 10, fontWeight: 800, color: "var(--c-red)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>Pulmonary Capillary</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+            <Stat label="PaO₂" value={`~${Math.max(10, paO2 - 7)} mmHg`} color={col}
+              note="Slightly below PAO₂ (normal A-a gap)" />
+            <Stat label="SaO₂" value={`${spO2}%`} color={col}
+              note={spO2 < 75 ? "Severe hypoxemia" : spO2 < 88 ? "Significant hypoxemia" : spO2 < 94 ? "Mild hypoxemia" : "Normal"} />
+            <Stat label="PvCO₂" value={`~${paCO2 + 6} mmHg`} color="var(--c-orange)"
+              note="Venous CO₂ driving diffusion" />
+          </div>
+        </div>
+      </div>
+
+      {paO2 < 60 && (
+        <div style={{ marginTop: 10, fontSize: 13, color: "var(--c-orange)", background: "oklch(0.96 0.05 45)", borderRadius: 8, padding: "8px 12px" }}>
+          ⚠ PAO₂ &lt; 60 mmHg — on the steep portion of the O₂-Hb dissociation curve. Small further drops cause large SaO₂ falls.
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Stat({ label, value, color, note }) {
+  return (
+    <div>
+      <span style={{ fontSize: 11, fontWeight: 600, color: "#8a96a3", marginRight: 6 }}>{label}</span>
+      <span style={{ fontFamily: "DM Mono, monospace", fontSize: 14, fontWeight: 700, color }}>{value}</span>
+      {note && <div style={{ fontSize: 11, color: "#999", marginTop: 1 }}>{note}</div>}
+    </div>
+  );
+}
+
+// ─── O₂-Hb Dissociation Curve ────────────────────────────────────────────────
+
+function O2CurveSection({ alt }) {
+  const [showShifts, setShowShifts] = React.useState(true);
+
+  const pb    = calcPB(alt);
+  const piO2  = calcPiO2(pb);
+  const paCO2 = calcPaCO2(alt);
+  const paO2  = calcPAO2(piO2, paCO2);
+  const col   = altColor(alt);
+
+  function hillSat(pO2, p50, n = 2.7) {
+    if (pO2 <= 0) return 0;
+    return (Math.pow(pO2, n) / (Math.pow(p50, n) + Math.pow(pO2, n))) * 100;
+  }
+
+  const W = 420, H = 260;
+  const pl = 50, pr = 20, pt = 22, pb_ = 46;
+  const plotW = W - pl - pr, plotH = H - pt - pb_;
+  const maxPO2 = 160;
+
+  const xS = v => pl + (v / maxPO2) * plotW;
+  const yS = v => pt + plotH - (v / 100) * plotH;
+
+  function makePath(p50) {
+    return Array.from({ length: 81 }, (_, i) => {
+      const p = i * 2;
+      return `${i === 0 ? 'M' : 'L'}${xS(p).toFixed(1)},${yS(hillSat(p, p50)).toFixed(1)}`;
+    }).join(' ');
+  }
+
+  const currentSat = hillSat(paO2, 27);
+  const cx = xS(paO2);
+  const cy = yS(currentSat);
+
+  const xTicks = [0, 20, 40, 60, 80, 100, 120, 140, 160];
+  const yTicks = [0, 25, 50, 75, 100];
+
+  return (
+    <div style={{ background: "#fff", borderRadius: 16, padding: "22px 24px", border: "1px solid #e8ecf0", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", marginBottom: 24 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#8a96a3", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4 }}>Oxyhemoglobin Dissociation Curve</div>
+          <div style={{ fontSize: 13.5, color: "#555" }}>
+            At {alt.toLocaleString()} m: PAO₂ = <strong style={{ color: col }}>{paO2} mmHg</strong> → SaO₂ ≈ <strong style={{ color: col }}>{Math.round(currentSat)}%</strong>
+          </div>
+        </div>
+        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "#888", cursor: "pointer", userSelect: "none" }}>
+          <input type="checkbox" checked={showShifts} onChange={e => setShowShifts(e.target.checked)} style={{ accentColor: "var(--c-blue)" }} />
+          Show curve shifts
+        </label>
+      </div>
+
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: "block", maxWidth: W }}>
+        {/* Grid */}
+        {yTicks.map(v => <line key={v} x1={pl} y1={yS(v)} x2={pl+plotW} y2={yS(v)} stroke="#f0f2f5" strokeWidth={1} />)}
+        {xTicks.map(v => <line key={v} x1={xS(v)} y1={pt} x2={xS(v)} y2={pt+plotH} stroke="#f0f2f5" strokeWidth={1} />)}
+
+        {/* Fills under curves */}
+        <clipPath id="plotClip">
+          <rect x={pl} y={pt} width={plotW} height={plotH} />
+        </clipPath>
+        <path d={makePath(27) + ` L${xS(160)},${pt+plotH} L${pl},${pt+plotH} Z`}
+          fill="var(--c-blue)" opacity={0.06} clipPath="url(#plotClip)" />
+
+        {/* Shift curves */}
+        {showShifts && <>
+          <path d={makePath(22)} stroke="var(--c-green)" strokeWidth={1.8} fill="none" strokeDasharray="6 3" opacity={0.7} />
+          <path d={makePath(32)} stroke="var(--c-orange)" strokeWidth={1.8} fill="none" strokeDasharray="6 3" opacity={0.7} />
+        </>}
+
+        {/* Normal curve */}
+        <path d={makePath(27)} stroke="var(--c-blue)" strokeWidth={2.8} fill="none" />
+
+        {/* Sea-level reference */}
+        {alt > 100 && (
+          <>
+            <circle cx={xS(100)} cy={yS(hillSat(100, 27))} r={5} fill="none" stroke="#ccc" strokeWidth={1.5} />
+            <text x={xS(100)+7} y={yS(hillSat(100,27))-5} fontSize={9} fill="#bbb">Sea level</text>
+          </>
+        )}
+
+        {/* Danger zone shading: PaO2 < 60 */}
+        <rect x={pl} y={pt} width={xS(60)-pl} height={plotH}
+          fill="var(--c-red)" opacity={0.04} clipPath="url(#plotClip)" />
+        <line x1={xS(60)} y1={pt} x2={xS(60)} y2={pt+plotH} stroke="var(--c-red)" strokeWidth={1} strokeDasharray="4 3" opacity={0.25} />
+        <text x={xS(60)-2} y={pt+plotH-4} textAnchor="end" fontSize={9} fill="var(--c-red)" opacity={0.6}>Steep region</text>
+
+        {/* Crosshairs */}
+        <line x1={cx} y1={pt} x2={cx} y2={pt+plotH} stroke={col} strokeWidth={1.2} strokeDasharray="3 2" opacity={0.7} />
+        <line x1={pl} y1={cy} x2={pl+plotW} y2={cy} stroke={col} strokeWidth={1.2} strokeDasharray="3 2" opacity={0.7} />
+
+        {/* Current dot */}
+        <circle cx={cx} cy={cy} r={8} fill={col} stroke="#fff" strokeWidth={2.5} />
+        <text x={cx} y={pt+plotH+30} textAnchor="middle" fontSize={10} fill={col} fontWeight="700">{paO2}</text>
+        <text x={pl-8} y={cy+4} textAnchor="end" fontSize={10} fill={col} fontWeight="700">{Math.round(currentSat)}</text>
+
+        {/* Axes */}
+        <line x1={pl} y1={pt} x2={pl} y2={pt+plotH} stroke="#c8d0da" strokeWidth={1.5} />
+        <line x1={pl} y1={pt+plotH} x2={pl+plotW} y2={pt+plotH} stroke="#c8d0da" strokeWidth={1.5} />
+        {xTicks.map(v => (
+          <g key={v}>
+            <line x1={xS(v)} y1={pt+plotH} x2={xS(v)} y2={pt+plotH+4} stroke="#c8d0da" strokeWidth={1} />
+            <text x={xS(v)} y={pt+plotH+16} textAnchor="middle" fontSize={9} fill="#aaa">{v}</text>
+          </g>
+        ))}
+        {yTicks.map(v => (
+          <g key={v}>
+            <line x1={pl-4} y1={yS(v)} x2={pl} y2={yS(v)} stroke="#c8d0da" strokeWidth={1} />
+            <text x={pl-8} y={yS(v)+3} textAnchor="end" fontSize={9} fill="#aaa">{v}</text>
+          </g>
+        ))}
+
+        {/* Axis titles */}
+        <text x={pl+plotW/2} y={H-4} textAnchor="middle" fontSize={11} fill="#999">PaO₂ (mmHg)</text>
+        <text transform={`rotate(-90,13,${pt+plotH/2})`} x={13} y={pt+plotH/2+4} textAnchor="middle" fontSize={11} fill="#999">SaO₂ (%)</text>
+
+        {/* Legend */}
+        {showShifts && <>
+          <line x1={pl+plotW-140} y1={pt+10} x2={pl+plotW-122} y2={pt+10} stroke="var(--c-green)" strokeWidth={1.8} strokeDasharray="6 3" />
+          <text x={pl+plotW-118} y={pt+14} fontSize={9} fill="#888">Leftward — acute alkalosis</text>
+          <line x1={pl+plotW-140} y1={pt+24} x2={pl+plotW-122} y2={pt+24} stroke="var(--c-blue)" strokeWidth={2.5} />
+          <text x={pl+plotW-118} y={pt+28} fontSize={9} fill="#888">Normal (P₅₀ = 27 mmHg)</text>
+          <line x1={pl+plotW-140} y1={pt+38} x2={pl+plotW-122} y2={pt+38} stroke="var(--c-orange)" strokeWidth={1.8} strokeDasharray="6 3" />
+          <text x={pl+plotW-118} y={pt+42} fontSize={9} fill="#888">Rightward — ↑2,3-DPG, acidosis</text>
+        </>}
+      </svg>
+
+      {paO2 < 60 && (
+        <div style={{ marginTop: 8, fontSize: 12.5, color: "var(--c-red)", background: "oklch(0.96 0.04 16)", borderRadius: 8, padding: "8px 12px", border: "1px solid oklch(0.85 0.10 16)" }}>
+          ⚠ On the steep portion — small ↓ PaO₂ → large ↓ SaO₂. Hemoglobin O₂ delivery is critically impaired.
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Discover Cards ───────────────────────────────────────────────────────────
+
+function DiscoverCard({ title, value, unit, intuition, mathLabel, mathContent, accent }) {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <div style={{ background: "#fff", borderRadius: 12, padding: "20px 22px", flex: 1, minWidth: 0, border: "1px solid #e8ecf0", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+      <div style={{ fontSize: 12, fontWeight: 600, color: "#8a96a3", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 6 }}>{title}</div>
+      <div style={{ fontSize: 38, fontWeight: 700, color: accent, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+        {value}<span style={{ fontSize: 16, fontWeight: 500, color: "#8a96a3", marginLeft: 4 }}>{unit}</span>
+      </div>
+      <div style={{ marginTop: 10, fontSize: 13.5, color: "#555", lineHeight: 1.55 }}>{intuition}</div>
+      <button onClick={() => setOpen(o => !o)}
+        style={{ marginTop: 12, background: "none", border: "none", padding: 0, cursor: "pointer", fontSize: 12.5, fontWeight: 600, color: "var(--c-blue)", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 4 }}>
+        <span style={{ fontSize: 14, display: "inline-block", transform: open ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>▶</span>
+        {open ? "Hide the math" : "Show the math"}
+      </button>
+      {open && (
+        <div style={{ marginTop: 10, background: "oklch(0.97 0.01 225)", borderRadius: 8, padding: "12px 14px" }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#8a96a3", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: 6 }}>{mathLabel}</div>
+          {mathContent}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MathLine({ formula, result, note }) {
+  return (
+    <div style={{ marginBottom: 2 }}>
+      <span style={{ fontFamily: "DM Mono, monospace", fontSize: 13, color: "#2a3445" }}>{formula}</span>
+      {result && <span style={{ fontFamily: "DM Mono, monospace", fontSize: 13, fontWeight: 700, color: "var(--c-blue)", marginLeft: 6 }}>= {result}</span>}
+      {note && <div style={{ fontSize: 11.5, color: "#8a96a3", marginTop: 2 }}>{note}</div>}
+    </div>
+  );
+}
+
+function AltSlider({ alt, setAlt }) {
+  const col = altColor(alt);
+  const nearest = WAYPOINTS.reduce((a, b) => Math.abs(b.alt - alt) < Math.abs(a.alt - alt) ? b : a);
+  const pb = calcPB(alt), piO2 = calcPiO2(calcPB(alt));
+  const paCO2 = calcPaCO2(alt), paO2 = calcPAO2(piO2, paCO2);
+  const spO2 = calcSpO2(paO2);
+
+  return (
+    <div style={{ background: "#fff", borderRadius: 16, padding: "28px 28px 22px", border: "1px solid #e8ecf0", boxShadow: "0 1px 6px rgba(0,0,0,0.06)", marginBottom: 24 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "#8a96a3", letterSpacing: "0.06em", textTransform: "uppercase" }}>Altitude Explorer</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: col, marginTop: 2, fontVariantNumeric: "tabular-nums" }}>{alt.toLocaleString()} m</div>
+          <div style={{ fontSize: 14, color: "#555", marginTop: 1 }}>{nearest.label} — {nearest.sublabel}</div>
+        </div>
+        <div style={{ textAlign: "right" }}>
+          <div style={{ fontSize: 12, color: "#aaa", marginBottom: 4 }}>Estimated SpO₂</div>
+          <div style={{ fontSize: 32, fontWeight: 700, color: col, fontVariantNumeric: "tabular-nums" }}>{spO2}%</div>
+        </div>
+      </div>
+      <input type="range" min={0} max={8849} step={50} value={alt}
+        onChange={e => { const v = Number(e.target.value); setAlt(v); e.target.style.setProperty("--pct", ((v/8849)*100)+"%"); }}
+        style={{ width: "100%", height: 6, cursor: "pointer", "--pct": ((alt/8849)*100)+"%" }} />
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
+        {WAYPOINTS.map(w => (
+          <button key={w.alt} onClick={() => setAlt(w.alt)}
+            style={{ background: "none", border: "none", padding: "2px 0", cursor: "pointer", fontSize: 10, color: Math.abs(alt-w.alt) < 200 ? col : "#bbb", fontWeight: Math.abs(alt-w.alt) < 200 ? 700 : 400, fontFamily: "inherit", textAlign: "center", lineHeight: 1.3, maxWidth: 52 }}>
+            <div style={{ width: 1, height: 4, background: "currentColor", margin: "0 auto 2px" }} />
+            {w.label.split(" ")[0]}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PhysiologyCards({ alt }) {
+  const pb = calcPB(alt), piO2 = calcPiO2(pb), paCO2 = calcPaCO2(alt), paO2 = calcPAO2(piO2, paCO2);
+  const col = altColor(alt);
+  return (
+    <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
+      <DiscoverCard title="Barometric Pressure" value={pb} unit="mmHg" accent={col}
+        intuition={alt === 0 ? "At sea level, the full weight of the atmosphere presses down — 760 mmHg." : `At ${alt.toLocaleString()} m, less atmosphere above you. PB has dropped ${760-pb} mmHg (${Math.round((760-pb)/760*100)}% below sea level).`}
+        mathLabel="Hüppert / West equation"
+        mathContent={<>
+          <MathLine formula={`PB = 760 × e^(−${alt} / 8150)`} />
+          <MathLine formula={`PB = 760 × ${Math.exp(-alt/8150).toFixed(3)}`} result={`${pb} mmHg`} note="Himalayan-corrected (West 2009)" />
+        </>} />
+
+      <div style={{ display: "flex", alignItems: "center", fontSize: 18, color: "#ddd", flexShrink: 0 }}>→</div>
+
+      <DiscoverCard title="Inspired PO₂ (PiO₂)" value={piO2} unit="mmHg" accent={col}
+        intuition={`O₂ is 20.93% of air at any altitude — but applied to a lower PB. Body humidity adds 47 mmHg water vapor that displaces O₂. Net: ${piO2} mmHg vs. 149 at sea level.`}
+        mathLabel="Dalton's Law of Partial Pressures"
+        mathContent={<>
+          <MathLine formula="PiO₂ = FiO₂ × (PB − PH₂O)" />
+          <MathLine formula={`PiO₂ = 0.2093 × (${pb} − 47)`} result={`${piO2} mmHg`} note="PH₂O = 47 mmHg at 37°C" />
+        </>} />
+
+      <div style={{ display: "flex", alignItems: "center", fontSize: 18, color: "#ddd", flexShrink: 0 }}>→</div>
+
+      <DiscoverCard title="Alveolar PO₂ (PAO₂)" value={paO2} unit="mmHg" accent={col}
+        intuition={`CO₂ from blood dilutes O₂ in alveoli. Hyperventilation lowers PaCO₂ to ~${paCO2} mmHg (vs. 40 at sea level), raising PAO₂. Without it: PAO₂ = ${Math.round(piO2 - 40/0.8)} mmHg.`}
+        mathLabel="Alveolar Gas Equation"
+        mathContent={<>
+          <MathLine formula="PAO₂ = PiO₂ − PaCO₂ / R" />
+          <MathLine formula={`PAO₂ = ${piO2} − ${paCO2} / 0.8`} result={`${paO2} mmHg`} note={`Acclimatized PaCO₂ at this altitude ≈ ${paCO2} mmHg`} />
+        </>} />
+    </div>
+  );
+}
+
+const ACCLI_STEPS = [
+  { time: "Minutes", icon: "💨", title: "Hyperventilation begins", body: "Peripheral chemoreceptors (carotid body) detect low PaO₂ and increase respiratory rate and depth. PaCO₂ falls, PAO₂ rises. Most powerful acute adaptation." },
+  { time: "Hours", icon: "❤️", title: "Heart rate increases", body: "Sympathetic activation raises HR and cardiac output, partially compensating for lower SaO₂. Mild systemic BP rise." },
+  { time: "1–2 Days", icon: "🫘", title: "Renal HCO₃⁻ excretion", body: "Kidneys excrete bicarbonate to compensate for respiratory alkalosis, removing the brake on further hyperventilation. This is acetazolamide's mechanism — it accelerates this step." },
+  { time: "2–7 Days", icon: "⚗️", title: "2,3-DPG rises", body: "RBCs increase 2,3-DPG, shifting the O₂-Hb curve rightward — Hb releases O₂ to tissues more readily at lower PaO₂. See the curve above shift rightward." },
+  { time: "Days–Weeks", icon: "🩸", title: "Erythropoiesis", body: "HIF activates EPO production. Over weeks, hematocrit rises (50–55%), increasing O₂ carrying capacity. EPO peaks at 48h then normalizes as Hct rises." },
+  { time: "Weeks–Months", icon: "🏔", title: "Structural changes", body: "↑ Muscle capillary density, mitochondrial changes, and myoglobin increases improve O₂ delivery at tissue level. Full acclimatization takes 4–6 weeks." },
+];
+
+function AcclimatizationSection() {
+  const [activeIdx, setActiveIdx] = React.useState(null);
+  return (
+    <div style={{ background: "#fff", borderRadius: 16, padding: "24px 26px", border: "1px solid #e8ecf0", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", marginBottom: 24 }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: "#8a96a3", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4 }}>Acclimatization Timeline</div>
+      <div style={{ fontSize: 14, color: "#777", marginBottom: 20 }}>Click any step to learn more</div>
+      <div style={{ display: "flex", gap: 0, position: "relative" }}>
+        <div style={{ position: "absolute", top: 20, left: 20, right: 20, height: 2, background: "linear-gradient(to right, var(--c-blue), var(--c-orange))", zIndex: 0, borderRadius: 1 }} />
+        {ACCLI_STEPS.map((s, i) => (
+          <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", zIndex: 1, cursor: "pointer" }} onClick={() => setActiveIdx(activeIdx === i ? null : i)}>
+            <div style={{ width: 40, height: 40, borderRadius: "50%", background: activeIdx === i ? "var(--c-blue)" : "#fff", border: `2px solid ${activeIdx === i ? "var(--c-blue)" : "#d0d7de"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, transition: "all 0.2s", boxShadow: activeIdx === i ? "0 0 0 4px rgba(56,132,255,0.15)" : "none" }}>{s.icon}</div>
+            <div style={{ fontSize: 9.5, fontWeight: 700, color: "#aaa", marginTop: 5, textAlign: "center" }}>{s.time}</div>
+          </div>
+        ))}
+      </div>
+      {activeIdx !== null && (
+        <div style={{ marginTop: 18, background: "oklch(0.97 0.01 225)", borderRadius: 10, padding: "14px 16px" }}>
+          <div style={{ fontWeight: 700, color: "#1e2d3d", marginBottom: 4 }}>{ACCLI_STEPS[activeIdx].icon} {ACCLI_STEPS[activeIdx].title}</div>
+          <div style={{ fontSize: 13.5, color: "#444", lineHeight: 1.6 }}>{ACCLI_STEPS[activeIdx].body}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const CARDIO_ITEMS = [
+  { label: "Pulmonary Artery Pressure", acute: "↑↑ HPV constricts pulmonary vessels", chronic: "Persistent elevation; cor pulmonale if extreme" },
+  { label: "Heart Rate", acute: "↑ Sympathetic activation", chronic: "Normalizes or mildly elevated" },
+  { label: "Cardiac Output", acute: "↑ Compensatory", chronic: "Returns toward normal" },
+  { label: "Hematocrit", acute: "→ Minimal change", chronic: "↑ 50–60% (polycythemia)" },
+  { label: "EPO", acute: "↑↑ Peaks 24–48h", chronic: "Normalizes as Hct rises" },
+  { label: "2,3-DPG", acute: "→ Unchanged initially", chronic: "↑ Rightward shift of O₂-Hb curve" },
+  { label: "Systemic BP", acute: "↑ Mild sympathetic", chronic: "Normalizes" },
+];
+
+function CardiovascularTable() {
+  return (
+    <div style={{ background: "#fff", borderRadius: 16, padding: "24px 26px", border: "1px solid #e8ecf0", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: "#8a96a3", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 16 }}>Cardiovascular &amp; Hematologic Responses</div>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
+        <thead>
+          <tr style={{ borderBottom: "2px solid #e8ecf0" }}>
+            <th style={{ textAlign: "left", padding: "6px 12px 10px 0", color: "#8a96a3", fontWeight: 600, fontSize: 12 }}>Parameter</th>
+            <th style={{ textAlign: "left", padding: "6px 12px 10px", color: "var(--c-amber)", fontWeight: 600, fontSize: 12 }}>Acute (hours–days)</th>
+            <th style={{ textAlign: "left", padding: "6px 0 10px 12px", color: "var(--c-blue)", fontWeight: 600, fontSize: 12 }}>Chronic (weeks)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {CARDIO_ITEMS.map((r, i) => (
+            <tr key={i} style={{ borderBottom: "1px solid #f0f2f4" }}>
+              <td style={{ padding: "8px 12px 8px 0", fontWeight: 600, color: "#2a3445" }}>{r.label}</td>
+              <td style={{ padding: "8px 12px", color: "#555" }}>{r.acute}</td>
+              <td style={{ padding: "8px 0 8px 12px", color: "#555" }}>{r.chronic}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function PhysiologyTab() {
+  const stored = localStorage.getItem("alt_altitude");
+  const [alt, setAlt] = React.useState(stored ? Number(stored) : 0);
+  React.useEffect(() => { localStorage.setItem("alt_altitude", alt); }, [alt]);
+
+  return (
+    <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <AltSlider alt={alt} setAlt={setAlt} />
+      <PhysiologyCards alt={alt} />
+      <AlveolusSection alt={alt} />
+      <O2CurveSection alt={alt} />
+      <AcclimatizationSection />
+      <CardiovascularTable />
+    </div>
+  );
+}
+
+Object.assign(window, { PhysiologyTab, calcPB, calcPiO2, calcPaCO2, calcPAO2, calcSpO2, altColor });
+
+</script>
+<script type="text/babel">
+
+// Pathology Tab — HACE + HAPE combined disease tabs (pathology + treatment inline)
+
+const HACE_STAGES = [
+  {
+    num: 1, label: "Normal",
+    features: ["Normal cerebral anatomy", "Sulci and gyri well-defined", "Ventricles normal size", "BBB intact"],
+    patho: "Baseline. The blood-brain barrier (BBB) — tight junctions between endothelial cells — prevents fluid from leaking into brain parenchyma. The rigid skull means any volume increase raises ICP.",
+    treatment: null,
+    edemaOpacity: 0, vesselScale: 1, sulciOpacity: 1, petechiae: false, midlineShift: 0, ventricleShrink: 0
+  },
+  {
+    num: 2, label: "Hypoxia",
+    features: ["Mild cerebral vasodilation", "↑ Cerebral blood flow (CBF) 20–40%", "SpO₂ 80–90%", "Altitude headache begins"],
+    patho: "Hypoxia triggers cerebral vasodilation — a protective reflex to maintain O₂ delivery. Increased CBF elevates ICP slightly. This vasodilation is the primary driver of altitude headache, not edema.",
+    treatment: "Acclimatize at current altitude. Supplemental O₂ if available. Ibuprofen 400–600 mg for headache.",
+    edemaOpacity: 0, vesselScale: 1.3, sulciOpacity: 0.9, petechiae: false, midlineShift: 0, ventricleShrink: 0
+  },
+  {
+    num: 3, label: "Early AMS",
+    features: ["Lake Louise Score ≥3", "Headache + nausea/fatigue", "Mild interstitial edema beginning", "Tight intracranial compliance"],
+    patho: "Vasodilation + early BBB disruption → slight interstitial fluid accumulation. Individuals with intrinsically lower intracranial compliance (tighter skull) may be more susceptible. VEGF upregulation begins.",
+    treatment: "Halt ascent. Ibuprofen, ondansetron. Acetazolamide 250 mg BID. Descend if no improvement in 24h.",
+    edemaOpacity: 0.12, vesselScale: 1.45, sulciOpacity: 0.7, petechiae: false, midlineShift: 0, ventricleShrink: 0.05
+  },
+  {
+    num: 4, label: "Moderate AMS",
+    features: ["Severe headache, unresponsive to analgesics", "Vomiting", "Significant weakness", "Sulci compressing"],
+    patho: "Progressive vasogenic edema from BBB disruption — predominantly white matter. VEGF-mediated permeability increase allows protein-rich fluid into the interstitium. Sulci narrow as the brain swells against the rigid skull.",
+    treatment: "Descend. Dexamethasone 4–8 mg if descent delayed. High-flow O₂ if available.",
+    edemaOpacity: 0.28, vesselScale: 1.6, sulciOpacity: 0.38, petechiae: false, midlineShift: 0, ventricleShrink: 0.12
+  },
+  {
+    num: 5, label: "HACE",
+    features: ["Ataxia (failed tandem gait)", "Altered mental status", "Petechiae in white matter", "Corpus callosum splenium affected"],
+    patho: "MRI hallmark: T2/FLAIR hyperintensity in white matter — especially the splenium of the corpus callosum. Microhemorrhages (petechiae) from mechanical stress on vessels. BBB severely disrupted. These changes are often reversible with prompt descent.",
+    treatment: "EMERGENCY: Immediate descent. Dexamethasone 8 mg IV/IM loading dose NOW. O₂. Gamow bag if descent impossible.",
+    edemaOpacity: 0.52, vesselScale: 1.72, sulciOpacity: 0.08, petechiae: true, midlineShift: 0, ventricleShrink: 0.26
+  },
+  {
+    num: 6, label: "Severe HACE",
+    features: ["Coma / obtunded", "Herniation signs", "Extensive petechiae", "Midline shift"],
+    patho: "Massive vasogenic edema causing uncal or transtentorial herniation. Extensive microhemorrhages throughout white matter. Despite severity, MRI changes are often reversible if treated rapidly — vasogenic (not cytotoxic) mechanism.",
+    treatment: "IMMEDIATE evacuation by any means. Dexamethasone 8 mg + 4 mg q6h. Airway protection. High-flow O₂. Gamow bag.",
+    edemaOpacity: 0.74, vesselScale: 1.88, sulciOpacity: 0, petechiae: true, midlineShift: 9, ventricleShrink: 0.4
+  }
+];
+
+const HAPE_STAGES = [
+  {
+    num: 1, label: "Normal Lungs",
+    features: ["Clear lung fields", "Normal vascular markings", "Normal PAP", "SpO₂ 94–99%"],
+    patho: "Normal lungs. The pulmonary vasculature is healthy. Alveolar-capillary interface is intact. HPV is minimal at sea level.",
+    treatment: null,
+    rightOpacity: 0, leftOpacity: 0, vesselWidth: 1, hilarSize: 1
+  },
+  {
+    num: 2, label: "Pulmonary Hypertension",
+    features: ["Elevated pulmonary artery pressure", "Enlarged hilar vessels on CXR", "Normal lung periphery", "Mild exertional dyspnea"],
+    patho: "HPV causes global pulmonary vasoconstriction. Central (hilar) vessels enlarge. This is the hemodynamic setup for HAPE — not yet edema, but dangerous pressure is building, especially in HAPE-susceptible individuals.",
+    treatment: "HAPE-susceptible individuals: nifedipine 30 mg XR prophylaxis. Slow ascent. Avoid exertion and cold.",
+    rightOpacity: 0, leftOpacity: 0, vesselWidth: 1.9, hilarSize: 1.6
+  },
+  {
+    num: 3, label: "Early HAPE",
+    features: ["Dry cough → productive", "Decreased exercise tolerance", "Patchy opacity — right-sided first", "SpO₂ 85–92%"],
+    patho: "Heterogeneous HPV: under-constricted vascular beds receive disproportionately high flow at elevated pressure → 'stress failure' of alveolar-capillary membrane. Right lung affected first (anatomy). Protein-rich fluid begins leaking.",
+    treatment: "Descent + O₂ (target SpO₂ ≥90%). Nifedipine 10 mg IR → 30 mg XR. Rest — exertion dramatically worsens HAPE.",
+    rightOpacity: 0.38, leftOpacity: 0.06, vesselWidth: 2.1, hilarSize: 1.8
+  },
+  {
+    num: 4, label: "Frank HAPE",
+    features: ["Pink frothy sputum", "Bilateral crackles", "Bilateral infiltrates on CXR", "SpO₂ 70–85%"],
+    patho: "Widespread capillary stress failure. BAL shows high protein, few inflammatory cells — non-cardiogenic (PCWP normal/low). Classic CXR: bilateral 'bat wing' infiltrates, often asymmetric. Inflammation is secondary, not primary.",
+    treatment: "EMERGENCY: Immediate descent. O₂ continuous. Nifedipine 30 mg XR. Gamow bag. Strict rest.",
+    rightOpacity: 0.66, leftOpacity: 0.52, vesselWidth: 2.3, hilarSize: 1.95
+  },
+  {
+    num: 5, label: "Severe HAPE",
+    features: ["Near-complete opacification", "Severe dyspnea at rest", "Cyanosis", "SpO₂ < 70% on room air"],
+    patho: "Massive alveolar flooding. Despite severity, HAPE resolves faster than other ARDS causes with descent + O₂. Mortality: <5% treated, ~50% untreated. HACE may co-occur — assess tandem gait.",
+    treatment: "Immediate evacuation — any means. Continuous high-flow O₂. Nifedipine. Assess for co-occurring HACE. Consider dexamethasone if altered mentation.",
+    rightOpacity: 0.88, leftOpacity: 0.83, vesselWidth: 2.5, hilarSize: 2.05
+  }
+];
+
+// ─── Brain SVG ────────────────────────────────────────────────────────────────
+
+function BrainSVG({ stage }) {
+  const s = HACE_STAGES[stage];
+  const { edemaOpacity: edema, vesselScale: vs, sulciOpacity: sulci, midlineShift: shift, ventricleShrink: vsh, petechiae } = s;
+  const wmRx = 58 * (1 + edema * 0.18), wmRy = 52 * (1 + edema * 0.18);
+  const ventW = 28 * (1 - vsh), ventH = 18 * (1 - vsh);
+  const PETCH = [[78,88],[95,72],[115,85],[82,108],[118,100],[70,100],[128,88],[100,115],[88,120],[110,70],[75,75],[125,110],[95,60],[105,125]];
+
+  return (
+    <svg viewBox="0 0 200 200" width="100%" style={{ maxWidth: 220, display: "block", margin: "0 auto" }}>
+      <ellipse cx={100+shift*0.1} cy={98} rx={88} ry={84} fill="#f0ede8" stroke="#c4bdb4" strokeWidth="2.5"/>
+      <ellipse cx={100+shift*0.1} cy={98} rx={81} ry={77} fill="#e8e0d5" stroke="#b8b0a4" strokeWidth="1"/>
+      <ellipse cx={100+shift*0.3} cy={98} rx={72} ry={68} fill="#c8a89a"/>
+      <ellipse cx={100+shift*0.5} cy={98} rx={wmRx} ry={wmRy} fill="#f0ebe4"/>
+      {edema > 0 && <ellipse cx={100+shift*0.5} cy={98} rx={wmRx} ry={wmRy} fill={`rgba(120,170,230,${edema})`}/>}
+      {sulci > 0 && (
+        <g opacity={sulci} stroke="#c8a89a" strokeWidth="1.5" fill="none">
+          <path d="M 52,80 Q 60,65 72,72 Q 80,60 95,65"/>
+          <path d="M 148,80 Q 140,65 128,72 Q 120,60 105,65"/>
+          <path d="M 44,100 Q 38,88 46,76"/>
+          <path d="M 156,100 Q 162,88 154,76"/>
+          <path d="M 50,116 Q 42,104 48,92"/>
+          <path d="M 150,116 Q 158,104 152,92"/>
+          <path d="M 60,130 Q 52,118 56,108"/>
+          <path d="M 140,130 Q 148,118 144,108"/>
+        </g>
+      )}
+      <path d={`M ${72+shift*0.4},${94} Q ${100+shift*0.5},${84} ${128+shift*0.6},${94}`}
+        stroke={edema > 0.3 ? `rgba(80,140,210,${edema*0.9})` : "#d4c5b8"} strokeWidth={edema > 0.3 ? 5 : 3} fill="none" strokeLinecap="round"/>
+      <ellipse cx={100+shift*0.7} cy={100} rx={ventW*0.5} ry={ventH*0.5} fill={edema > 0.4 ? "rgba(180,210,240,0.4)" : "#b8cce0"}/>
+      {[[100,22,100,40],[155,55,142,70],[175,100,155,100],[155,145,142,130],[100,178,100,160],[45,145,58,130],[25,100,45,100],[45,55,58,70]].map(([x1,y1,x2,y2],i) => (
+        <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={`rgba(180,80,80,${0.3+(vs-1)*0.5})`} strokeWidth={1.5*vs} strokeLinecap="round"/>
+      ))}
+      {petechiae && PETCH.map(([x,y],i) => (
+        <circle key={i} cx={x+shift*0.5} cy={y} r={2.2} fill={`rgba(190,50,50,${0.55+Math.sin(i)*0.2})`}/>
+      ))}
+      <text x={100} y={192} textAnchor="middle" fontSize={10} fill="#aaa" fontFamily="DM Sans, sans-serif">Stage {stage+1} of 6</text>
+    </svg>
+  );
+}
+
+// ─── Lung SVG ─────────────────────────────────────────────────────────────────
+
+function LungSVG({ stage }) {
+  const s = HAPE_STAGES[stage];
+  return (
+    <svg viewBox="0 0 200 210" width="100%" style={{ maxWidth: 220, display: "block", margin: "0 auto" }}>
+      <rect x={10} y={10} width={180} height={190} rx={20} fill="#f5f3f0" stroke="#d8d0c8" strokeWidth={1.5}/>
+      <rect x={93} y={30} width={14} height={160} rx={4} fill="#c8bfb4" opacity={0.5}/>
+      <path d="M 90,32 Q 60,32 40,50 Q 22,70 22,100 Q 22,140 38,160 Q 55,178 80,178 Q 90,178 90,165 Z"
+        fill={`rgb(${Math.round(245-s.rightOpacity*100)},${Math.round(220-s.rightOpacity*100)},${Math.round(210-s.rightOpacity*60)})`} stroke="#b8a89a" strokeWidth={1.5}/>
+      <path d="M 110,32 Q 140,32 160,50 Q 178,70 178,100 Q 178,135 165,158 Q 150,178 125,178 Q 112,178 110,165 Z"
+        fill={`rgb(${Math.round(245-s.leftOpacity*100)},${Math.round(220-s.leftOpacity*100)},${Math.round(210-s.leftOpacity*60)})`} stroke="#b8a89a" strokeWidth={1.5}/>
+      {s.rightOpacity > 0 && <path d="M 90,32 Q 60,32 40,50 Q 22,70 22,100 Q 22,140 38,160 Q 55,178 80,178 Q 90,178 90,165 Z" fill={`rgba(160,170,180,${s.rightOpacity*0.7})`}/>}
+      {s.leftOpacity > 0 && <path d="M 110,32 Q 140,32 160,50 Q 178,70 178,100 Q 178,135 165,158 Q 150,178 125,178 Q 112,178 110,165 Z" fill={`rgba(160,170,180,${s.leftOpacity*0.7})`}/>}
+      {[[90,50,55,90],[90,62,42,100],[90,74,38,120],[90,86,44,140],[90,100,56,155]].map(([x1,y1,x2,y2],i) => (
+        <line key={`rv${i}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke={`rgba(160,100,100,${0.3+s.vesselWidth*0.12})`} strokeWidth={s.vesselWidth*(0.8+i*0.08)} strokeLinecap="round"/>
+      ))}
+      {[[110,50,145,90],[110,62,158,100],[110,74,162,120],[110,86,156,140],[110,100,144,155]].map(([x1,y1,x2,y2],i) => (
+        <line key={`lv${i}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke={`rgba(160,100,100,${0.3+s.vesselWidth*0.12})`} strokeWidth={s.vesselWidth*(0.8+i*0.08)} strokeLinecap="round"/>
+      ))}
+      <circle cx={90} cy={88} r={8*s.hilarSize} fill="none" stroke="rgba(140,80,80,0.5)" strokeWidth={s.vesselWidth*1.2}/>
+      <circle cx={110} cy={88} r={8*s.hilarSize} fill="none" stroke="rgba(140,80,80,0.5)" strokeWidth={s.vesselWidth*1.2}/>
+      <rect x={96} y={15} width={8} height={28} rx={3} fill="#d8d0c8"/>
+      <path d="M 100,42 Q 90,50 90,56" stroke="#c8bfb4" strokeWidth={3} fill="none" strokeLinecap="round"/>
+      <path d="M 100,42 Q 110,50 110,56" stroke="#c8bfb4" strokeWidth={3} fill="none" strokeLinecap="round"/>
+      <text x={100} y={202} textAnchor="middle" fontSize={10} fill="#aaa" fontFamily="DM Sans, sans-serif">Stage {stage+1} of 5</text>
+    </svg>
+  );
+}
+
+// ─── Shared Stage Navigator ───────────────────────────────────────────────────
+
+function StageNavigator({ stages, currentStage, setStage, DiagramComponent, accentColor }) {
+  const s = stages[currentStage];
+  const sevIdx = currentStage / (stages.length - 1);
+  const bg = sevIdx < 0.35 ? "oklch(0.97 0.02 150)" : sevIdx < 0.6 ? "oklch(0.97 0.04 80)" : sevIdx < 0.8 ? "oklch(0.96 0.05 45)" : "oklch(0.95 0.05 16)";
+  const bc = sevIdx < 0.35 ? "oklch(0.84 0.10 150)" : sevIdx < 0.6 ? "oklch(0.86 0.10 80)" : sevIdx < 0.8 ? "oklch(0.80 0.12 45)" : "oklch(0.75 0.14 16)";
+  const txc = sevIdx < 0.35 ? "#0a3020" : sevIdx < 0.6 ? "#3a2800" : sevIdx < 0.8 ? "#3a1800" : "#3a0a0a";
+
+  return (
+    <div style={{ background: "#fff", borderRadius: 16, padding: "22px 24px", border: "1px solid #e8ecf0", boxShadow: "0 1px 6px rgba(0,0,0,0.05)" }}>
+      {/* Stage pills */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 20, flexWrap: "wrap" }}>
+        {stages.map((st, i) => (
+          <button key={i} onClick={() => setStage(i)}
+            style={{ padding: "5px 13px", borderRadius: 20, border: "1.5px solid", borderColor: i === currentStage ? accentColor : "#e0e4ea", background: i === currentStage ? accentColor : "transparent", color: i === currentStage ? "#fff" : "#666", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", transition: "all 0.18s" }}>
+            {st.num}. {st.label}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+        {/* Diagram + nav */}
+        <div style={{ flex: "0 0 220px" }}>
+          <DiagramComponent stage={currentStage} />
+          <div style={{ display: "flex", justifyContent: "center", gap: 10, marginTop: 10 }}>
+            <button onClick={() => setStage(s => Math.max(0, s-1))} disabled={currentStage === 0}
+              style={{ background: "none", border: "1.5px solid #e0e4ea", borderRadius: 8, padding: "5px 14px", cursor: "pointer", fontSize: 16, fontFamily: "inherit", opacity: currentStage === 0 ? 0.3 : 1 }}>←</button>
+            <button onClick={() => setStage(s => Math.min(stages.length-1, s+1))} disabled={currentStage === stages.length-1}
+              style={{ background: "none", border: "1.5px solid #e0e4ea", borderRadius: 8, padding: "5px 14px", cursor: "pointer", fontSize: 16, fontFamily: "inherit", opacity: currentStage === stages.length-1 ? 0.3 : 1 }}>→</button>
+          </div>
+        </div>
+
+        {/* Info panel */}
+        <div style={{ flex: 1, minWidth: 220 }}>
+          <div style={{ fontSize: 18, fontWeight: 700, color: "#1e2d3d", marginBottom: 12 }}>Stage {s.num}: {s.label}</div>
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#8a96a3", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 6 }}>Key Features</div>
+            <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
+              {s.features.map((f, i) => (
+                <li key={i} style={{ fontSize: 13.5, color: "#333", display: "flex", gap: 8, marginBottom: 5, alignItems: "flex-start" }}>
+                  <span style={{ color: accentColor, marginTop: 2, flexShrink: 0 }}>●</span>{f}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div style={{ background: bg, border: `1px solid ${bc}`, borderRadius: 10, padding: "12px 14px", marginBottom: s.treatment ? 10 : 0 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#8a96a3", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 5 }}>Pathophysiology</div>
+            <div style={{ fontSize: 13, color: txc, lineHeight: 1.6 }}>{s.patho}</div>
+          </div>
+          {s.treatment && (
+            <div style={{ background: "oklch(0.96 0.04 155)", border: "1px solid oklch(0.82 0.10 150)", borderRadius: 10, padding: "12px 14px" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--c-green)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 5 }}>Stage-Appropriate Response</div>
+              <div style={{ fontSize: 13, color: "#0a3020", lineHeight: 1.6 }}>{s.treatment}</div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Inline Treatment Sections ────────────────────────────────────────────────
+
+function TreatmentBlock({ title, color, bg, border, steps, wms, drugs }) {
+  return (
+    <div style={{ background: "#fff", borderRadius: 16, border: `1.5px solid ${border}`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)", overflow: "hidden", marginTop: 20 }}>
+      <div style={{ background: bg, padding: "14px 20px", borderBottom: `1px solid ${border}` }}>
+        <div style={{ fontSize: 16, fontWeight: 800, color }}>{title}</div>
+        <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>WMS 2019 guidelines</div>
+      </div>
+      <div style={{ padding: "18px 20px" }}>
+        <ol style={{ margin: "0 0 16px", padding: "0 0 0 18px" }}>
+          {steps.map((step, i) => (
+            <li key={i} style={{ fontSize: 13.5, color: step.urgent ? color : "#333", fontWeight: step.urgent ? 700 : 400, marginBottom: 8, lineHeight: 1.5 }}>
+              {step.text}
+            </li>
+          ))}
+        </ol>
+        <div style={{ background: "oklch(0.96 0.04 220)", borderRadius: 8, padding: "8px 12px", display: "flex", gap: 8, alignItems: "flex-start", marginBottom: drugs ? 16 : 0 }}>
+          <span style={{ fontSize: 11, fontWeight: 800, color: "var(--c-blue)", flexShrink: 0, marginTop: 1 }}>WMS</span>
+          <span style={{ fontSize: 12.5, color: "#334" }}>{wms}</span>
+        </div>
+        {drugs && (
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            {drugs.map((d, i) => (
+              <div key={i} style={{ flex: 1, minWidth: 200, background: "oklch(0.97 0.01 225)", borderRadius: 10, padding: "12px 14px", border: "1px solid #e4e8ec" }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: "#1e2d3d", marginBottom: 2 }}>{d.name}</div>
+                <div style={{ fontFamily: "DM Mono, monospace", fontSize: 13, fontWeight: 700, color: d.color || "var(--c-blue)", marginBottom: 4 }}>{d.dose}</div>
+                <div style={{ fontSize: 12, color: "#777", lineHeight: 1.5 }}>{d.note}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── HACE Combined Tab ────────────────────────────────────────────────────────
+
+function HACETab() {
+  const [stage, setStage] = React.useState(0);
+  return (
+    <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 20, fontWeight: 700, color: "#1e2d3d" }}>High-Altitude Cerebral Edema</div>
+        <div style={{ fontSize: 13.5, color: "#666", marginTop: 3 }}>Navigate stages of cerebral involvement — from hypoxia to herniation. Treatment guidance updates at each stage.</div>
+      </div>
+
+      <StageNavigator stages={HACE_STAGES} currentStage={stage} setStage={setStage} DiagramComponent={BrainSVG} accentColor="var(--c-orange)" />
+
+      <TreatmentBlock
+        title="HACE Treatment Protocol"
+        color="var(--c-orange)"
+        bg="oklch(0.96 0.05 45)"
+        border="oklch(0.80 0.12 45)"
+        steps={[
+          { text: "DESCEND IMMEDIATELY — even 300–1,000 m can be life-saving. This is the definitive treatment.", urgent: true },
+          { text: "Dexamethasone 8 mg loading dose IV/IM/PO — administer NOW, before or during descent.", urgent: true },
+          { text: "Supplemental O₂ — target SpO₂ ≥90%. Reduces cerebral vasodilation.", urgent: false },
+          { text: "Gamow bag — if immediate descent is impossible. Simulates 1,500 m descent. Bridge only, not substitute for descent.", urgent: false },
+          { text: "Dexamethasone maintenance: 4 mg every 6 hours during evacuation.", urgent: false },
+          { text: "Do NOT leave patient alone — altered consciousness risks airway compromise.", urgent: false },
+          { text: "Continue descent regardless of apparent improvement on dexamethasone — 'dex rebound' is real.", urgent: false },
+        ]}
+        wms="Immediate descent + dexamethasone 8 mg load (then 4 mg q6h). Gamow bag as bridge. Do not use dexamethasone to continue ascent."
+        drugs={[
+          { name: "Dexamethasone", dose: "8 mg load → 4 mg q6h", color: "var(--c-orange)", note: "IV/IM preferred; PO if needed. Stabilizes BBB, reduces VEGF, decreases vasogenic edema. Does NOT treat underlying hypoxia." },
+          { name: "Gamow Bag", dose: "2 PSI above ambient", color: "var(--c-blue)", note: "Raises PB → raises PiO₂ → simulates ~1,500 m descent. Requires pump operator. 1–2h sessions. Bridge to actual descent." },
+        ]}
+      />
+
+      <div style={{ marginTop: 16, background: "#fff", borderRadius: 12, padding: "14px 18px", border: "1px solid #e8ecf0", fontSize: 13, color: "#555", lineHeight: 1.6 }}>
+        <strong style={{ color: "#1e2d3d" }}>Clinical pearl:</strong> Tandem gait test is the key field test. A climber who cannot walk heel-to-toe without stumbling at altitude has HACE until proven otherwise. Do not wait for MRI — act immediately.
+      </div>
+    </div>
+  );
+}
+
+// ─── HAPE Combined Tab ────────────────────────────────────────────────────────
+
+function HAPETab() {
+  const [stage, setStage] = React.useState(0);
+  return (
+    <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 20, fontWeight: 700, color: "#1e2d3d" }}>High-Altitude Pulmonary Edema</div>
+        <div style={{ fontSize: 13.5, color: "#666", marginTop: 3 }}>The most common cause of altitude-related death. Trace progression from HPV to alveolar flooding — with integrated treatment at each stage.</div>
+      </div>
+
+      <StageNavigator stages={HAPE_STAGES} currentStage={stage} setStage={setStage} DiagramComponent={LungSVG} accentColor="var(--c-blue)" />
+
+      <TreatmentBlock
+        title="HAPE Treatment Protocol"
+        color="var(--c-red)"
+        bg="oklch(0.95 0.05 16)"
+        border="oklch(0.75 0.14 16)"
+        steps={[
+          { text: "DESCEND IMMEDIATELY — even 300–500 m may be curative. This is the single most effective intervention.", urgent: true },
+          { text: "Supplemental O₂ — most critical drug. Target SpO₂ ≥90%. Directly reverses HPV.", urgent: true },
+          { text: "REST — absolutely no exertion. Exertion dramatically worsens pulmonary hemodynamics.", urgent: false },
+          { text: "Nifedipine 10 mg IR → 30 mg XR — reduces pulmonary artery pressure by blunting HPV. Use when descent is delayed.", urgent: false },
+          { text: "Gamow bag — simulates descent if actual descent impossible.", urgent: false },
+          { text: "Do NOT give furosemide — HAPE patients are often volume-depleted. Diuresis worsens outcome.", urgent: false },
+          { text: "Assess for co-occurring HACE — check tandem gait and mental status.", urgent: false },
+        ]}
+        wms="O₂ and descent are definitive. Nifedipine 30 mg XR reduces PAP when descent is delayed. Furosemide is NOT recommended. HAPE is reversible with prompt treatment."
+        drugs={[
+          { name: "Nifedipine", dose: "10 mg IR → 30 mg XR", color: "var(--c-red)", note: "Blocks Ca²⁺ in pulmonary smooth muscle → inhibits HPV → reduces PAP. Monitor BP. Tadalafil 10 mg BID is an alternative." },
+          { name: "Salmeterol", dose: "125 mcg inhaled BID", color: "var(--c-blue)", note: "β₂ agonist enhances alveolar fluid clearance via Na⁺ channels. Alternative/adjunct to nifedipine. Also used for prophylaxis in susceptible individuals." },
+        ]}
+      />
+
+      <div style={{ marginTop: 16, background: "#fff", borderRadius: 12, padding: "14px 18px", border: "1px solid #e8ecf0", fontSize: 13, color: "#555", lineHeight: 1.6 }}>
+        <strong style={{ color: "#1e2d3d" }}>Clinical pearl:</strong> Physical fitness is NOT protective — many HAPE victims are elite athletes. Prior HAPE history is the strongest risk factor. SpO₂ disproportionately lower than altitude peers is a red flag.
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { HACETab, HAPETab, BrainSVG, LungSVG, HACE_STAGES, HAPE_STAGES, StageNavigator });
+
+</script>
+<script type="text/babel">
+
+// Treatment Tab — AMS protocol + full drug reference
+
+const AMS_STEPS = [
+  { text: "Halt ascent — do not go higher until symptom-free for 24h", urgent: false },
+  { text: "Rest at current altitude", urgent: false },
+  { text: "Ibuprofen 400–600 mg q6–8h or acetaminophen for headache", urgent: false },
+  { text: "Ondansetron or prochlorperazine for nausea/vomiting", urgent: false },
+  { text: "Acetazolamide 250 mg BID — speeds acclimatization", urgent: false },
+  { text: "Supplemental O₂ if available (low flow)", urgent: false },
+  { text: "Descend if no improvement in 24h, or if any ataxia/AMS develops", urgent: true },
+];
+
+const DRUGS_REF = [
+  {
+    name: "Acetazolamide",
+    class: "Carbonic anhydrase inhibitor",
+    color: "var(--c-blue)",
+    badge: "AMS",
+    uses: ["AMS prophylaxis", "AMS treatment", "Accelerated acclimatization"],
+    dosing: [
+      { indication: "Prophylaxis", dose: "125–250 mg BID", timing: "Start 1–2 days before ascent; continue 2 days past highest point" },
+      { indication: "Treatment (AMS)", dose: "250 mg BID", timing: "Continue until symptoms resolve" },
+    ],
+    mechanism: "Inhibits carbonic anhydrase → HCO₃⁻ excretion → metabolic acidosis → sustained ventilatory drive without alkalosis feedback. Accelerates acclimatization.",
+    ci: "Sulfonamide allergy, severe renal impairment, pregnancy (relative).",
+    pearls: "125 mg BID equally effective with fewer side effects (polyuria, paresthesias, flat-tasting carbonated drinks). Does not treat HACE or HAPE.",
+    wms: "Grade A for AMS prophylaxis in rapid ascent. Preferred over dexamethasone as first-line."
+  },
+  {
+    name: "Dexamethasone",
+    class: "Glucocorticoid",
+    color: "var(--c-orange)",
+    badge: "HACE",
+    uses: ["HACE treatment (first-line)", "Severe AMS bridge to descent", "AMS prophylaxis — 2nd line only"],
+    dosing: [
+      { indication: "HACE loading", dose: "8 mg IV/IM/PO", timing: "Immediately on diagnosis" },
+      { indication: "HACE maintenance", dose: "4 mg q6h", timing: "Continue through descent + resolution" },
+      { indication: "Severe AMS", dose: "4 mg q6h", timing: "Bridge to descent only — do not use to push ascent" },
+      { indication: "Prophylaxis (2nd line)", dose: "2 mg q6h or 4 mg q12h", timing: "Only when acetazolamide contraindicated" },
+    ],
+    mechanism: "Stabilizes BBB tight junctions, downregulates VEGF, reduces vasogenic edema. Does NOT treat underlying hypoxia — descent remains mandatory.",
+    ci: "Active untreated infection (relative). Caution in diabetes.",
+    pearls: "⚠️ 'Dexamethasone rebound': symptoms recur if patient stays at altitude when drug wears off. Never use to push ascent after HACE. Not effective for HAPE.",
+    wms: "First-line pharmacotherapy for HACE: 8 mg load, then 4 mg q6h. Descent is still mandatory despite drug response."
+  },
+  {
+    name: "Nifedipine",
+    class: "Calcium channel blocker",
+    color: "var(--c-red)",
+    badge: "HAPE",
+    uses: ["HAPE treatment (first-line when descent delayed)", "HAPE prophylaxis in susceptible individuals"],
+    dosing: [
+      { indication: "HAPE treatment", dose: "10 mg IR → 30 mg XR", timing: "IR for rapid onset, then XR for sustained effect" },
+      { indication: "HAPE prophylaxis", dose: "30 mg XR daily", timing: "Start before ascent; for HAPE-susceptible individuals" },
+    ],
+    mechanism: "Blocks voltage-gated Ca²⁺ channels in pulmonary vascular smooth muscle → inhibits HPV → reduces pulmonary artery pressure → reduces capillary stress failure.",
+    ci: "Systemic hypotension (monitor BP). Not indicated for HACE.",
+    pearls: "Most effective specifically at reducing PAP. Tadalafil 10 mg BID and salmeterol 125 mcg BID are alternatives.",
+    wms: "First-line pharmacotherapy for HAPE when descent impossible. Preferred for HAPE prophylaxis in susceptible individuals."
+  },
+  {
+    name: "Tadalafil / Sildenafil",
+    class: "PDE-5 inhibitor",
+    color: "var(--c-blue)",
+    badge: "HAPE",
+    uses: ["HAPE prophylaxis (alternative)", "HAPE treatment (alternative to nifedipine)"],
+    dosing: [
+      { indication: "Tadalafil — prophylaxis", dose: "10 mg BID", timing: "Start 1 day before ascent" },
+      { indication: "Sildenafil — prophylaxis", dose: "50 mg TID", timing: "Start 1 day before ascent" },
+    ],
+    mechanism: "Inhibits PDE-5 → ↑ cGMP → NO-mediated pulmonary vasodilation → reduces PAP. Same downstream target as nifedipine but via NO/cGMP pathway.",
+    ci: "Concurrent nitrate use (severe hypotension). Retinal disease. Hypotension.",
+    pearls: "Alternative when nifedipine not tolerated. Less published evidence than nifedipine but growing data for tadalafil.",
+    wms: "Alternative to nifedipine for HAPE prophylaxis in susceptible individuals."
+  },
+];
+
+function DrugCard({ drug }) {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #e8ecf0", overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+      <div style={{ padding: "16px 20px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }} onClick={() => setOpen(o => !o)}>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 9, height: 9, borderRadius: "50%", background: drug.color, flexShrink: 0 }} />
+            <span style={{ fontSize: 16, fontWeight: 700, color: "#1e2d3d" }}>{drug.name}</span>
+            <span style={{ fontSize: 11, color: "#fff", background: drug.color, padding: "2px 8px", borderRadius: 8, fontWeight: 700 }}>{drug.badge}</span>
+            <span style={{ fontSize: 12, color: "#aaa" }}>{drug.class}</span>
+          </div>
+          <div style={{ marginTop: 5, display: "flex", gap: 5, flexWrap: "wrap" }}>
+            {drug.uses.map((u, i) => (
+              <span key={i} style={{ fontSize: 11.5, background: "oklch(0.96 0.01 225)", color: "#556", padding: "2px 8px", borderRadius: 8, fontWeight: 500 }}>{u}</span>
+            ))}
+          </div>
+        </div>
+        <span style={{ fontSize: 18, color: "#ccc", transform: open ? "rotate(90deg)" : "rotate(0)", transition: "transform 0.2s", flexShrink: 0 }}>▶</span>
+      </div>
+
+      {open && (
+        <div style={{ borderTop: "1px solid #f0f2f4", padding: "16px 20px", background: "oklch(0.985 0.005 225)" }}>
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#8a96a3", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 8 }}>Dosing</div>
+            {drug.dosing.map((d, i) => (
+              <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8, background: "#fff", borderRadius: 8, padding: "10px 12px", border: "1px solid #e8ecf0", flexWrap: "wrap" }}>
+                <div style={{ minWidth: 150, fontSize: 12.5, fontWeight: 600, color: drug.color }}>{d.indication}</div>
+                <div>
+                  <div style={{ fontFamily: "DM Mono, monospace", fontSize: 13, fontWeight: 700, color: "#1e2d3d" }}>{d.dose}</div>
+                  <div style={{ fontSize: 12, color: "#777", marginTop: 2 }}>{d.timing}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#8a96a3", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 5 }}>Mechanism</div>
+            <div style={{ fontSize: 13, color: "#444", lineHeight: 1.6 }}>{drug.mechanism}</div>
+          </div>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
+            <div style={{ flex: 1, minWidth: 180, background: "oklch(0.96 0.04 80)", borderRadius: 8, padding: "10px 12px" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--c-amber)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>Pearls</div>
+              <div style={{ fontSize: 12.5, color: "#444", lineHeight: 1.5 }}>{drug.pearls}</div>
+            </div>
+            <div style={{ flex: 1, minWidth: 180, background: "oklch(0.96 0.04 16)", borderRadius: 8, padding: "10px 12px" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--c-red)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>Contraindications</div>
+              <div style={{ fontSize: 12.5, color: "#444", lineHeight: 1.5 }}>{drug.ci}</div>
+            </div>
+          </div>
+          <div style={{ background: "oklch(0.96 0.04 220)", borderRadius: 8, padding: "8px 12px", display: "flex", gap: 8, alignItems: "flex-start" }}>
+            <span style={{ fontSize: 11, fontWeight: 800, color: "var(--c-blue)", flexShrink: 0, marginTop: 1 }}>WMS</span>
+            <span style={{ fontSize: 12.5, color: "#335" }}>{drug.wms}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TreatmentTab() {
+  return (
+    <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      {/* AMS Protocol */}
+      <div style={{ background: "#fff", borderRadius: 14, border: "1.5px solid oklch(0.85 0.10 80)", overflow: "hidden", marginBottom: 28, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+        <div style={{ background: "oklch(0.97 0.04 80)", padding: "14px 20px", borderBottom: "1px solid oklch(0.85 0.10 80)", display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{ fontSize: 18, fontWeight: 800, color: "var(--c-amber)" }}>Acute Mountain Sickness (AMS)</span>
+          <span style={{ fontSize: 12, fontWeight: 700, background: "var(--c-amber)", color: "#fff", padding: "2px 10px", borderRadius: 10 }}>Non-Emergency</span>
+        </div>
+        <div style={{ padding: "16px 20px" }}>
+          <div style={{ fontSize: 13, color: "#666", marginBottom: 14, fontStyle: "italic" }}>
+            <strong style={{ color: "#333", fontStyle: "normal" }}>Diagnose when:</strong> Lake Louise Score ≥3 with headache after ascent, in absence of other explanation. No ataxia, no AMS.
+          </div>
+          <ol style={{ margin: 0, padding: "0 0 0 18px" }}>
+            {AMS_STEPS.map((s, i) => (
+              <li key={i} style={{ fontSize: 13.5, color: s.urgent ? "var(--c-orange)" : "#333", fontWeight: s.urgent ? 700 : 400, marginBottom: 7, lineHeight: 1.5 }}>{s.text}</li>
+            ))}
+          </ol>
+          <div style={{ marginTop: 14, background: "oklch(0.96 0.04 220)", borderRadius: 8, padding: "8px 12px", display: "flex", gap: 8 }}>
+            <span style={{ fontSize: 11, fontWeight: 800, color: "var(--c-blue)", flexShrink: 0, marginTop: 1 }}>WMS</span>
+            <span style={{ fontSize: 12.5, color: "#334" }}>Halt ascent for AMS. Descent indicated if symptoms worsen or do not improve within 24h. Do not ascend with AMS. Acetazolamide speeds recovery.</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Drug reference */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ fontSize: 18, fontWeight: 700, color: "#1e2d3d" }}>Drug Reference</div>
+        <div style={{ fontSize: 13.5, color: "#777", marginTop: 2 }}>Click to expand dosing, mechanism, and WMS guidance</div>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {DRUGS_REF.map((d, i) => <DrugCard key={i} drug={d} />)}
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { TreatmentTab });
+
+</script>
+<script type="text/babel">
+
+// Quiz Tab — NBME-style self-assessment
+
+const CATEGORIES = ["All Topics", "Physiology", "AMS & HACE", "HAPE", "Treatment"];
+const CAT_COUNTS = { "All Topics": 20, "Physiology": 6, "AMS & HACE": 6, "HAPE": 4, "Treatment": 4 };
+const CAT_COLORS = {
+  "All Topics": "var(--c-blue)",
+  "Physiology": "var(--c-blue)",
+  "AMS & HACE": "var(--c-orange)",
+  "HAPE": "var(--c-red)",
+  "Treatment": "var(--c-green)",
+};
+
+function getFilteredQuestions(cat) {
+  if (!window.ALTITUDE_QUIZ) return [];
+  if (cat === "All Topics") return window.ALTITUDE_QUIZ;
+  return window.ALTITUDE_QUIZ.filter(q => q.category === cat);
+}
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function ProgressBar({ correct, incorrect, total, current }) {
+  const pct = Math.round((current / total) * 100);
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "#8a96a3" }}>
+          Question {current + 1} of {total}
+        </div>
+        <div style={{ display: "flex", gap: 14, fontSize: 13 }}>
+          <span style={{ color: "var(--c-green)", fontWeight: 700 }}>✓ {correct}</span>
+          <span style={{ color: "var(--c-red)", fontWeight: 700 }}>✗ {incorrect}</span>
+        </div>
+      </div>
+      <div style={{ height: 6, background: "#edf0f4", borderRadius: 3, overflow: "hidden" }}>
+        <div style={{ width: `${pct}%`, height: "100%", background: "var(--c-blue)", borderRadius: 3, transition: "width 0.4s ease" }} />
+      </div>
+    </div>
+  );
+}
+
+function QuestionCard({ q, qNum, total, onAnswer, answered, selectedId, correct, incorrect }) {
+  const [selected, setSelected] = React.useState(null);
+  const [revealed, setRevealed] = React.useState(false);
+
+  React.useEffect(() => {
+    setSelected(null);
+    setRevealed(false);
+  }, [q.id]);
+
+  function handleSelect(id) {
+    if (revealed) return;
+    setSelected(id);
+  }
+
+  function handleReveal() {
+    if (!selected) return;
+    setRevealed(true);
+    const isCorrect = selected === q.correct;
+    onAnswer(isCorrect);
+  }
+
+  function optionStyle(id) {
+    const base = {
+      padding: "13px 16px", borderRadius: 10, border: "1.5px solid",
+      cursor: revealed ? "default" : selected === id ? "default" : "pointer",
+      marginBottom: 8, display: "flex", gap: 12, alignItems: "flex-start",
+      transition: "all 0.15s", fontSize: 14, lineHeight: 1.5,
+      background: "#fff", borderColor: "#e0e4ea", color: "#333"
+    };
+    if (!revealed) {
+      if (selected === id) return { ...base, borderColor: "var(--c-blue)", background: "oklch(0.96 0.04 220)", color: "#1a3060" };
+      return { ...base };
+    }
+    if (id === q.correct) return { ...base, borderColor: "var(--c-green)", background: "oklch(0.95 0.05 150)", color: "#0a3020" };
+    if (id === selected && id !== q.correct) return { ...base, borderColor: "var(--c-red)", background: "oklch(0.95 0.05 16)", color: "#3a0a0a" };
+    return { ...base, opacity: 0.5 };
+  }
+
+  function optionIcon(id) {
+    if (!revealed) return selected === id ? "◉" : "○";
+    if (id === q.correct) return "✓";
+    if (id === selected && id !== q.correct) return "✗";
+    return "○";
+  }
+
+  const catColor = CAT_COLORS[q.category] || "var(--c-blue)";
+
+  return (
+    <div style={{ background: "#fff", borderRadius: 16, padding: "26px 28px", border: "1px solid #e8ecf0", boxShadow: "0 1px 6px rgba(0,0,0,0.06)" }}>
+      {/* Category tag */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 16, alignItems: "center" }}>
+        <span style={{ fontSize: 11.5, fontWeight: 700, color: catColor, background: "oklch(0.96 0.01 225)", padding: "3px 10px", borderRadius: 10, letterSpacing: "0.04em" }}>
+          {q.category}
+        </span>
+        {q.wms_ref && (
+          <span style={{ fontSize: 11.5, fontWeight: 600, color: "var(--c-blue)", background: "oklch(0.94 0.05 220)", padding: "3px 10px", borderRadius: 10 }}>
+            WMS Guideline
+          </span>
+        )}
+      </div>
+
+      {/* Stem */}
+      <div style={{ fontSize: 15.5, color: "#1e2d3d", lineHeight: 1.7, marginBottom: 22, fontWeight: 400 }}>
+        {q.stem}
+      </div>
+
+      {/* Options */}
+      <div style={{ marginBottom: 16 }}>
+        {q.options.map(opt => (
+          <div key={opt.id} style={optionStyle(opt.id)} onClick={() => handleSelect(opt.id)}>
+            <span style={{
+              fontWeight: 700, flexShrink: 0, width: 20, fontSize: 14,
+              color: revealed
+                ? opt.id === q.correct ? "var(--c-green)"
+                  : opt.id === selected ? "var(--c-red)" : "#ccc"
+                : selected === opt.id ? "var(--c-blue)" : "#aaa"
+            }}>
+              {optionIcon(opt.id)}
+            </span>
+            <span><strong>{opt.id}.</strong> {opt.text}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Reveal / Next buttons */}
+      {!revealed ? (
+        <button
+          onClick={handleReveal}
+          disabled={!selected}
+          style={{
+            padding: "11px 28px", borderRadius: 10, border: "none",
+            background: selected ? "var(--c-blue)" : "#e0e4ea",
+            color: selected ? "#fff" : "#aaa",
+            fontSize: 14, fontWeight: 700, cursor: selected ? "pointer" : "default",
+            fontFamily: "inherit", transition: "all 0.18s"
+          }}>
+          Submit Answer
+        </button>
+      ) : (
+        <div>
+          {/* Result banner */}
+          <div style={{
+            padding: "10px 16px", borderRadius: 10, marginBottom: 14,
+            background: selected === q.correct ? "oklch(0.95 0.06 150)" : "oklch(0.95 0.05 16)",
+            border: `1px solid ${selected === q.correct ? "oklch(0.82 0.12 150)" : "oklch(0.75 0.14 16)"}`,
+            display: "flex", alignItems: "center", gap: 10
+          }}>
+            <span style={{ fontSize: 20 }}>{selected === q.correct ? "✓" : "✗"}</span>
+            <span style={{ fontWeight: 700, color: selected === q.correct ? "var(--c-green)" : "var(--c-red)", fontSize: 14 }}>
+              {selected === q.correct ? "Correct!" : `Incorrect — The answer is ${q.correct}`}
+            </span>
+          </div>
+
+          {/* Explanation */}
+          <div style={{ background: "oklch(0.97 0.01 225)", borderRadius: 10, padding: "14px 16px", marginBottom: 16, border: "1px solid #e4e8ec" }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#8a96a3", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 6 }}>Explanation</div>
+            <div style={{ fontSize: 13.5, color: "#333", lineHeight: 1.7 }}>{q.explanation}</div>
+            {q.wms_ref && (
+              <div style={{ marginTop: 10, display: "flex", gap: 7, alignItems: "flex-start" }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: "var(--c-blue)", flexShrink: 0, marginTop: 1 }}>WMS</span>
+                <span style={{ fontSize: 12.5, color: "#446", fontStyle: "italic" }}>{q.wms_ref}</span>
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={() => onAnswer(null, true)}
+            style={{
+              padding: "11px 28px", borderRadius: 10, border: "none",
+              background: "var(--c-blue)", color: "#fff",
+              fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit"
+            }}>
+            Next Question →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ScoreScreen({ correct, total, category, onRestart }) {
+  const pct = Math.round((correct / total) * 100);
+  const grade = pct >= 80 ? { label: "Excellent", color: "var(--c-green)", msg: "Strong command of the material." }
+    : pct >= 60 ? { label: "Good", color: "var(--c-amber)", msg: "Review the topics you missed." }
+    : { label: "Needs Review", color: "var(--c-red)", msg: "Revisit the Physiology and Pathology tabs before re-testing." };
+
+  return (
+    <div style={{ background: "#fff", borderRadius: 16, padding: "40px 32px", border: "1px solid #e8ecf0", textAlign: "center", boxShadow: "0 1px 6px rgba(0,0,0,0.06)" }}>
+      <div style={{ fontSize: 56, fontWeight: 800, color: grade.color, lineHeight: 1, marginBottom: 6 }}>{pct}%</div>
+      <div style={{ fontSize: 22, fontWeight: 700, color: "#1e2d3d", marginBottom: 4 }}>{grade.label}</div>
+      <div style={{ fontSize: 14, color: "#777", marginBottom: 8 }}>{correct} of {total} correct — {category}</div>
+      <div style={{ fontSize: 14, color: "#555", marginBottom: 30 }}>{grade.msg}</div>
+      <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+        <button onClick={() => onRestart(false)} style={{ padding: "11px 24px", borderRadius: 10, border: "none", background: "var(--c-blue)", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+          Retake Same Set
+        </button>
+        <button onClick={() => onRestart(true)} style={{ padding: "11px 24px", borderRadius: 10, border: "1.5px solid #e0e4ea", background: "#fff", color: "#555", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+          New Shuffle
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function QuizTab() {
+  const [category, setCategory] = React.useState("All Topics");
+  const [questions, setQuestions] = React.useState([]);
+  const [currentIdx, setCurrentIdx] = React.useState(0);
+  const [correct, setCorrect] = React.useState(0);
+  const [incorrect, setIncorrect] = React.useState(0);
+  const [done, setDone] = React.useState(false);
+
+  React.useEffect(() => {
+    startQuiz(category, true);
+  }, [category]);
+
+  function startQuiz(cat, shuffle) {
+    const qs = getFilteredQuestions(cat);
+    setQuestions(shuffle ? shuffleArray(qs) : qs);
+    setCurrentIdx(0);
+    setCorrect(0);
+    setIncorrect(0);
+    setDone(false);
+  }
+
+  function handleAnswer(isCorrect, next) {
+    if (next) {
+      if (currentIdx + 1 >= questions.length) {
+        setDone(true);
+      } else {
+        setCurrentIdx(i => i + 1);
+      }
+      return;
+    }
+    if (isCorrect) setCorrect(c => c + 1);
+    else setIncorrect(c => c + 1);
+  }
+
+  const q = questions[currentIdx];
+
+  return (
+    <div style={{ maxWidth: 780, margin: "0 auto" }}>
+      {/* Category filter */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+        {CATEGORIES.map(cat => (
+          <button key={cat} onClick={() => setCategory(cat)}
+            style={{
+              padding: "7px 16px", borderRadius: 20, border: "1.5px solid",
+              borderColor: category === cat ? CAT_COLORS[cat] : "#e0e4ea",
+              background: category === cat ? CAT_COLORS[cat] : "#fff",
+              color: category === cat ? "#fff" : "#555",
+              fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+              transition: "all 0.15s"
+            }}>
+            {cat}
+            <span style={{ marginLeft: 6, opacity: 0.7, fontWeight: 400, fontSize: 11 }}>({CAT_COUNTS[cat]})</span>
+          </button>
+        ))}
+      </div>
+
+      {done ? (
+        <ScoreScreen correct={correct} total={questions.length} category={category}
+          onRestart={(shuffle) => startQuiz(category, shuffle)} />
+      ) : q ? (
+        <>
+          <ProgressBar correct={correct} incorrect={incorrect} total={questions.length} current={currentIdx} />
+          <QuestionCard
+            key={`${q.id}-${currentIdx}`}
+            q={q} qNum={currentIdx + 1} total={questions.length}
+            onAnswer={handleAnswer}
+          />
+        </>
+      ) : (
+        <div style={{ textAlign: "center", color: "#aaa", padding: 40 }}>Loading questions…</div>
+      )}
+    </div>
+  );
+}
+
+Object.assign(window, { QuizTab });
+
+</script>
+
+<!-- APP SHELL -->
+<script type="text/babel">
+const TABS = [
+  { id: "physiology", label: "Physiology",    dot: "var(--c-blue)",   color: "var(--c-blue)"   },
+  { id: "hace",       label: "HACE",          dot: "var(--c-orange)", color: "var(--c-orange)" },
+  { id: "hape",       label: "HAPE",          dot: "var(--c-red)",    color: "var(--c-red)"    },
+  { id: "treatment",  label: "AMS & Drugs",   dot: "var(--c-green)",  color: "var(--c-green)"  },
+  { id: "quiz",       label: "Self-Assessment", dot: "oklch(0.50 0.17 280)", color: "oklch(0.50 0.17 280)" },
+];
+
+function getTabComponent(id) {
+  return { physiology: window.PhysiologyTab, hace: window.HACETab, hape: window.HAPETab, treatment: window.TreatmentTab, quiz: window.QuizTab }[id];
+}
+
+function AppWrapper() {
+  const stored = localStorage.getItem("alt_tab") || "physiology";
+  const [tab, setTab] = React.useState(stored);
+
+  window.__setTab = (t) => {
+    setTab(t);
+    localStorage.setItem("alt_tab", t);
+    document.querySelectorAll(".tab-btn").forEach(b => {
+      const active = b.dataset.tab === t;
+      b.classList.toggle("active", active);
+      if (active) b.style.setProperty("--active-color", b.dataset.color);
+    });
+  };
+
+  React.useEffect(() => {
+    window.__setTab(tab);
+    const updateSliders = () => {
+      document.querySelectorAll("input[type=range]").forEach(el => {
+        const pct = ((el.value - el.min) / (el.max - el.min)) * 100;
+        el.style.setProperty("--pct", pct + "%");
+      });
+    };
+    document.addEventListener("input", updateSliders);
+    return () => document.removeEventListener("input", updateSliders);
+  }, []);
+
+  const ActiveTab = getTabComponent(tab);
+  return (
+    <div className="tab-panel" key={tab}>
+      {ActiveTab ? <ActiveTab /> : <div style={{ color: "#aaa", padding: 40, textAlign: "center" }}>Loading…</div>}
+    </div>
+  );
+}
+
+// Build tab nav
+const navEl = document.getElementById("tab-nav");
+const storedTab = localStorage.getItem("alt_tab") || "physiology";
+navEl.innerHTML = TABS.map(t => `
+  <button class="tab-btn ${t.id === storedTab ? 'active' : ''}" data-tab="${t.id}" data-color="${t.color}" style="${t.id === storedTab ? `--active-color:${t.color}` : ''}">
+    <span class="tab-dot" style="background:${t.dot}"></span>${t.label}
+  </button>`).join("");
+navEl.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => window.__setTab && window.__setTab(btn.dataset.tab));
+});
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<AppWrapper />);
+
+// Tweaks
+window.addEventListener("message", e => {
+  if (e.data?.type === "__activate_edit_mode")   document.getElementById("tweaks-panel").style.display = "block";
+  if (e.data?.type === "__deactivate_edit_mode") document.getElementById("tweaks-panel").style.display = "none";
+});
+window.parent.postMessage({ type: "__edit_mode_available" }, "*");
+
+document.getElementById("tweak-fontsize")?.querySelectorAll(".tweak-opt").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.getElementById("tweak-fontsize").querySelectorAll(".tweak-opt").forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+    document.body.style.fontSize = btn.dataset.val + "px";
+  });
+});
+document.getElementById("tweak-accent")?.querySelectorAll(".tweak-opt").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.getElementById("tweak-accent").querySelectorAll(".tweak-opt").forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+    document.documentElement.style.setProperty("--c-blue", btn.dataset.val);
+  });
+});
+</script>
+</body>
+</html>
