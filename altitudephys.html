@@ -1,0 +1,3120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>High Altitude Medicine — Interactive Learning Module</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+  --bg: #06090f;
+  --surface: #0d1520;
+  --surface2: #141f30;
+  --border: #1e2d42;
+  --border2: #2e4560;
+  --text: #e8f4ff;
+  --text-dim: #7a9abb;
+  --text-mid: #aecde8;
+  --accent: #5cc5ff;
+  --green: #3eeaa8;
+  --warn: #f5a840;
+  --danger: #ff4d6a;
+  --purple: #b466ff;
+  --yellow: #f4d04a;
+  --hape: #b466ff;
+
+  /* Section themes */
+  --physio: #5cc5ff;
+  --ams: #f5a840;
+  --hace: #ff4d6a;
+  --hape-color: #b466ff;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+/* ─── APP SHELL — viewport scaler ─── */
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 16px;
+}
+
+/* Outer viewport wrapper — full screen, clips overflow */
+.viewport-scaler {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+/* The inner app is fixed at design width; JS scales it to fit */
+.app {
+  width: 1200px;
+  height: 720px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform-origin: top left;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+
+/* ─── HEADER ─── */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.55rem 1.2rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.mountain-icon {
+  width: 36px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.header-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #e8f4ff;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.header-sub {
+  font-size: 0.75rem;
+  color: var(--text-mid);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.header-spacer { flex: 1; }
+
+.wms-link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--accent);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--accent);
+  padding: 0.28rem 0.7rem;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.wms-link:hover { color: white; border-color: white; background: rgba(92,197,255,0.12); }
+.wms-link svg { opacity: 0.9; }
+
+.ncme-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  background: rgba(100,160,255,0.06);
+  border: 1px solid var(--border2);
+  padding: 0.28rem 0.65rem;
+  white-space: nowrap;
+}
+
+/* ─── MODULE NAV ─── */
+.module-nav {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--surface);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.module-nav::-webkit-scrollbar { display: none; }
+
+.mod-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.3rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.mod-tab:hover { color: var(--text-mid); }
+.mod-tab.active { color: var(--text); }
+
+.mod-tab[data-mod="physio"].active { border-color: var(--physio); color: var(--physio); }
+.mod-tab[data-mod="amshace"].active { border-color: var(--warn); color: var(--warn); }
+.mod-tab[data-mod="hape"].active { border-color: var(--hape); color: var(--hape); }
+.mod-tab[data-mod="quiz"].active { border-color: var(--green); color: var(--green); }
+
+.tab-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ─── MAIN BODY (left nav + content) ─── */
+.main-body {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ─── LEFT NAVIGATION RAIL ─── */
+.left-nav {
+  display: none;
+}
+
+.left-nav-section-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 0.55rem 1rem 0.3rem;
+  opacity: 0.7;
+}
+
+.left-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.18s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.left-nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text-mid); }
+.left-nav-item.active { border-left-color: var(--physio); background: rgba(92,197,255,0.08); color: var(--accent); }
+.left-nav-item[data-mod="amshace"].active { border-left-color: var(--warn); color: var(--warn); background: rgba(240,149,42,0.08); }
+.left-nav-item[data-mod="hape"].active { border-left-color: var(--hape); color: var(--hape); background: rgba(255,77,106,0.08); }
+.left-nav-item[data-mod="quiz"].active { border-left-color: var(--green); color: var(--green); background: rgba(62,234,168,0.08); }
+
+.left-nav-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.left-nav-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0.4rem 0.8rem;
+}
+
+.left-nav-disabled {
+  pointer-events: none;
+  opacity: 0.45;
+  cursor: default;
+}
+
+.left-nav-soon {
+  margin-left: auto;
+  font-size: 0.68rem;
+  color: #3a5270;
+  font-family: 'Space Mono', monospace;
+}
+
+/* ─── CONTENT AREA ─── */
+.content-area {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* ─── MODULE NAV ─── */
+
+
+.module-panel {
+  display: none;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.module-panel.active {
+  display: flex;
+}
+
+/* ═══════════════════════════════════════════
+   MODULE 1 — PHYSIOLOGY
+═══════════════════════════════════════════ */
+.physio-layout {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.phys-sidebar {
+  display: none;
+}
+
+.phys-ctrl {
+  padding: 0.3rem 1rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  max-height: 52px;
+  overflow: hidden;
+}
+
+.phys-canvas-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.phys-canvas-row {
+  display: flex;
+  flex: 1;
+  gap: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.canvas-pane {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.canvas-pane canvas {
+  display: block;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.phys-info {
+  border-top: 1px solid var(--border);
+  padding: 0.2rem 0.5rem;
+  background: var(--surface);
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+  max-height: 58px;
+}
+
+/* System nav items */
+.sys-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.18s;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.88rem;
+}
+.sys-item:hover { background: rgba(255,255,255,0.04); }
+.sys-item.active {
+  border-left-color: var(--accent);
+  background: rgba(92,197,255,0.08);
+  color: var(--accent);
+}
+.sys-icon { font-size: 1.1rem; width: 24px; text-align: center; }
+.sys-label { font-weight: 500; }
+
+/* Alt control */
+.alt-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+.alt-display {
+  font-family: 'Space Mono', monospace;
+  font-size: 1rem;
+  color: var(--text);
+  min-width: 72px;
+  white-space: nowrap;
+}
+.alt-display span { font-size: 0.65rem; color: var(--text-dim); }
+
+input[type=range] {
+  -webkit-appearance: none;
+  width: 240px;
+  max-width: 40vw;
+  height: 3px;
+  background: linear-gradient(90deg, var(--green) 0%, var(--warn) 45%, var(--danger) 75%, #2a1060 100%);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--text);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 6px rgba(56,178,255,0.5);
+  cursor: pointer;
+}
+
+.preset-btns {
+  display: flex; gap: 0.25rem; flex-wrap: nowrap;
+}
+.preset-btn {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  padding: 0.18rem 0.4rem;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+.preset-btn:hover, .preset-btn.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+/* Disabled sidebar item */
+.sys-item-disabled {
+  cursor: default;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Acid-Base sub-panel */
+.acid-subpanel {
+  display: flex;
+  flex-direction: row;
+  border-top: 1px solid var(--border);
+  background: rgba(6,9,15,0.9);
+  flex-shrink: 0;
+  height: 160px;
+  max-height: 160px;
+  overflow: hidden;
+}
+.acid-numerics {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.85rem;
+  min-width: 150px;
+  max-width: 150px;
+  border-left: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.acid-num-row {
+  display: flex;
+  flex-direction: column;
+}
+.acid-num-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.acid-num-val {
+  font-family: 'Space Mono', monospace;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.acid-num-unit {
+  font-size: 0.65rem;
+  opacity: 0.6;
+  font-weight: 400;
+}
+.acid-canvas-pane {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Equations panel */
+.phys-equations {
+  border-top: 1px solid var(--border);
+  background: rgba(8,15,28,0.85);
+  padding: 0.3rem 1rem;
+  display: flex;
+  gap: 0;
+  flex-shrink: 0;
+  max-height: 90px;
+  overflow: hidden;
+}
+.eq-block {
+  flex: 1;
+  min-width: 0;
+  padding: 0 0.8rem;
+  overflow: hidden;
+}
+.eq-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.eq-formula {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.82rem;
+  color: #f5a840;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.eq-note {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  line-height: 1.3;
+  margin-bottom: 0.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.eq-live {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--green);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.eq-divider {
+  width: 1px;
+  background: var(--border);
+  flex-shrink: 0;
+  margin: 0.1rem 0;
+}
+
+/* Metrics */
+.metric-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 70px;
+  padding: 0.2rem 0.5rem;
+  border-right: 1px solid var(--border);
+}
+.metric-box:last-child { border-right: none; }
+.metric-label {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+}
+.metric-val {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.metric-unit { font-size: 0.65rem; font-weight: 400; opacity: 0.7; }
+.metric-delta { font-size: 0.65rem; margin-top: 0.05rem; }
+.metric-delta.up { color: var(--danger); }
+.metric-delta.down { color: var(--accent); }
+.metric-delta.warn { color: var(--warn); }
+.metric-delta.norm { color: var(--green); }
+
+/* ═══════════════════════════════════════════
+   MODULE 2 — AMS / HACE
+═══════════════════════════════════════════ */
+.amshace-layout {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Top row: canvas + info side by side */
+.amshace-main-row {
+  display: grid;
+  grid-template-columns: 1fr minmax(220px, 300px);
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.amshace-canvas-wrap {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+  min-height: 0;
+}
+
+.stage-nav {
+  display: flex;
+  gap: 0.3rem;
+  padding: 0.35rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.stage-btn {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+  font-family: 'Space Mono', monospace;
+  font-size: 0.68rem;
+  padding: 0.22rem 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.stage-btn:hover { border-color: var(--warn); color: var(--warn); }
+.stage-btn.active { border-color: var(--warn); color: var(--bg); background: var(--warn); }
+.stage-btn.danger.active { border-color: var(--danger); background: var(--danger); }
+
+.amshace-canvas-area {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+#brainCanvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.amshace-info {
+  overflow-y: auto;
+  padding: 0.65rem 0.85rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-height: 0;
+}
+
+.stage-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.stage-title .label {
+  display: block;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 0.3rem;
+}
+
+.altitude-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.75rem;
+  color: var(--text-mid);
+}
+.alt-track { flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.alt-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+
+.findings { display: flex; flex-direction: column; gap: 0.5rem; }
+.finding-item {
+  display: flex; gap: 0.5rem; align-items: flex-start;
+  font-size: 0.85rem; line-height: 1.5;
+  opacity: 0; transform: translateX(8px);
+  animation: slideIn 0.35s forwards;
+}
+@keyframes slideIn { to { opacity:1; transform:translateX(0); } }
+.dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.dot.normal { background: var(--green); }
+.dot.warn { background: var(--warn); }
+.dot.danger { background: var(--danger); }
+.dot.info { background: var(--accent); }
+
+.mechanisms {
+  border-top: 1px solid var(--border);
+  padding-top: 0.6rem;
+}
+.mech-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  margin-bottom: 0.5rem;
+}
+.mech-flow { display: flex; flex-direction: column; gap: 0.4rem; }
+.mech-step {
+  font-size: 0.82rem;
+  color: var(--text-mid);
+  padding-left: 0.5rem;
+  border-left: 2px solid var(--border);
+  line-height: 1.45;
+  opacity: 0;
+  animation: fadeUp 0.45s forwards;
+}
+.mech-step.highlight { border-left-color: var(--warn); color: var(--text); }
+.mech-step.danger-h { border-left-color: var(--danger); color: #ffaabb; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+
+/* Treatment section */
+.treatment-box {
+  background: rgba(255,59,92,0.06);
+  border: 1px solid rgba(255,59,92,0.2);
+  padding: 0.6rem 0.8rem;
+  border-radius: 2px;
+}
+.treat-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--danger);
+  margin-bottom: 0.4rem;
+}
+.treat-item {
+  font-size: 0.82rem;
+  color: var(--text);
+  line-height: 1.5;
+  display: flex;
+  gap: 0.4rem;
+  align-items: flex-start;
+  margin-bottom: 0.2rem;
+}
+.treat-icon { flex-shrink: 0; font-size: 0.85rem; }
+
+/* ═══════════════════════════════════════════
+   MODULE 3 — HAPE
+═══════════════════════════════════════════ */
+.hape-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr auto;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.hape-ctrl {
+  grid-column: 1 / 3;
+  padding: 0.55rem 1rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.hape-stage-btn {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  padding: 0.28rem 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.03em;
+}
+.hape-stage-btn:hover { border-color: var(--hape); color: var(--hape); }
+.hape-stage-btn.active { background: var(--hape); color: var(--bg); border-color: var(--hape); }
+
+.hape-canvas-left {
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.hape-canvas-right {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.hape-canvas-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 0.4rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.hape-canvas-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-height: 0;
+  padding: 0.3rem;
+}
+
+.hape-canvas-wrap canvas {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.hape-info-bar {
+  grid-column: 1 / 3;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  padding: 0.6rem 1rem;
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  flex-shrink: 0;
+  min-height: 0;
+}
+
+.hape-info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 140px;
+}
+.hape-info-section-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-mid);
+}
+.hape-info-item {
+  font-size: 0.8rem;
+  color: var(--text);
+  line-height: 1.45;
+  display: flex;
+  gap: 0.35rem;
+}
+
+/* ═══════════════════════════════════════════
+   MODULE 4 — QUIZ
+═══════════════════════════════════════════ */
+.quiz-layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  align-items: stretch;
+}
+
+.quiz-sidebar {
+  width: 180px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  padding: 0.8rem 0;
+  overflow-y: auto;
+  background: var(--surface);
+}
+
+.quiz-cat-item {
+  padding: 0.55rem 1rem;
+  font-size: 0.82rem;
+  color: var(--text-mid);
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.18s;
+  line-height: 1.3;
+}
+.quiz-cat-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+.quiz-cat-item.active { border-left-color: var(--green); color: var(--green); background: rgba(54,224,154,0.07); }
+
+.quiz-count {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-top: 0.15rem;
+}
+
+.quiz-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+  padding: 1rem 1.5rem;
+  gap: 0.8rem;
+}
+
+.quiz-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-shrink: 0;
+}
+.quiz-progress-text {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.quiz-progress-bar {
+  flex: 1;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.quiz-progress-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.quiz-q {
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.quiz-q .q-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-mid);
+  display: block;
+  margin-bottom: 0.3rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.quiz-option {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text-mid);
+  font-size: 0.88rem;
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s;
+  line-height: 1.4;
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+.quiz-option:hover:not(.answered) { border-color: var(--green); color: var(--text); }
+.quiz-option.correct { border-color: var(--green); background: rgba(54,224,154,0.1); color: var(--green); }
+.quiz-option.wrong { border-color: var(--danger); background: rgba(255,59,92,0.08); color: var(--danger); }
+.quiz-option.dimmed { opacity: 0.4; cursor: default; }
+
+.option-letter {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  width: 18px;
+  margin-top: 0.05rem;
+}
+
+.quiz-explanation {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--text);
+  background: rgba(92,197,255,0.06);
+  border: 1px solid rgba(92,197,255,0.25);
+  padding: 0.7rem 0.9rem;
+  display: none;
+  flex-shrink: 0;
+}
+.quiz-explanation.show { display: block; }
+.quiz-explanation .exp-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 0.35rem;
+}
+
+.quiz-nav {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+.quiz-btn {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--text-mid);
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  transition: all 0.18s;
+  letter-spacing: 0.04em;
+}
+.quiz-btn:hover { border-color: var(--green); color: var(--green); }
+.quiz-btn.primary { background: var(--green); color: var(--bg); border-color: var(--green); font-weight: 700; }
+.quiz-btn:disabled { opacity: 0.3; cursor: default; }
+
+.quiz-score {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin-left: auto;
+}
+.score-chip {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  padding: 0.22rem 0.6rem;
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+}
+.score-chip.correct { border-color: var(--green); color: var(--green); background: rgba(54,224,154,0.06); }
+.score-chip.wrong { border-color: var(--danger); color: var(--danger); background: rgba(255,59,92,0.05); }
+
+.coming-soon {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  opacity: 0.5;
+}
+.coming-soon-icon { font-size: 2.5rem; }
+.coming-soon-text {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.coming-soon-sub {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-align: center;
+  max-width: 280px;
+}
+
+/* ─── LEGEND BAR ─── */
+.legend-bar {
+  display: none;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.3rem 1rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+.legend-bar.show { display: flex; }
+.leg-item {
+  display: flex; align-items: center; gap: 0.35rem;
+  font-size: 0.75rem; color: var(--text-dim); white-space: nowrap;
+}
+.leg-swatch { width: 16px; height: 3px; border-radius: 2px; }
+
+/* ─── RESPONSIVE ─── */
+/* Layout responsiveness is handled by the JS viewport scaler (uniform scale-to-fit).
+   These queries only handle edge cases for very small screens. */
+@media (max-width: 600px) {
+  .quiz-layout { flex-direction: column; }
+  .quiz-sidebar { width: 100%; max-height: 80px; display: flex; flex-direction: row; border-right: none; border-bottom: 1px solid var(--border); padding: 0; overflow-x: auto; }
+  .quiz-cat-item { border-left: none; border-bottom: 3px solid transparent; flex-shrink: 0; }
+  .quiz-cat-item.active { border-bottom-color: var(--green); border-left-color: transparent; }
+}
+</style>
+</head>
+<body>
+<div class="viewport-scaler">
+<div class="app">
+
+<!-- ─── HEADER ─── -->
+<header class="header">
+  <div class="header-brand">
+    <svg class="mountain-icon" viewBox="0 0 36 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="18,2 32,26 4,26" fill="none" stroke="#8aaccc" stroke-width="1.5"/>
+      <polygon points="27,10 36,26 18,26" fill="rgba(56,178,255,0.12)" stroke="#38b2ff" stroke-width="1.2"/>
+      <line x1="14" y1="10" x2="22" y2="10" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <div class="header-title">High Altitude Medicine</div>
+      <div class="header-sub">Interactive Learning Module · Wilderness Medicine</div>
+    </div>
+  </div>
+  <div class="header-spacer"></div>
+  <a class="wms-link" href="https://wms.org/magazine/1127/altitude_illness_guidelines" target="_blank" rel="noopener">
+    <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M7 1h4v4M11 1L5.5 6.5M2 3h3v6H2V3z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>WMS Practice Guidelines</span>
+  </a>
+  <div class="ncme-badge">
+    <svg width="9" height="9" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="#4e6a88" stroke-width="1.2"/><text x="5" y="7.5" font-size="12" text-anchor="middle" fill="#4e6a88" font-family="sans-serif">i</text></svg>
+    NCME Questions — Coming Soon
+  </div>
+  <a class="wms-link" href="case-engine.html" style="margin-left:0.5rem; border-color:var(--green); color:var(--green);">
+    ← Case Engine
+  </a>
+</header>
+
+
+<!-- ─── TOP MODULE NAV ─── -->
+<nav class="module-nav" id="moduleNav">
+  <div class="mod-tab active" data-mod="physio" onclick="activatePhysio('pulm')">
+    <span class="tab-dot" style="background:var(--physio)"></span>🫁 Physiology
+  </div>
+  <div class="mod-tab" data-mod="amshace" onclick="activateMod('amshace')">
+    <span class="tab-dot" style="background:var(--warn)"></span>⛰ AMS &amp; HACE
+  </div>
+  <div class="mod-tab" data-mod="hape" onclick="activateMod('hape')">
+    <span class="tab-dot" style="background:var(--hape)"></span>🫁 HAPE
+  </div>
+  <div class="mod-tab" data-mod="quiz" onclick="activateMod('quiz')">
+    <span class="tab-dot" style="background:var(--green)"></span>✎ Self-Assessment
+  </div>
+</nav>
+
+<!-- ─── MAIN BODY: persistent left nav + content ─── -->
+<div class="main-body">
+
+<!-- ─── LEFT NAVIGATION RAIL ─── -->
+<nav class="left-nav">
+  <div class="left-nav-section-label">Physiology</div>
+  <div class="left-nav-item active" data-sys="pulm" onclick="activatePhysio('pulm')">
+    <span class="left-nav-dot" style="background:var(--physio)"></span>🫁 Pulmonary / Renal
+  </div>
+  <div class="left-nav-item" data-sys="cardio" onclick="activatePhysio('cardio')">
+    <span class="left-nav-dot" style="background:var(--physio)"></span>❤️ Cardiovascular
+  </div>
+  <div class="left-nav-item left-nav-disabled" title="Coming soon">
+    <span class="left-nav-dot" style="background:#2a3a50"></span><span style="opacity:0.35">🧠 Sleep / Neuro</span><span class="left-nav-soon">soon</span>
+  </div>
+
+  <div class="left-nav-divider"></div>
+  <div class="left-nav-section-label">Pathology</div>
+  <div class="left-nav-item" data-mod="amshace" onclick="activateMod('amshace')">
+    <span class="left-nav-dot" style="background:var(--warn)"></span>⛰ AMS &amp; HACE
+  </div>
+  <div class="left-nav-item" data-mod="hape" onclick="activateMod('hape')">
+    <span class="left-nav-dot" style="background:var(--hape)"></span>🫁 HAPE
+  </div>
+
+  <div class="left-nav-divider"></div>
+  <div class="left-nav-section-label">Assessment</div>
+  <div class="left-nav-item" data-mod="quiz" onclick="activateMod('quiz')">
+    <span class="left-nav-dot" style="background:var(--green)"></span>✎ Self-Assessment
+  </div>
+</nav>
+
+<!-- ─── CONTENT ─── -->
+<div class="content-area">
+
+<!-- ══════════════════════════════════════
+     MODULE 1: PHYSIOLOGY
+══════════════════════════════════════ -->
+<div class="module-panel active" id="panel-physio">
+<div class="physio-layout">
+
+  <!-- Altitude control -->
+  <div class="phys-ctrl">
+    <div class="alt-label">Altitude</div>
+    <div class="alt-display" id="altDisplay">0 <span>m</span></div>
+    <input type="range" id="altSlider" min="0" max="8849" step="50" value="0">
+    <div class="preset-btns">
+      <button class="preset-btn active" onclick="setAlt(0)">Sea Level</button>
+      <button class="preset-btn" onclick="setAlt(1500)">Denver 1,500m</button>
+      <button class="preset-btn" onclick="setAlt(2438)">Pressurized Plane</button>
+      <button class="preset-btn" onclick="setAlt(5364)">EBC 5,364m</button>
+      <button class="preset-btn" onclick="setAlt(5500)">5,500m</button>
+      <button class="preset-btn" onclick="setAlt(8849)">Everest 8,849m</button>
+    </div>
+  </div>
+
+  <!-- Canvas area - no trend graph -->
+  <div class="phys-canvas-area">
+    <div class="phys-canvas-row">
+      <div class="canvas-pane">
+        <canvas id="physMain" width="1010" height="440"></canvas>
+      </div>
+    </div>
+    <!-- Acid-Base sub-panel (visible only for Pulmonary/Renal) -->
+    <div class="acid-subpanel" id="acidSubpanel" style="display:none;">
+      <div class="canvas-pane acid-canvas-pane">
+        <canvas id="acidCanvas" width="840" height="220"></canvas>
+      </div>
+      <div class="acid-numerics" id="acidNumerics"><!-- filled by JS --></div>
+    </div>
+  </div>
+
+  <!-- Equations panel (Pulmonary only) -->
+  <div class="phys-equations" id="physEquations" style="display:none;">
+    <div class="eq-block">
+      <div class="eq-title">Barometric Pressure (Hüppert/West)</div>
+      <div class="eq-formula">P<sub>B</sub> = 760 × e<sup>−alt / 8150</sup></div>
+      <div class="eq-note">Himalayan-corrected (West 2009); actual Everest PB ≈ 253 mmHg</div>
+      <div class="eq-live" id="eqBaro"></div>
+    </div>
+    <div class="eq-divider"></div>
+    <div class="eq-block">
+      <div class="eq-title">Dalton's Law of Partial Pressures</div>
+      <div class="eq-formula">P<sub>gas</sub> = F<sub>gas</sub> × P<sub>B</sub></div>
+      <div class="eq-note">At altitude, P<sub>B</sub> falls → PiO₂ = 0.2093 × (P<sub>B</sub> − 47 mmHg)</div>
+      <div class="eq-live" id="eqDalton"></div>
+    </div>
+    <div class="eq-divider"></div>
+    <div class="eq-block">
+      <div class="eq-title">Alveolar Gas Equation</div>
+      <div class="eq-formula">P<sub>A</sub>O<sub>2</sub> = PiO₂ − PaCO₂/R</div>
+      <div class="eq-note">R = respiratory quotient (≈0.8); PaCO₂ falls with hyperventilation at altitude</div>
+      <div class="eq-live" id="eqAlvGas"></div>
+    </div>
+  </div>
+
+  <!-- Metrics strip -->
+  <div class="phys-info" id="metricsStrip"></div>
+
+</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODULE 2: AMS / HACE
+══════════════════════════════════════ -->
+<div class="module-panel" id="panel-amshace">
+<div class="amshace-layout">
+
+  <div class="amshace-main-row">
+    <div class="amshace-canvas-wrap">
+      <div class="stage-nav">
+        <button class="stage-btn active" onclick="setStage(0)">① Normal</button>
+        <button class="stage-btn" onclick="setStage(1)">② Hypoxia</button>
+        <button class="stage-btn" onclick="setStage(2)">③ Early AMS</button>
+        <button class="stage-btn" onclick="setStage(3)">④ Moderate AMS</button>
+        <button class="stage-btn danger" onclick="setStage(4)">⑤ HACE</button>
+        <button class="stage-btn danger" onclick="setStage(5)">⑥ Severe HACE</button>
+      </div>
+      <div class="amshace-canvas-area">
+        <canvas id="brainCanvas" width="520" height="440"></canvas>
+      </div>
+    </div>
+
+    <div class="amshace-info" id="infoPanel">
+      <!-- filled by JS -->
+    </div>
+  </div><!-- amshace-main-row -->
+
+  <div class="legend-bar show" id="brainLegend">
+    <div class="leg-item"><div class="leg-swatch" style="background:#c0bcbc"></div>White matter</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#a0a0a4"></div>Grey matter</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#ff3232"></div>Arteries</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#4060d0"></div>Veins</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#38b2ff"></div>Vasogenic edema</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#ff3b5c"></div>Petechiae / herniation</div>
+    <div class="leg-item" style="margin-left:auto">
+      <span style="font-size: 0.68rem;font-family:'Space Mono',monospace;color:var(--text-dim)">← → arrow keys to navigate stages</span>
+    </div>
+  </div>
+
+</div><!-- amshace-layout -->
+</div><!-- panel-amshace -->
+
+<!-- ══════════════════════════════════════
+     MODULE 3: HAPE
+══════════════════════════════════════ -->
+<div class="module-panel" id="panel-hape">
+<div class="hape-layout">
+
+  <div class="hape-ctrl">
+    <span class="alt-label">HAPE Stage:</span>
+    <button class="hape-stage-btn active" onclick="setHapeStage(0)">① Normal Lungs</button>
+    <button class="hape-stage-btn" onclick="setHapeStage(1)">② Pulm Hypertension</button>
+    <button class="hape-stage-btn" onclick="setHapeStage(2)">③ Early HAPE</button>
+    <button class="hape-stage-btn" onclick="setHapeStage(3)">④ Frank HAPE</button>
+    <button class="hape-stage-btn" onclick="setHapeStage(4)">⑤ Severe HAPE</button>
+    <span style="margin-left:auto; font-size: 0.75rem; color:var(--text-dim)">
+      Risk: HAPE-S (susceptible) individuals, rapid ascent, cold, exertion
+    </span>
+  </div>
+
+  <div class="hape-canvas-left" style="grid-column:1/3">
+    <div class="hape-canvas-title">Pulmonary Vasculature &amp; Edema</div>
+    <div class="hape-canvas-wrap">
+      <canvas id="hapeMain" width="720" height="320"></canvas>
+    </div>
+  </div>
+
+  <div class="hape-info-bar">
+    <div class="hape-info-section">
+      <div class="hape-info-section-title">Key Symptoms</div>
+      <div id="hapeSymptoms"></div>
+    </div>
+    <div class="hape-info-section">
+      <div class="hape-info-section-title">Pathophysiology</div>
+      <div id="hapeMechanism"></div>
+    </div>
+    <div class="hape-info-section">
+      <div class="hape-info-section-title">Treatment</div>
+      <div id="hapeTreatment"></div>
+    </div>
+    <div class="hape-info-section">
+      <div class="hape-info-section-title">WMS Guideline Highlights</div>
+      <div id="hapeWMS"></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODULE 4: QUIZ
+══════════════════════════════════════ -->
+<div class="module-panel" id="panel-quiz">
+<div class="quiz-layout">
+
+  <div class="quiz-sidebar">
+    <div class="quiz-cat-item active" onclick="setQuizCat('all')" data-cat="all">
+      All Topics
+      <div class="quiz-count">20 questions</div>
+    </div>
+    <div class="quiz-cat-item" onclick="setQuizCat('physio')" data-cat="physio">
+      Physiology
+      <div class="quiz-count">6 questions</div>
+    </div>
+    <div class="quiz-cat-item" onclick="setQuizCat('ams')" data-cat="ams">
+      AMS &amp; HACE
+      <div class="quiz-count">6 questions</div>
+    </div>
+    <div class="quiz-cat-item" onclick="setQuizCat('hape')" data-cat="hape">
+      HAPE
+      <div class="quiz-count">4 questions</div>
+    </div>
+    <div class="quiz-cat-item" onclick="setQuizCat('treat')" data-cat="treat">
+      Treatment
+      <div class="quiz-count">4 questions</div>
+    </div>
+  </div>
+
+  <div class="quiz-main">
+    <div class="quiz-progress-row">
+      <div class="quiz-progress-text" id="quizProgressText">Question 1 of 20</div>
+      <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quizProgressFill" style="width:5%"></div></div>
+      <div class="quiz-score">
+        <div class="score-chip correct" id="scoreCorrect">✓ 0</div>
+        <div class="score-chip wrong" id="scoreWrong">✗ 0</div>
+      </div>
+    </div>
+
+    <div class="quiz-q" id="quizQuestion">Loading...</div>
+
+    <div class="quiz-options" id="quizOptions"></div>
+
+    <div class="quiz-explanation" id="quizExplanation">
+      <div class="exp-label">Explanation</div>
+      <div id="expText"></div>
+    </div>
+
+    <div class="quiz-nav">
+      <button class="quiz-btn" id="btnPrev" onclick="quizNav(-1)" disabled>← Prev</button>
+      <button class="quiz-btn primary" id="btnNext" onclick="quizNav(1)">Next →</button>
+      <button class="quiz-btn" onclick="resetQuiz()">Restart</button>
+    </div>
+  </div>
+
+</div>
+</div>
+
+</div><!-- content-area -->
+
+</div><!-- main-body -->
+
+</div><!-- app -->
+</div><!-- viewport-scaler -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  MODULE SWITCHING
+// ═══════════════════════════════════════════════════════════════════
+// ── Unified left-nav activation ──
+function activatePhysio(sys) {
+  // Switch to physio panel
+  document.querySelectorAll('.module-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-physio').classList.add('active');
+  // Highlight top tab nav
+  document.querySelectorAll('.mod-tab').forEach(el => el.classList.remove('active'));
+  document.querySelector('.mod-tab[data-mod="physio"]')?.classList.add('active');
+  // Highlight left-nav (kept for compatibility)
+  document.querySelectorAll('.left-nav-item').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.left-nav-item[data-sys="${sys}"]`)?.classList.add('active');
+  // Set system
+  currentSystem = sys;
+  updatePhysUI();
+  if (!physAnimRunning) startPhysAnim();
+}
+
+function activateMod(mod) {
+  document.querySelectorAll('.module-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + mod).classList.add('active');
+  // Highlight top tab nav
+  document.querySelectorAll('.mod-tab').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.mod-tab[data-mod="${mod}"]`)?.classList.add('active');
+  // Highlight left-nav (kept for compatibility)
+  document.querySelectorAll('.left-nav-item').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.left-nav-item[data-mod="${mod}"]`)?.classList.add('active');
+  if (mod === 'amshace' && !brainAnimRunning) startBrainAnim();
+  if (mod === 'hape' && !hapeAnimRunning) startHapeAnim();
+}
+
+// Keep switchModule for any internal calls
+function switchModule(mod) {
+  if (mod === 'physio') { activatePhysio(currentSystem); return; }
+  activateMod(mod);
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  PHYSIOLOGY MODULE
+// ═══════════════════════════════════════════════════════════════════
+let physFrame = 0, altitude = 0, currentSystem = 'pulm', physAnimRunning = false;
+
+// ─── Hill equation: SaO₂ from PaO₂ ───────────────────────────────
+// Hill 1910 / Severinghaus model: SaO₂ = PO₂ⁿ / (P₅₀ⁿ + PO₂ⁿ), n=2.7
+// P₅₀ left-shifts at altitude (respiratory alkalosis reduces O₂ affinity need,
+// alkalosis actually shifts LEFT — lower P₅₀ means higher affinity at given PaO₂)
+function hillSaturation(PaO2, P50, n) {
+  if (PaO2 <= 0) return 0;
+  const pn = Math.pow(PaO2, n);
+  return 100 * pn / (Math.pow(P50, n) + pn);
+}
+
+function altPhysics(a) {
+  const f = a / 8849;   // fraction of Everest altitude
+
+  // ── Barometric pressure (West/Himalayan-corrected equation) ──────
+  // Standard 760·e^(−a/7000) gives 215 mmHg at Everest; actual measured ~253 mmHg.
+  // Scale height 8150 m gives 257 mmHg — matches OP-Everest II data well.
+  const PB = Math.round(760 * Math.exp(-a / 8150));
+
+  // ── Inspired PO₂  (Dalton / Fick) ────────────────────────────────
+  // PiO₂ = FiO₂ × (PB − PH₂O)   FiO₂=0.2093, PH₂O=47 mmHg at 37°C
+  const PiO2 = Math.round(0.2093 * (PB - 47));
+
+  // ── PaCO₂: hyperventilatory response ─────────────────────────────
+  // Calibrated to West 2009 direct measurements:
+  //   Sea level=40, Denver(1500m)≈35, EBC(5364m)≈22, Everest≈13
+  const PaCO2 = Math.max(10, Math.round(40 - f * 28));
+
+  // ── Alveolar gas equation: PAO₂ = PiO₂ − PaCO₂/RQ ───────────────
+  // RQ=0.8 (mixed diet)
+  const PAO2 = Math.round(Math.max(5, PiO2 - PaCO2 / 0.8));
+
+  // ── A-a oxygen gradient ───────────────────────────────────────────
+  // In acclimatized climbers: 5 mmHg at SL, rises to ~11 at mid-altitude
+  // (V/Q mismatch), then falls back toward 5 at extreme altitude
+  // (HPV homogenises perfusion). Parabolic model fitted to Sutton 1988 data.
+  const AaGrad = Math.round(5 + 9 * 4 * f * Math.pow(1 - f, 1.5));
+
+  // ── PaO₂ (arterial) ──────────────────────────────────────────────
+  const PaO2 = Math.max(5, PAO2 - AaGrad);
+
+  // ── SaO₂ / SpO₂ via Hill equation (NOT linear!) ──────────────────
+  // P₅₀ left-shifts with altitude (respiratory alkalosis increases Hb–O₂ affinity)
+  // Sea level P₅₀=26.6 → Everest ≈21.6 mmHg
+  const P50 = 26.6 - f * 5;
+  const SpO2 = Math.round(hillSaturation(PaO2, P50, 2.7));
+
+  // ── Acid-base (Henderson-Hasselbalch with renal compensation) ────
+  // Chronic HCO₃⁻ falls 3.5 mEq/L per 10 mmHg drop in PaCO₂
+  const HCO3 = Math.max(11, Math.round(24 - (40 - PaCO2) * 0.35));
+  const pH   = parseFloat((6.1 + Math.log10(HCO3 / (0.0307 * PaCO2))).toFixed(2));
+
+  // ── Ventilation ───────────────────────────────────────────────────
+  const RR = Math.round(12 + f * 28);          // 12→40 /min
+  const TV = parseFloat(Math.max(0.5, 0.5 + f * 0.5).toFixed(2));  // 0.5→1.0 L
+  const MV = parseFloat((RR * TV).toFixed(1));  // minute ventilation L/min
+
+  // ── Cardiovascular ────────────────────────────────────────────────
+  const HR  = Math.round(60 + f * 65);
+  const SBP = Math.round(120 + f * 25);
+  const PAP = Math.round(15 + f * 35);
+  const CO  = parseFloat((4.5 + f * 3.5).toFixed(1));
+
+  // ── Haematology ───────────────────────────────────────────────────
+  const Hb  = parseFloat((14 + f * 4).toFixed(1));
+  const Hct = Math.round(42 + f * 18);
+  const EPO = parseFloat((1 + f * 8).toFixed(1));
+
+  // ── Other ─────────────────────────────────────────────────────────
+  const CBF   = Math.round(100 + f * 45);
+  const HIF   = Math.min(1, f * 1.5);
+  const SNS   = Math.min(1, f * 1.3);
+  const urine = parseFloat(Math.max(0.5, 1.5 - f * 0.5).toFixed(1));
+  const sleep = Math.min(9, f * 12);
+
+  return { PiO2, PAO2, PaO2, SpO2, AaGrad, RR, TV, MV,
+           HR, SBP, PAP, CO, Hb, Hct, EPO,
+           pH, PaCO2, HCO3, CBF, HIF, SNS, urine, sleep, PB };
+}
+
+const systems = {
+  pulm: {
+    label: 'Pulmonary / Renal',
+    draw: drawPulmonary,
+    metrics: p => [
+      { label: 'SpO₂', val: p.SpO2, unit: '%', delta: p.SpO2 < 80 ? 'down' : p.SpO2 < 90 ? 'warn' : 'norm', ref: 98 },
+      { label: 'RR', val: p.RR, unit: '/min', delta: p.RR > 20 ? 'up' : 'norm', ref: 14 },
+      { label: 'PiO₂', val: p.PiO2, unit: 'mmHg', delta: p.PiO2 < 100 ? 'down' : 'norm', ref: 149 },
+      { label: 'PAO₂', val: p.PAO2, unit: 'mmHg', delta: p.PAO2 < 60 ? 'down' : 'norm', ref: 99 },
+      { label: 'A-a Gap', val: p.AaGrad, unit: 'mmHg', delta: p.AaGrad > 10 ? 'warn' : 'norm', ref: 5 },
+      { label: 'Min Vent', val: p.MV, unit: 'L/min', delta: p.MV > 10 ? 'up' : 'norm', ref: 6 },
+      { label: 'pH', val: p.pH, unit: '', delta: p.pH > 7.45 ? 'up' : p.pH < 7.35 ? 'down' : 'norm' },
+      { label: 'PaCO₂', val: p.PaCO2, unit: 'mmHg', delta: p.PaCO2 < 32 ? 'down' : 'norm' },
+      { label: 'HCO₃⁻', val: p.HCO3, unit: 'mEq/L', delta: p.HCO3 < 20 ? 'down' : 'norm' },
+    ],
+  },
+  cardio: {
+    label: 'Cardiovascular',
+    draw: drawCardiovascular,
+    metrics: p => [
+      { label: 'HR', val: p.HR, unit: 'bpm', delta: p.HR > 100 ? 'up' : 'norm' },
+      { label: 'CO', val: p.CO, unit: 'L/min', delta: p.CO > 7 ? 'up' : 'norm' },
+      { label: 'SBP', val: p.SBP, unit: 'mmHg', delta: p.SBP > 140 ? 'warn' : 'norm' },
+      { label: 'PAP', val: p.PAP, unit: 'mmHg', delta: p.PAP > 25 ? 'warn' : p.PAP > 35 ? 'up' : 'norm' },
+      { label: 'SpO₂', val: p.SpO2, unit: '%', delta: p.SpO2 < 85 ? 'down' : 'norm' },
+    ],
+  },
+  renal: {
+    label: 'Acid-Base',
+    draw: drawRenal,
+    metrics: p => [
+      { label: 'pH', val: p.pH, unit: '', delta: p.pH > 7.45 ? 'up' : p.pH < 7.35 ? 'down' : 'norm' },
+      { label: 'PaCO₂', val: p.PaCO2, unit: 'mmHg', delta: p.PaCO2 < 32 ? 'down' : 'norm' },
+      { label: 'HCO₃', val: p.HCO3, unit: 'mEq/L', delta: p.HCO3 < 20 ? 'down' : 'norm' },
+      { label: 'Urine', val: p.urine, unit: 'L/d', delta: 'norm' },
+    ],
+  },
+  neuro: {
+    label: 'Sleep / Neurologic',
+    draw: drawNeurological,
+    metrics: p => [
+      { label: 'CBF', val: p.CBF + '%', unit: '', delta: p.CBF > 130 ? 'up' : 'norm' },
+      { label: 'SpO₂', val: p.SpO2, unit: '%', delta: p.SpO2 < 85 ? 'down' : p.SpO2 < 90 ? 'warn' : 'norm' },
+      { label: 'Sleep Dist', val: p.sleep.toFixed(1), unit: '/10', delta: p.sleep > 3 ? 'warn' : 'norm' },
+      { label: 'RR', val: p.RR, unit: '/min', delta: p.RR > 20 ? 'up' : 'norm' },
+    ],
+  },
+};
+
+function drawPulmonary(ctx, p, W, H, alt) {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#06090f'; ctx.fillRect(0, 0, W, H);
+
+  const f = alt / 8849;
+  const spo2 = p.SpO2 / 100;
+  const RR_fast = p.RR / 14;
+  const breathPhase = (physFrame * RR_fast * 0.025) % (Math.PI * 2);
+  const breathScale = 1 + Math.sin(breathPhase) * 0.07;
+
+  // ── SPLIT: left ~73% = alveolus/capillary, right ~27% = ODC ──
+  const splitX = W * 0.72;   // divider line
+  const odcPad = 24;          // padding between divider and ODC axes
+
+  // ════════════════════════════════════════════════════
+  //  LEFT PANEL — Alveolus + Pulmonary Capillary
+  // ════════════════════════════════════════════════════
+
+  // Colour based on oxygenation
+  const r = Math.round(Math.max(50, 220 - (1 - spo2) * 180));
+  const g = Math.round(Math.max(20, spo2 * 80));
+  const b = Math.round(spo2 * 200 + 55);
+
+  // Alveolus centred in left panel
+  const alcX = splitX * 0.38, alcY = H * 0.54;
+  const alcR = 72 * breathScale;
+
+  const alvGrad = ctx.createRadialGradient(alcX, alcY - 12, 6, alcX, alcY, alcR);
+  alvGrad.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.9)`);
+  alvGrad.addColorStop(1, `rgba(${Math.max(0, r-60)}, ${Math.max(0, g-30)}, ${Math.max(0, b-80)}, 0.28)`);
+  ctx.beginPath(); ctx.arc(alcX, alcY, alcR, 0, Math.PI * 2);
+  ctx.fillStyle = alvGrad; ctx.fill();
+  ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.5)`; ctx.lineWidth = 2; ctx.stroke();
+
+  // Air molecules — total count drops with altitude (Dalton's law)
+  const maxMols = 20;
+  const nMols = Math.max(4, Math.round(maxMols * (1 - f * 0.56)));
+  for (let i = 0; i < nMols; i++) {
+    const seed1 = (i * 137.508) % 1;
+    const seed2 = (i * 251.317) % 1;
+    const angle = seed1 * Math.PI * 2;
+    const radius = Math.sqrt(seed2) * (alcR - 12);
+    const mx = alcX + Math.cos(angle + physFrame * 0.016) * radius * 0.85;
+    const my = alcY + Math.sin(angle + physFrame * 0.016) * radius * 0.85;
+    const isO2 = i < Math.round(nMols * 0.21);
+    if (isO2) {
+      ctx.beginPath(); ctx.arc(mx, my, 4.5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(92, 197, 255, 0.95)'; ctx.fill();
+    } else {
+      ctx.beginPath(); ctx.arc(mx, my, 3, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(90, 110, 140, 0.55)'; ctx.fill();
+    }
+  }
+
+  // Alveolus labels
+  ctx.font = 'bold 14px Outfit, sans-serif'; ctx.fillStyle = 'rgba(210,235,255,0.92)';
+  ctx.textAlign = 'center';
+  ctx.fillText('Alveolus', alcX, alcY + alcR + 20);
+  ctx.font = 'bold 14px Space Mono, monospace'; ctx.fillStyle = `rgb(${r},${g},${b})`;
+  ctx.fillText(`PAO₂: ${p.PAO2} mmHg`, alcX, alcY + alcR + 38);
+
+  // Blood vessel — close to alveolus
+  const bvX = alcX + alcR + 28;
+  const bvCX = bvX + 18;
+  const bvTop = alcY - 100;
+  const bvBottom = alcY + 100;
+  const bvW = 36;
+
+  // Diffusion dots crossing gap
+  const diffX1 = alcX + alcR + 4;
+  const diffX2 = bvX - 4;
+  const diffOpacity = 0.25 + spo2 * 0.65;
+  const nDiff = Math.round(spo2 * 5);
+  for (let i = 0; i < nDiff; i++) {
+    const prog = ((physFrame * 0.013 + i * 0.22) % 1);
+    const dx = diffX1 + (diffX2 - diffX1) * prog;
+    const dy = alcY - 22 + i * 11;
+    ctx.beginPath(); ctx.arc(dx, dy, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(62, 234, 168, ${diffOpacity * (1 - prog * 0.5)})`; ctx.fill();
+  }
+
+  // Vessel walls
+  ctx.strokeStyle = 'rgba(200, 90, 90, 0.45)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(bvX, bvTop); ctx.lineTo(bvX, bvBottom); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(bvX + bvW, bvTop); ctx.lineTo(bvX + bvW, bvBottom); ctx.stroke();
+
+  const bldR = Math.round(lerp(110, 210, spo2));
+  const bldG = Math.round(lerp(12, 38, spo2));
+  const bldB = Math.round(lerp(18, 55, spo2));
+  ctx.fillStyle = `rgba(${bldR}, ${bldG}, ${bldB}, 0.88)`;
+  ctx.fillRect(bvX, bvTop, bvW, bvBottom - bvTop);
+
+  const nRBC = Math.round(5 + spo2 * 6);
+  for (let i = 0; i < nRBC; i++) {
+    const ry = bvTop + 10 + ((i * 29 + physFrame * 0.9) % (bvBottom - bvTop - 14));
+    ctx.beginPath(); ctx.ellipse(bvCX, ry, bvW * 0.34, 5.5, 0, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${bldR - 28}, ${bldG + 5}, ${bldB + 8}, 0.92)`; ctx.fill();
+  }
+
+  // Vessel labels
+  ctx.font = 'bold 13px Outfit, sans-serif'; ctx.fillStyle = 'rgba(210,235,255,0.9)';
+  ctx.textAlign = 'center';
+  ctx.fillText('Pulm. Capillary', bvCX, bvBottom + 18);
+  ctx.font = 'bold 14px Space Mono, monospace';
+  ctx.fillStyle = `rgb(${bldR}, ${Math.min(255, bldG + 60)}, ${Math.min(255, bldB + 80)})`;
+  ctx.fillText(`SpO₂: ${p.SpO2}%`, bvCX, bvBottom + 36);
+
+  // Diffusion labels — right of vessel
+  const lblX = bvX + bvW + 12;
+  const lblY = alcY - 44;
+  ctx.textAlign = 'left';
+  ctx.font = 'bold 13px Outfit, sans-serif';
+  ctx.fillStyle = f > 0.2 ? '#f5a840' : '#3eeaa8';
+  ctx.fillText('O₂ Diffusion', lblX, lblY);
+  ctx.font = '13px Space Mono, monospace';
+  ctx.fillStyle = 'rgba(220,235,255,0.88)';
+  ctx.fillText(`ΔPO₂ ≈ ${Math.round(p.PAO2 - p.SpO2 * 0.13)} mmHg`, lblX, lblY + 20);
+  if (f > 0.2) {
+    ctx.font = 'bold 12px Outfit, sans-serif'; ctx.fillStyle = '#f5a840';
+    ctx.fillText('↓ gradient at altitude', lblX, lblY + 40);
+  }
+
+  // Top info strip (left panel)
+  ctx.font = 'bold 14px Outfit, sans-serif'; ctx.fillStyle = '#f5a840'; ctx.textAlign = 'left';
+  ctx.fillText(`PiO₂: ${p.PiO2} mmHg  (${Math.round((1-f)*100)}% of sea level)`, 12, 22);
+  ctx.font = 'bold 13px Outfit, sans-serif'; ctx.fillStyle = 'rgba(190,220,245,0.92)';
+  ctx.fillText(`A-a gradient: ${p.AaGrad} mmHg`, 12, 42);
+
+  // Molecule legend
+  const legY = 64;
+  ctx.font = '12px Outfit, sans-serif'; ctx.textAlign = 'left';
+  ctx.beginPath(); ctx.arc(16, legY - 3, 4, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(92, 197, 255, 0.95)'; ctx.fill();
+  ctx.fillStyle = 'rgba(210,235,255,0.8)'; ctx.fillText('O₂', 23, legY);
+  ctx.beginPath(); ctx.arc(44, legY - 3, 3, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(130,160,200,0.6)'; ctx.fill();
+  ctx.fillStyle = 'rgba(150,175,210,0.8)'; ctx.fillText('N₂', 50, legY);
+  ctx.fillStyle = 'rgba(140,165,200,0.65)';
+  ctx.fillText(`(${nMols} molecules/vol)`, 70, legY);
+
+  // Bottom warning
+  if (f > 0.35) {
+    ctx.font = 'bold 12px Outfit, sans-serif'; ctx.fillStyle = '#ff4d6a'; ctx.textAlign = 'left';
+    ctx.fillText(`⚠ Low PAO₂ → reduced alveolar-capillary diffusion`, 12, H - 10);
+  }
+
+  // Vertical divider
+  ctx.strokeStyle = 'rgba(92,197,255,0.12)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(splitX, 10); ctx.lineTo(splitX, H - 10); ctx.stroke();
+
+  // ════════════════════════════════════════════════════
+  //  RIGHT PANEL — Oxygen-Haemoglobin Dissociation Curve
+  // ════════════════════════════════════════════════════
+
+  const odcLeft  = splitX + odcPad;
+  const odcRight = W - 18;
+  const odcTop   = 28;
+  const odcBot   = H - 38;
+  const odcW     = odcRight - odcLeft;
+  const odcH     = odcBot - odcTop;
+
+  // Title
+  ctx.font = 'bold 14px Outfit, sans-serif'; ctx.fillStyle = 'rgba(210,235,255,0.92)';
+  ctx.textAlign = 'center';
+  ctx.fillText('O₂-Hb Dissociation Curve', odcLeft + odcW / 2, odcTop - 10);
+
+  // Axes
+  ctx.strokeStyle = 'rgba(120,160,200,0.45)'; ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(odcLeft, odcTop); ctx.lineTo(odcLeft, odcBot); // Y axis
+  ctx.lineTo(odcRight, odcBot);                              // X axis
+  ctx.stroke();
+
+  // Axis labels
+  ctx.font = '12px Outfit, sans-serif'; ctx.fillStyle = 'rgba(150,185,220,0.8)';
+  ctx.textAlign = 'center';
+  ctx.fillText('PaO₂ (mmHg)', odcLeft + odcW / 2, odcBot + 18);
+  ctx.save(); ctx.translate(odcLeft - 20, odcTop + odcH / 2);
+  ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center';
+  ctx.fillText('SaO₂ (%)', 0, 0); ctx.restore();
+
+  // X gridlines + labels: 0, 20, 40, 60, 80, 100 mmHg
+  const xMax = 100;
+  const yMax = 100;
+  for (let xv = 0; xv <= xMax; xv += 20) {
+    const px = odcLeft + (xv / xMax) * odcW;
+    ctx.strokeStyle = 'rgba(120,160,200,0.12)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(px, odcTop); ctx.lineTo(px, odcBot); ctx.stroke();
+    ctx.font = '12px Space Mono, monospace'; ctx.fillStyle = 'rgba(130,165,200,0.65)';
+    ctx.textAlign = 'center';
+    ctx.fillText(xv, px, odcBot + 14);
+  }
+  // Y gridlines + labels: 0, 25, 50, 75, 100%
+  for (let yv = 0; yv <= yMax; yv += 25) {
+    const py = odcBot - (yv / yMax) * odcH;
+    ctx.strokeStyle = 'rgba(120,160,200,0.12)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(odcLeft, py); ctx.lineTo(odcRight, py); ctx.stroke();
+    ctx.font = '12px Space Mono, monospace'; ctx.fillStyle = 'rgba(130,165,200,0.65)';
+    ctx.textAlign = 'right';
+    ctx.fillText(yv, odcLeft - 6, py + 4);
+  }
+
+  // ODC sigmoid — Hill equation: SaO₂ = PO₂ⁿ / (P₅₀ⁿ + PO₂ⁿ)  [P50=26.6, n=2.7]
+  // At altitude: respiratory alkalosis left-shifts curve (higher Hb–O₂ affinity)
+  const P50 = 26.6 - f * 5;    // 26.6 mmHg → ~21.6 mmHg at Everest
+  const n   = 2.7;
+  function hillSat(po2) {
+    if (po2 <= 0) return 0;
+    const pn = Math.pow(po2, n);
+    return 100 * pn / (Math.pow(P50, n) + pn);
+  }
+
+  // Draw the curve
+  ctx.beginPath();
+  for (let xv = 0; xv <= xMax; xv += 0.5) {
+    const sat = hillSat(xv);
+    const px = odcLeft + (xv / xMax) * odcW;
+    const py = odcBot  - (sat / yMax) * odcH;
+    xv === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+  }
+  ctx.strokeStyle = 'rgba(255, 120, 120, 0.9)'; ctx.lineWidth = 2.5; ctx.stroke();
+
+  // ── Death Zone line — SaO₂ = 40% ──
+  const deathZoneY = odcBot - (40 / yMax) * odcH;
+  ctx.strokeStyle = 'rgba(60, 220, 120, 0.75)'; ctx.lineWidth = 1.5;
+  ctx.setLineDash([5, 4]);
+  ctx.beginPath(); ctx.moveTo(odcLeft, deathZoneY); ctx.lineTo(odcRight, deathZoneY); ctx.stroke();
+  ctx.setLineDash([]);
+  // Label on the right side, just above the line
+  ctx.font = 'bold 12px Outfit, sans-serif'; ctx.fillStyle = 'rgba(60,220,120,0.9)';
+  ctx.textAlign = 'right';
+  ctx.fillText('⚠ Death Zone  SaO₂ 40%', odcRight - 4, deathZoneY - 5);
+
+  // P50 reference line (dashed)
+  const p50px = odcLeft + (P50 / xMax) * odcW;
+  ctx.strokeStyle = 'rgba(150,150,200,0.3)'; ctx.lineWidth = 1;
+  ctx.setLineDash([3, 5]);
+  ctx.beginPath(); ctx.moveTo(p50px, odcTop); ctx.lineTo(p50px, odcBot); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.font = '12px Outfit, sans-serif'; ctx.fillStyle = 'rgba(140,140,200,0.6)';
+  ctx.textAlign = 'center';
+  // Move label down 26px to clear the top axis numbers
+  ctx.fillText(`P₅₀=${P50.toFixed(0)}`, p50px, odcTop + 26);
+
+  // ── Current altitude marker on the curve ──
+  const curPaO2  = p.PaO2 || p.PAO2;
+  const curSat   = hillSat(curPaO2);
+  const markerPX = odcLeft + (Math.min(curPaO2, xMax) / xMax) * odcW;
+  const markerPY = odcBot  - (Math.min(curSat, yMax) / yMax) * odcH;
+
+  // Crosshairs from axes to point
+  ctx.strokeStyle = 'rgba(255,200,80,0.35)'; ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(odcLeft, markerPY); ctx.lineTo(markerPX, markerPY);
+  ctx.moveTo(markerPX, odcBot);  ctx.lineTo(markerPX, markerPY);
+  ctx.stroke(); ctx.setLineDash([]);
+
+  // Animated pulsing dot
+  const pulse = 1 + Math.sin(physFrame * 0.08) * 0.25;
+  ctx.beginPath(); ctx.arc(markerPX, markerPY, 7 * pulse, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,200,60,0.18)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(markerPX, markerPY, 5, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffc83c'; ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,180,0.7)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(markerPX, markerPY, 5, 0, Math.PI * 2); ctx.stroke();
+
+  // ── Yellow labels — fixed to bottom-right of ODC area so they never overlap title ──
+  const infoX = odcRight - 6;
+  const infoY = odcBot - 48;   // anchored near the bottom
+  ctx.textAlign = 'right';
+  ctx.font = 'bold 13px Space Mono, monospace';
+  ctx.fillStyle = '#ffc83c';
+  ctx.fillText(`PaO₂: ${curPaO2} mmHg`, infoX, infoY);
+  ctx.fillText(`SaO₂: ${curSat.toFixed(0)}%`, infoX, infoY + 18);
+  const altLabel = alt === 0 ? 'Sea Level' : `${alt.toLocaleString()} m`;
+  ctx.font = '12px Outfit, sans-serif'; ctx.fillStyle = 'rgba(255,200,80,0.75)';
+  ctx.fillText(`@ ${altLabel}`, infoX, infoY + 34);
+
+  // Bohr shift note
+  if (f > 0.15) {
+    ctx.font = '12px Outfit, sans-serif'; ctx.fillStyle = 'rgba(160,200,255,0.7)';
+    ctx.textAlign = 'left';
+    ctx.fillText('← Bohr shift: alkalosis shifts curve left', odcLeft + 4, odcTop + 28);
+  }
+}
+
+function drawCardiovascular(ctx, p, W, H, alt) {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#06090f'; ctx.fillRect(0, 0, W, H);
+  const cx = W / 2, cy = H * 0.48;
+  const HR_rate = p.HR / 65;
+  const beatPhase = (physFrame * HR_rate * 0.025) % (Math.PI * 2);
+  const beat = beatPhase < Math.PI * 0.3 ? Math.sin(beatPhase / 0.3) : 0;
+  const scale = 1 + beat * 0.06;
+  const pap = p.PAP;
+  const papNorm = Math.min(1, (pap - 15) / 35);
+  const f = alt / 8849;
+
+  // PA lumen gets narrower with altitude (HPV vasoconstriction)
+  // Higher altitude = higher papNorm = thicker wall, smaller lumen
+  const paLumen = Math.max(4, 14 - papNorm * 10);  // lumen radius shrinks
+  const paWallThick = 3 + papNorm * 7;             // wall gets thicker
+
+  const aCol = `rgba(220, 60, 60, 0.88)`;
+  const pvCol = `rgba(${Math.round(100 + papNorm * 155)}, 60, 60, 0.82)`;
+  const raCol = 'rgba(160, 90, 90, 0.65)';
+  const rvCol = `rgba(${Math.round(140 + papNorm * 80)}, 70, 70, 0.72)`;
+  const laCol = 'rgba(190, 100, 80, 0.65)';
+  const lvCol = 'rgba(215, 55, 55, 0.85)';
+
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(scale, scale); ctx.translate(-cx, -cy);
+
+  // === RIGHT ATRIUM ===
+  ctx.beginPath(); ctx.ellipse(cx - 58, cy - 30, 28, 22, -0.3, 0, Math.PI*2);
+  ctx.fillStyle = raCol; ctx.fill();
+  ctx.strokeStyle = 'rgba(200,100,100,0.4)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // === LEFT ATRIUM ===
+  ctx.beginPath(); ctx.ellipse(cx + 48, cy - 30, 28, 22, 0.3, 0, Math.PI*2);
+  ctx.fillStyle = laCol; ctx.fill();
+  ctx.strokeStyle = 'rgba(220,110,90,0.4)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // === RIGHT VENTRICLE ===
+  ctx.beginPath(); ctx.ellipse(cx - 40, cy + 22, 32, 44, -0.18, 0, Math.PI*2);
+  ctx.fillStyle = rvCol; ctx.fill();
+  ctx.strokeStyle = `rgba(${Math.round(160+papNorm*80)},70,70,0.5)`; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // === LEFT VENTRICLE ===
+  ctx.beginPath(); ctx.ellipse(cx + 36, cy + 22, 35, 46, 0.18, 0, Math.PI*2);
+  ctx.fillStyle = lvCol; ctx.fill();
+  ctx.strokeStyle = 'rgba(220,60,60,0.5)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // === AORTA (from LV) - stays normal ===
+  ctx.beginPath();
+  ctx.arc(cx + 52, cy - 58, 36, 0.8, Math.PI * 1.85);
+  ctx.strokeStyle = `rgba(220, 60, 60, ${0.65 + beat * 0.3})`; ctx.lineWidth = 10; ctx.stroke();
+
+  // === PULMONARY ARTERY (from RV) - lumen narrows with altitude ===
+  // Outer wall (thickens with altitude)
+  ctx.beginPath();
+  ctx.arc(cx - 52, cy - 58, 36, Math.PI * 0.15, Math.PI * 0.98);
+  ctx.strokeStyle = pvCol; ctx.lineWidth = paLumen * 2 + paWallThick * 2; ctx.stroke();
+  // Inner lumen (lighter color, narrows)
+  ctx.beginPath();
+  ctx.arc(cx - 52, cy - 58, 36, Math.PI * 0.15, Math.PI * 0.98);
+  ctx.strokeStyle = `rgba(80, 30, 30, 0.6)`; ctx.lineWidth = paLumen * 2; ctx.stroke();
+
+  ctx.restore();
+
+  // === LABELS ===
+  function heartLabel(text, x, y, color) {
+    ctx.save();
+    ctx.font = 'bold 12px Outfit, sans-serif';
+    ctx.fillStyle = color || 'rgba(220, 230, 245, 0.9)';
+    ctx.textAlign = 'center';
+    ctx.shadowColor = '#06090f'; ctx.shadowBlur = 4;
+    ctx.fillText(text, x, y);
+    ctx.restore();
+  }
+
+  heartLabel('RA', cx - 58, cy - 28);
+  heartLabel('LA', cx + 48, cy - 28);
+  heartLabel('RV', cx - 40, cy + 28);
+  heartLabel('LV', cx + 36, cy + 28);
+
+  // PA label with vasoconstriction indicator
+  ctx.save();
+  ctx.font = 'bold 12px Outfit, sans-serif';
+  ctx.fillStyle = papNorm > 0.35 ? '#ff4d6a' : '#f5a840';
+  ctx.textAlign = 'center';
+  ctx.shadowColor = '#06090f'; ctx.shadowBlur = 6;
+  ctx.fillText('Pulm. Artery', cx - 82, cy - 84);
+  if (f > 0.2) {
+    ctx.font = '12px Outfit, sans-serif'; ctx.fillStyle = '#f5a840';
+    ctx.fillText('↑ HPV → vasoconstriction', cx - 82, cy - 68);
+    ctx.fillText(`lumen ↓ ${Math.round((1 - paLumen/14)*100)}% at this altitude`, cx - 82, cy - 54);
+  }
+  ctx.restore();
+
+  // Aorta label
+  ctx.save();
+  ctx.font = 'bold 12px Outfit, sans-serif'; ctx.fillStyle = 'rgba(220,160,160,0.9)';
+  ctx.textAlign = 'center'; ctx.shadowColor = '#06090f'; ctx.shadowBlur = 4;
+  ctx.fillText('Aorta', cx + 82, cy - 80);
+  ctx.restore();
+
+  // === TOP METRICS ===
+  ctx.font = 'bold 14px Space Mono, monospace'; ctx.fillStyle = '#3eeaa8'; ctx.textAlign = 'left';
+  ctx.fillText(`HR: ${p.HR} bpm   CO: ${p.CO} L/min`, 12, 22);
+  ctx.font = 'bold 13px Space Mono, monospace';
+  ctx.fillStyle = papNorm > 0.45 ? '#ff4d6a' : '#f5a840';
+  ctx.fillText(`PAP: ${p.PAP} mmHg ${p.PAP > 25 ? '⚠ ELEVATED' : ''}`, 12, 40);
+  ctx.font = '12px Outfit, sans-serif'; ctx.fillStyle = 'rgba(174,205,232,0.8)';
+  ctx.fillText(`SBP: ${p.SBP} mmHg`, 12, 58);
+}
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+function drawHematologic(ctx, p, W, H, alt) {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#06090f'; ctx.fillRect(0, 0, W, H);
+  const cx = W / 2;
+  const hct = p.Hct / 100;
+  const spo2 = p.SpO2 / 100;
+  const r2 = Math.round(180 + spo2 * 60);
+  const g2 = Math.round(30 + spo2 * 20);
+  const b2 = Math.round(30 + spo2 * 20);
+
+  const vessels = [{ x: 80, y: H/2, r: 38 },{ x: cx, y: H/2, r: 52 },{ x: W-80, y: H/2, r: 38 }];
+  vessels.forEach(v => {
+    ctx.beginPath(); ctx.arc(v.x, v.y, v.r, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(120, 90, 70, 0.35)'; ctx.fill();
+    ctx.beginPath(); ctx.arc(v.x, v.y, v.r - 5, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255, 210, 170, 0.65)`; ctx.fill();
+    const fillH = (v.r - 5) * 2 * hct;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(v.x, v.y, v.r - 5, 0, Math.PI * 2); ctx.clip();
+    ctx.fillStyle = `rgba(${r2}, ${g2}, ${b2}, 0.85)`;
+    ctx.fillRect(v.x - v.r, v.y + (v.r - 5) - fillH, v.r * 2, fillH);
+    const nRBC = Math.floor(hct * 14);
+    for (let i = 0; i < nRBC; i++) {
+      const s = i * 53.3 + v.x;
+      const px = v.x - v.r * 0.7 + (s % (v.r * 1.4));
+      const py = v.y + (v.r - 5) - fillH + (i * 11 % fillH);
+      ctx.beginPath(); ctx.ellipse(px, py, 6, 3.5, s % 2, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${r2-30}, ${g2}, ${b2}, 0.9)`; ctx.fill();
+    }
+    ctx.restore();
+  });
+
+  ctx.font = '12px Outfit, sans-serif'; ctx.fillStyle = '#8aaccc'; ctx.textAlign = 'center';
+  ctx.fillText('Hematocrit', cx, H/2 - 55);
+  ctx.font = 'bold 20px Space Mono, monospace'; ctx.fillStyle = '#f0952a';
+  ctx.fillText(`${p.Hct}%`, cx, H/2 + 58);
+
+  ctx.fillStyle = 'rgba(210, 55, 55, 0.82)'; ctx.beginPath(); ctx.roundRect(W-115, 14, 100, 48, 3); ctx.fill();
+  ctx.font = 'bold 12px Space Mono, monospace'; ctx.fillStyle = 'white'; ctx.textAlign = 'center';
+  ctx.fillText('EPO', W-65, 30); ctx.font = 'bold 18px Space Mono, monospace';
+  ctx.fillText(`${p.EPO}×`, W-65, 52);
+
+  ctx.font = '12px Space Mono, monospace'; ctx.fillStyle = '#36e09a'; ctx.textAlign = 'left';
+  ctx.fillText(`Hb: ${p.Hb} g/dL  SpO₂: ${p.SpO2}%`, 10, 20);
+}
+
+function drawRenal(ctx, p, W, H, alt) {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#06090f'; ctx.fillRect(0, 0, W, H);
+  const pH = parseFloat(p.pH);
+
+  // ── Layout constants ──────────────────────────────────────────────
+  // Divide canvas into thirds: gauge | HCO₃ bar | PaCO₂ bar
+  // Each third is W/3 wide. Gauge centred in left third, bars centred in their thirds.
+  const third = W / 3;
+  const barW   = Math.round(third * 0.38);   // wide bars ~38% of each third
+  const barH   = H * 0.58;
+  const barTop = H * 0.14;
+
+  // Gauge: centred in left third
+  const gr = third * 0.5;
+  const gy = H * 0.56;
+  const gaugeR = Math.min(Math.round(third * 0.42), 82);
+
+  // Bar centres: middle of 2nd and 3rd thirds
+  const b1cx = third * 1.5;   // centre of middle third
+  const b2cx = third * 2.5;   // centre of right third
+  const b1x  = b1cx - barW / 2;
+  const b2x  = b2cx - barW / 2;
+
+  // ── pH Gauge ──────────────────────────────────────────────────────
+  // Gauge spans pH 7.1 (full left = acidosis) to 7.7 (full right = alkalosis)
+  // Needle angle: −π/2 (left end) to +π/2 (right end) mapped to pH 7.1–7.7
+  const phMin = 7.1, phMax = 7.7;
+  const phClamped = Math.max(phMin, Math.min(phMax, pH));
+  const phFrac = (phClamped - phMin) / (phMax - phMin);  // 0=acidosis left, 1=alkalosis right
+  const phAngle = (phFrac - 0.5) * Math.PI;  // −π/2 to +π/2
+
+  // Arc gradient: acidosis (red/orange) on left → normal (green) → alkalosis (blue) on right
+  const acidBaseGrad = ctx.createConicGradient(-Math.PI / 2, gr, gy);
+  acidBaseGrad.addColorStop(0,    '#ff4d6a');   // far left = acidosis (red)
+  acidBaseGrad.addColorStop(0.35, '#f5a840');   // mild acidosis (orange)
+  acidBaseGrad.addColorStop(0.5,  '#3eeaa8');   // normal (green)
+  acidBaseGrad.addColorStop(0.65, '#5cc5ff');   // mild alkalosis (blue)
+  acidBaseGrad.addColorStop(1,    '#5cc5ff');   // far right = alkalosis (blue)
+  ctx.beginPath(); ctx.arc(gr, gy, gaugeR, -Math.PI, 0);
+  ctx.strokeStyle = acidBaseGrad; ctx.lineWidth = 14; ctx.stroke();
+
+  ctx.save(); ctx.translate(gr, gy); ctx.rotate(phAngle);
+  ctx.beginPath(); ctx.moveTo(0, 5); ctx.lineTo(0, -gaugeR + 10);
+  ctx.strokeStyle = '#e8f4ff'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.stroke();
+  ctx.restore();
+
+  ctx.fillStyle = '#e8f4ff'; ctx.font = 'bold 22px Space Mono, monospace'; ctx.textAlign = 'center';
+  ctx.fillText(`pH ${p.pH}`, gr, gy + 26);
+  ctx.font = '12px Outfit, sans-serif'; ctx.fillStyle = '#7a9abb';
+  ctx.fillText('← Acidosis   Alkalosis →', gr, gy + 44);
+
+  // Thin vertical dividers between thirds
+  ctx.strokeStyle = 'rgba(60,90,130,0.25)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(third, 8); ctx.lineTo(third, H - 8); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(third * 2, 8); ctx.lineTo(third * 2, H - 8); ctx.stroke();
+
+  // ── Bar backgrounds ───────────────────────────────────────────────
+  ctx.fillStyle = 'rgba(20,31,48,0.7)';
+  ctx.fillRect(b1x, barTop, barW, barH);
+  ctx.fillRect(b2x, barTop, barW, barH);
+
+  // ── HCO₃⁻ bar (teal) — range 8–26 mEq/L ─────────────────────────
+  // Min fill 4% so bar is always visible even at extreme altitude
+  const hco3Norm  = Math.max(0.04, Math.min(1, (parseFloat(p.HCO3) - 8) / 18));
+  const hco3FillH = barH * hco3Norm;
+  ctx.fillStyle = 'rgba(30,160,140,0.85)';
+  ctx.fillRect(b1x, barTop + barH - hco3FillH, barW, hco3FillH);
+
+  // ── PaCO₂ bar (blue) — range 8–42 mmHg ───────────────────────────
+  // Min fill 4% so bar is always visible even at extreme altitude
+  const paco2Norm  = Math.max(0.04, Math.min(1, (p.PaCO2 - 8) / 34));
+  const paco2FillH = barH * paco2Norm;
+  ctx.fillStyle = 'rgba(56,140,220,0.85)';
+  ctx.fillRect(b2x, barTop + barH - paco2FillH, barW, paco2FillH);
+
+  // ── Bar borders ───────────────────────────────────────────────────
+  ctx.strokeStyle = 'rgba(60,90,130,0.5)'; ctx.lineWidth = 1;
+  ctx.strokeRect(b1x, barTop, barW, barH);
+  ctx.strokeRect(b2x, barTop, barW, barH);
+
+  // ── Reference lines (sea-level normal) ───────────────────────────
+  // HCO₃ SL norm = 24, scale 8–26 → frac = (24-8)/18 = 0.889
+  // PaCO₂ SL norm = 40, scale 8–42 → frac = (40-8)/34 = 0.941
+  const hco3RefY  = barTop + barH - barH * ((24 - 8) / 18);
+  const paco2RefY = barTop + barH - barH * ((40 - 8) / 34);
+  ctx.strokeStyle = 'rgba(255,200,80,0.55)'; ctx.lineWidth = 1; ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.moveTo(b1x - 4, hco3RefY);  ctx.lineTo(b1x + barW + 4, hco3RefY);  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(b2x - 4, paco2RefY); ctx.lineTo(b2x + barW + 4, paco2RefY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.font = '12px Outfit, sans-serif'; ctx.fillStyle = 'rgba(255,200,80,0.75)'; ctx.textAlign = 'left';
+  ctx.fillText('SL norm', b1x + barW + 6, hco3RefY + 4);
+  ctx.fillText('SL norm', b2x + barW + 6, paco2RefY + 4);
+
+  // ── Labels above bars ─────────────────────────────────────────────
+  ctx.font = 'bold 13px Outfit, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(56,200,180,0.9)';
+  ctx.fillText('HCO₃⁻', b1cx, barTop - 10);
+  ctx.fillStyle = 'rgba(92,197,255,0.9)';
+  ctx.fillText('PaCO₂', b2cx, barTop - 10);
+
+  // ── Values below bars ─────────────────────────────────────────────
+  ctx.font = 'bold 16px Space Mono, monospace'; ctx.textAlign = 'center';
+  ctx.fillStyle = '#3eeaa8';
+  ctx.fillText(`${p.HCO3}`, b1cx, barTop + barH + 22);
+  ctx.font = '12px Outfit, sans-serif'; ctx.fillStyle = '#7a9abb';
+  ctx.fillText('mEq/L', b1cx, barTop + barH + 36);
+
+  ctx.font = 'bold 16px Space Mono, monospace'; ctx.textAlign = 'center';
+  ctx.fillStyle = '#5cc5ff';
+  ctx.fillText(`${p.PaCO2}`, b2cx, barTop + barH + 22);
+  ctx.font = '12px Outfit, sans-serif'; ctx.fillStyle = '#7a9abb';
+  ctx.fillText('mmHg', b2cx, barTop + barH + 36);
+
+  // ── Bottom explanation ────────────────────────────────────────────
+  ctx.font = 'bold 12px Outfit, sans-serif'; ctx.fillStyle = '#aecde8'; ctx.textAlign = 'left';
+  ctx.fillText('↓ PaCO₂: hyperventilation (HVR)', 12, H - 28);
+  ctx.fillText('↓ HCO₃⁻: renal compensation (days)', 12, H - 12);
+}
+
+function drawNeurological(ctx, p, W, H, alt) {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#06090f'; ctx.fillRect(0, 0, W, H);
+  const f = alt / 8849;
+  const spo2 = p.SpO2 / 100;
+  const sleep = p.sleep / 9;
+
+  // === IMPROVED BRAIN (left side) ===
+  const bcx = W * 0.3, bcy = H * 0.42;
+  const brainR = Math.round(180 + (1-spo2)*55), brainG = Math.round(110 - (1-spo2)*55), brainB = Math.round(100 - (1-spo2)*45);
+
+  // Outer brain shape (more realistic ellipsoid)
+  ctx.save();
+  // Main cerebral hemisphere
+  const bGrad = ctx.createRadialGradient(bcx - 20, bcy - 20, 10, bcx, bcy, 105);
+  bGrad.addColorStop(0, `rgb(${brainR+18},${brainG+16},${brainB+14})`);
+  bGrad.addColorStop(0.6, `rgb(${brainR},${brainG},${brainB})`);
+  bGrad.addColorStop(1, `rgb(${brainR-26},${brainG-24},${brainB-20})`);
+
+  ctx.beginPath();
+  ctx.moveTo(bcx - 88, bcy + 20);
+  ctx.bezierCurveTo(bcx - 95, bcy - 20, bcx - 90, bcy - 55, bcx - 60, bcy - 78);
+  ctx.bezierCurveTo(bcx - 30, bcy - 100, bcx + 20, bcy - 100, bcx + 55, bcy - 80);
+  ctx.bezierCurveTo(bcx + 88, bcy - 58, bcx + 95, bcy - 20, bcx + 88, bcy + 18);
+  ctx.bezierCurveTo(bcx + 75, bcy + 50, bcx + 30, bcy + 62, bcx, bcy + 60);
+  ctx.bezierCurveTo(bcx - 30, bcy + 62, bcx - 72, bcy + 50, bcx - 88, bcy + 20);
+  ctx.fillStyle = bGrad; ctx.fill();
+  ctx.strokeStyle = `rgba(${brainR-40},${brainG-38},${brainB-32},0.6)`; ctx.lineWidth = 1.8; ctx.stroke();
+
+  // Gyri / sulci lines
+  ctx.strokeStyle = `rgba(${brainR-55},${brainG-50},${brainB-42},0.45)`;
+  ctx.lineWidth = 1.2;
+  const gyri = [
+    [bcx-70, bcy-40, bcx-30, bcy-75, bcx+30, bcy-68],
+    [bcx-55, bcy+5, bcx+5, bcy-35, bcx+60, bcy-30],
+    [bcx-40, bcy+40, bcx+10, bcy+10, bcx+65, bcy+15],
+    [bcx-80, bcy-10, bcx-50, bcy+25, bcx-15, bcy+50],
+    [bcx+20, bcy-85, bcx+50, bcy-55, bcx+75, bcy-20],
+  ];
+  gyri.forEach(([x1,y1,x2,y2,x3,y3]) => {
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.quadraticCurveTo(x2,y2,x3,y3); ctx.stroke();
+  });
+
+  // Cerebellum
+  ctx.beginPath();
+  ctx.ellipse(bcx + 65, bcy + 45, 32, 28, 0.15, 0, Math.PI*2);
+  ctx.fillStyle = `rgb(${brainR-8},${brainG-8},${brainB-6})`; ctx.fill();
+  ctx.strokeStyle = `rgba(${brainR-50},${brainG-48},${brainB-40},0.5)`; ctx.lineWidth = 1.2; ctx.stroke();
+  // Cerebellum folia lines
+  for (let i = -2; i <= 2; i++) {
+    ctx.beginPath();
+    ctx.moveTo(bcx+50, bcy+45+i*7);
+    ctx.lineTo(bcx+80, bcy+45+i*7);
+    ctx.strokeStyle = `rgba(${brainR-55},${brainG-52},${brainB-44},0.4)`; ctx.lineWidth = 1; ctx.stroke();
+  }
+
+  // Brainstem
+  ctx.beginPath();
+  ctx.moveTo(bcx+52, bcy+55);
+  ctx.bezierCurveTo(bcx+52, bcy+75, bcx+46, bcy+92, bcx+44, bcy+108);
+  ctx.strokeStyle = `rgba(${brainR-12},${brainG-12},${brainB-10},0.85)`; ctx.lineWidth = 16; ctx.stroke();
+
+  // Edema highlight at altitude
+  if (f > 0.3) {
+    const edAlpha = (f - 0.3) * 0.45;
+    const edGrad = ctx.createRadialGradient(bcx, bcy, 40, bcx, bcy, 110);
+    edGrad.addColorStop(0, 'rgba(56,178,255,0)');
+    edGrad.addColorStop(0.7, `rgba(56,178,255,${edAlpha*0.5})`);
+    edGrad.addColorStop(1, `rgba(56,178,255,${edAlpha})`);
+    ctx.beginPath();
+    ctx.ellipse(bcx, bcy, 100, 88, 0, 0, Math.PI*2);
+    ctx.fillStyle = edGrad; ctx.fill();
+  }
+  ctx.restore();
+
+  // Brain labels
+  ctx.font = 'bold 12px Outfit, sans-serif'; ctx.fillStyle = 'rgba(220,230,245,0.85)';
+  ctx.textAlign = 'center'; ctx.shadowColor = '#06090f'; ctx.shadowBlur = 4;
+  ctx.fillText('Cerebral cortex', bcx, bcy - 95);
+  ctx.fillText('Cerebellum', bcx + 65, bcy + 14);
+  ctx.fillText('Brainstem', bcx + 62, bcy + 122);
+  ctx.shadowBlur = 0;
+
+  // CBF indicator
+  ctx.font = 'bold 13px Space Mono, monospace'; ctx.fillStyle = '#b466ff'; ctx.textAlign = 'left';
+  ctx.fillText(`CBF: ${p.CBF}% of sea level`, 12, 22);
+  ctx.font = '12px Outfit, sans-serif'; ctx.fillStyle = '#aecde8';
+  ctx.fillText('↑ vasodilation in response to hypoxia', 12, 38);
+
+  // 8,000 ft threshold note
+  const alt8k = 2438; // ~8,000 feet in meters
+  if (alt >= alt8k) {
+    ctx.font = 'bold 12px Outfit, sans-serif'; ctx.fillStyle = '#f5a840'; ctx.textAlign = 'left';
+    ctx.fillText(`⚠ Above 8,000 ft (${alt8k}m): Sleep-disordered breathing begins`, 12, 58);
+  }
+
+  // === SLEEP / SpO2 GRAPH (right side) ===
+  const gx = W * 0.55, gy2 = 18, gW = W * 0.41, gH = H * 0.78;
+  ctx.fillStyle = 'rgba(13,21,32,0.85)'; ctx.fillRect(gx, gy2, gW, gH);
+  ctx.strokeStyle = 'rgba(30,45,66,0.7)'; ctx.lineWidth = 1;
+  ctx.strokeRect(gx, gy2, gW, gH);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(30,50,80,0.6)'; ctx.lineWidth = 0.8;
+  for (let i = 1; i < 4; i++) {
+    const ly = gy2 + gH * (i / 4);
+    ctx.beginPath(); ctx.moveTo(gx, ly); ctx.lineTo(gx+gW, ly); ctx.stroke();
+  }
+
+  // Title
+  ctx.font = 'bold 12px Space Mono, monospace'; ctx.fillStyle = '#aecde8'; ctx.textAlign = 'center';
+  ctx.fillText('Nocturnal SpO₂ & Respiratory Pattern', gx + gW/2, gy2 - 4);
+
+  // SpO2 line (simulated nocturnal trace with Cheyne-Stokes drops at altitude)
+  const baseSpO2 = p.SpO2;
+  const dropDepth = Math.min(35, sleep * 38);
+
+  ctx.beginPath();
+  for (let i = 0; i < gW; i++) {
+    const t = (i / gW + physFrame * 0.004) % 1;
+    const cycle = t % 0.2; // Cheyne-Stokes period
+    let drop = 0;
+    if (sleep > 0.25) {
+      // Apnea troughs during CS cycles
+      drop = dropDepth * Math.max(0, Math.sin(cycle / 0.2 * Math.PI)) * (cycle > 0.08 && cycle < 0.16 ? 1 : 0.1);
+    }
+    const spVal = Math.max(50, baseSpO2 - drop + Math.sin(t * Math.PI * 80) * 1.5);
+    const yVal = gy2 + gH * (1 - (spVal - 50) / 55);
+    i === 0 ? ctx.moveTo(gx + i, yVal) : ctx.lineTo(gx + i, yVal);
+  }
+  const spColor = baseSpO2 < 80 ? '#ff4d6a' : baseSpO2 < 88 ? '#f5a840' : '#3eeaa8';
+  ctx.strokeStyle = spColor; ctx.lineWidth = 2; ctx.stroke();
+
+  // Respiratory effort line
+  ctx.beginPath();
+  for (let i = 0; i < gW; i++) {
+    const t = (i / gW + physFrame * 0.004) % 1;
+    const cycle = t % 0.2;
+    let resp = 0;
+    if (sleep > 0.25) {
+      const crescendo = Math.sin(cycle / 0.2 * Math.PI);
+      const apnea = (cycle > 0.09 && cycle < 0.15) ? 0 : 1;
+      resp = Math.sin(t * Math.PI * 30) * crescendo * apnea * sleep * 0.8;
+    } else {
+      resp = Math.sin(t * Math.PI * 20) * 0.25;
+    }
+    const yVal = gy2 + gH * 0.75 + resp * gH * 0.2;
+    i === 0 ? ctx.moveTo(gx + i, yVal) : ctx.lineTo(gx + i, yVal);
+  }
+  ctx.strokeStyle = sleep > 0.3 ? '#f5a840' : '#5cc5ff'; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // Apnea markers
+  if (sleep > 0.3) {
+    for (let j = 0; j < 3; j++) {
+      const markerX = gx + gW * (0.12 + j * 0.28);
+      ctx.fillStyle = 'rgba(255,77,106,0.8)';
+      ctx.font = 'bold 12px Outfit, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('APNEA', markerX, gy2 + gH * 0.12);
+    }
+  }
+
+  // Graph labels
+  ctx.font = '12px Outfit, sans-serif'; ctx.fillStyle = spColor; ctx.textAlign = 'right';
+  ctx.fillText(`SpO₂`, gx - 3, gy2 + gH * 0.15);
+  ctx.fillStyle = sleep > 0.3 ? '#f5a840' : '#5cc5ff';
+  ctx.fillText('Resp.', gx - 3, gy2 + gH * 0.72);
+
+  ctx.font = 'bold 12px Space Mono, monospace'; ctx.fillStyle = spColor; ctx.textAlign = 'left';
+  ctx.fillText(`Nadir ~${Math.round(Math.max(50, baseSpO2 - dropDepth))}%`, gx + 4, gy2 + gH + 16);
+  ctx.font = '12px Outfit, sans-serif'; ctx.fillStyle = sleep > 0.3 ? '#f5a840' : '#3eeaa8';
+  ctx.fillText(sleep > 0.3 ? '⚠ Cheyne-Stokes / periodic breathing' : 'Normal breathing', gx + gW/2, gy2 + gH + 16);
+}
+
+function drawEndocrine(ctx, p, W, H, alt) {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#06090f'; ctx.fillRect(0, 0, W, H);
+  const cx = W/2;
+  const hif = p.HIF;
+  const nodes = [
+    { l: 'Hypoxia', x:cx, y:36, r:30, c:`rgba(${Math.round(100+hif*155)},60,60,0.85)` },
+    { l: 'HIF-1α', x:cx, y:100, r:27, c:`rgba(${Math.round(80+hif*150)},50,50,0.9)` },
+    { l: 'EPO', x:cx-110, y:168, r:23, c:'rgba(54,188,130,0.85)' },
+    { l: 'VEGF', x:cx, y:168, r:23, c:'rgba(56,140,255,0.85)' },
+    { l: 'Glycolysis', x:cx+110, y:168, r:23, c:'rgba(166,77,255,0.85)' },
+    { l: '↑RBC', x:cx-110, y:228, r:19, c:'rgba(54,188,130,0.7)' },
+    { l: '↑BBB perm', x:cx, y:228, r:19, c:'rgba(240,149,42,0.8)' },
+    { l: '↑ATP', x:cx+110, y:228, r:19, c:'rgba(166,77,255,0.7)' },
+  ];
+  [[0,1],[1,2],[1,3],[1,4],[2,5],[3,6],[4,7]].forEach(([f2,t]) => {
+    const a = nodes[f2], b = nodes[t];
+    const pulse = 0.5 + Math.sin(physFrame*0.04)*0.3*hif;
+    ctx.beginPath(); ctx.moveTo(a.x, a.y+a.r); ctx.lineTo(b.x, b.y-b.r);
+    ctx.strokeStyle = `rgba(140,160,180,${0.25+pulse*0.35})`; ctx.lineWidth = 1+hif*1.5; ctx.stroke();
+  });
+  nodes.forEach(n => {
+    const pulse = n.l==='HIF-1α' ? 1+Math.sin(physFrame*0.06)*0.09*hif : 1;
+    ctx.save(); ctx.translate(n.x, n.y); ctx.scale(pulse, pulse);
+    ctx.beginPath(); ctx.arc(0, 0, n.r, 0, Math.PI*2);
+    ctx.fillStyle = n.c; ctx.fill();
+    ctx.fillStyle = 'white'; ctx.font = '12px Outfit,sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(n.l, 0, 0);
+    ctx.restore();
+  });
+  ctx.font = '12px Space Mono, monospace'; ctx.fillStyle = '#ff3b5c'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.fillText(`HIF-1α: ${(hif*100).toFixed(0)}%  EPO: ${p.EPO}×  SNS: ${(p.SNS*100).toFixed(0)}%`, 8, H-8);
+}
+
+function drawTrend() {
+  const tc = document.getElementById('physTrend');
+  if (!tc || !tc.getContext) return;
+  const ctx2 = tc.getContext('2d');
+  const TW = tc.width, TH = tc.height;
+  const sys = systems[currentSystem];
+  if (!sys) return;
+  ctx2.clearRect(0, 0, TW, TH);
+  ctx2.fillStyle = '#0d1520'; ctx2.fillRect(0, 0, TW, TH);
+  const pad = {l:36, r:12, t:22, b:28};
+  const cW = TW-pad.l-pad.r, cH = TH-pad.t-pad.b;
+
+  ctx2.strokeStyle = 'rgba(30,45,66,0.8)'; ctx2.lineWidth = 1;
+  for (let i=0; i<=4; i++) {
+    const y = pad.t + cH*(i/4);
+    ctx2.beginPath(); ctx2.moveTo(pad.l, y); ctx2.lineTo(pad.l+cW, y); ctx2.stroke();
+  }
+
+  const markerX = pad.l + (altitude/8849)*cW;
+  ctx2.beginPath(); ctx2.moveTo(markerX, pad.t); ctx2.lineTo(markerX, pad.t+cH);
+  ctx2.strokeStyle = 'rgba(56,178,255,0.4)'; ctx2.lineWidth = 1.5;
+  ctx2.setLineDash([4,3]); ctx2.stroke(); ctx2.setLineDash([]);
+
+  sys.trendFns.forEach((series, si) => {
+    ctx2.beginPath();
+    for (let i=0; i<=200; i++) {
+      const a = (i/200)*8849;
+      const v = Math.max(0, Math.min(1, series.fn(a)));
+      const x = pad.l + (a/8849)*cW;
+      const y = pad.t + cH*(1-v);
+      i===0 ? ctx2.moveTo(x,y) : ctx2.lineTo(x,y);
+    }
+    ctx2.strokeStyle = series.color; ctx2.lineWidth = 1.8; ctx2.stroke();
+    ctx2.beginPath(); ctx2.arc(pad.l + si*88 + 8, pad.t+8, 3.5, 0, Math.PI*2);
+    ctx2.fillStyle = series.color; ctx2.fill();
+    ctx2.fillStyle = series.color; ctx2.font = '12px Outfit, sans-serif'; ctx2.textAlign = 'left';
+    ctx2.fillText(series.label, pad.l + si*88 + 14, pad.t+12);
+  });
+
+  [0,2000,4000,6000,8849].forEach(a => {
+    const x = pad.l + (a/8849)*cW;
+    ctx2.fillStyle = 'rgba(78,106,136,0.7)'; ctx2.font = '12px Outfit, sans-serif'; ctx2.textAlign = 'center';
+    ctx2.fillText(a===8849?'8849':a, x, TH-4);
+  });
+  ctx2.fillStyle = 'rgba(78,106,136,0.5)'; ctx2.textAlign = 'center';
+  ctx2.fillText('Altitude (m)', pad.l+cW/2, TH);
+  // Title
+  ctx2.fillStyle = '#4e6a88'; ctx2.font = '12px Outfit, sans-serif'; ctx2.textAlign = 'left';
+  ctx2.fillText(sys.trendLabel, pad.l, TH - 16);
+}
+
+function renderMetrics(p) {
+  const strip = document.getElementById('metricsStrip');
+  const sys = systems[currentSystem];
+  if (!sys) return;
+  strip.innerHTML = sys.metrics(p).map(m => {
+    const dCls = m.delta === 'up' ? 'up' : m.delta === 'down' ? 'down' : m.delta === 'warn' ? 'warn' : 'norm';
+    const arrow = m.delta==='up'?'▲':m.delta==='down'?'▼':m.delta==='warn'?'⚠':'●';
+    const color = m.delta==='down'?'var(--accent)':m.delta==='up'?'var(--danger)':m.delta==='warn'?'var(--warn)':'var(--green)';
+    return `<div class="metric-box">
+      <div class="metric-label">${m.label}</div>
+      <div class="metric-val" style="color:${color}">${m.val}<span class="metric-unit"> ${m.unit}</span></div>
+      <div class="metric-delta ${dCls}">${arrow}</div>
+    </div>`;
+  }).join('');
+}
+
+function startPhysAnim() {
+  physAnimRunning = true;
+  function loop() {
+    physFrame++;
+    const p = altPhysics(altitude);
+    const sys = systems[currentSystem];
+    const mc = document.getElementById('physMain');
+    if (mc && sys && sys.draw) sys.draw(mc.getContext('2d'), p, mc.width, mc.height, altitude);
+    // Always animate acid canvas when pulmonary/renal is active
+    if (currentSystem === 'pulm') {
+      const ac = document.getElementById('acidCanvas');
+      if (ac) drawRenal(ac.getContext('2d'), p, ac.width, ac.height, altitude);
+    }
+    if (physAnimRunning) requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+function updatePhysUI() {
+  const p = altPhysics(altitude);
+  renderMetrics(p);
+  document.getElementById('altDisplay').innerHTML = `${altitude.toLocaleString()} <span>m</span>`;
+  document.querySelectorAll('.preset-btn').forEach(b => {
+    const m = b.getAttribute('onclick').match(/\d+/);
+    b.classList.toggle('active', m && parseInt(m[0]) === altitude);
+  });
+
+  // Show/hide equations panel and acid-base sub-panel for Pulmonary/Renal system
+  const eqPanel = document.getElementById('physEquations');
+  const acidPanel = document.getElementById('acidSubpanel');
+  const isPulm = currentSystem === 'pulm';
+
+  if (eqPanel) eqPanel.style.display = isPulm ? 'flex' : 'none';
+  if (acidPanel) acidPanel.style.display = isPulm ? 'flex' : 'none';
+
+  if (isPulm) {
+    // Use values from altPhysics directly (already computed with corrected equations)
+    const PB    = p.PB;
+    const PiO2  = p.PiO2;
+    const PaCO2 = p.PaCO2;
+    const PAO2  = p.PAO2;
+    document.getElementById('eqDalton').textContent =
+      `PiO₂ = 0.2093 × (${PB} − 47) = ${PiO2} mmHg`;
+    document.getElementById('eqBaro').textContent =
+      `PB = 760 × e^(−${altitude}/8150) = ${PB} mmHg`;
+    document.getElementById('eqAlvGas').textContent =
+      `PAO₂ = ${PiO2} − ${PaCO2}/0.8 = ${PAO2} mmHg`;
+
+    // Numeric values panel
+    const phNum = parseFloat(p.pH);
+    const phColor = phNum > 7.45 ? '#5cc5ff' : phNum < 7.35 ? '#ff4d6a' : '#3eeaa8';
+    const hco3Color = parseFloat(p.HCO3) < 22 ? '#f5a840' : '#3eeaa8';
+    const paco2Color = p.PaCO2 < 35 ? '#5cc5ff' : p.PaCO2 > 45 ? '#ff4d6a' : '#3eeaa8';
+    document.getElementById('acidNumerics').innerHTML = `
+      <div style="font-family:'Space Mono',monospace;font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.4rem;border-bottom:1px solid var(--border);padding-bottom:0.35rem;">Acid-Base Status</div>
+      <div class="acid-num-row">
+        <span class="acid-num-label">pH</span>
+        <span class="acid-num-val" style="color:${phColor}">${p.pH}<span class="acid-num-unit"></span></span>
+        <span style="font-size:0.75rem;color:${phColor}">${phNum > 7.45 ? '↑ Alkalosis' : phNum < 7.35 ? '↓ Acidosis' : '● Normal'}</span>
+      </div>
+      <div class="acid-num-row">
+        <span class="acid-num-label">HCO₃⁻</span>
+        <span class="acid-num-val" style="color:${hco3Color}">${p.HCO3}<span class="acid-num-unit"> mEq/L</span></span>
+        <span style="font-size:0.75rem;color:var(--text-dim);">↓ renal compensation</span>
+      </div>
+      <div class="acid-num-row">
+        <span class="acid-num-label">PaCO₂</span>
+        <span class="acid-num-val" style="color:${paco2Color}">${p.PaCO2}<span class="acid-num-unit"> mmHg</span></span>
+        <span style="font-size:0.75rem;color:var(--text-dim);">↓ hyperventilation (HVR)</span>
+      </div>
+    `;
+  }
+}
+
+function setAlt(val) {
+  altitude = val;
+  document.getElementById('altSlider').value = val;
+  updatePhysUI();
+}
+
+function setSystem(name) {
+  currentSystem = name;
+  updatePhysUI();
+}
+
+document.getElementById('altSlider').addEventListener('input', e => { altitude = parseInt(e.target.value); updatePhysUI(); });
+updatePhysUI();
+startPhysAnim();
+
+// ── Canvas auto-resize: keeps pixel buffer = CSS display size ──────
+// This prevents clipping when the container is wider/taller than
+// the canvas's hard-coded width/height attributes.
+(function() {
+  function syncCanvas(canvas) {
+    if (!canvas) return false;
+    const rect = canvas.getBoundingClientRect();
+    const w = Math.round(rect.width);
+    const h = Math.round(rect.height);
+    if (w > 0 && h > 0 && (canvas.width !== w || canvas.height !== h)) {
+      canvas.width  = w;
+      canvas.height = h;
+      return true; // dimensions changed
+    }
+    return false;
+  }
+
+  const ro = new ResizeObserver(() => {
+    syncCanvas(document.getElementById('physMain'));
+    syncCanvas(document.getElementById('acidCanvas'));
+    // Also sync other module canvases
+    ['brainCanvas','hapeMainCanvas','hapeCascadeCanvas'].forEach(id => {
+      syncCanvas(document.getElementById(id));
+    });
+  });
+
+  // Observe the canvas pane containers
+  document.querySelectorAll('.canvas-pane').forEach(el => ro.observe(el));
+  // Also observe the full content area for initial sizing
+  const ca = document.querySelector('.content-area');
+  if (ca) ro.observe(ca);
+})();
+
+// ═══════════════════════════════════════════════════════════════════
+//  AMS/HACE MODULE
+// ═══════════════════════════════════════════════════════════════════
+let brainFrame = 0, currentBrainStage = 0, brainAnimRunning = false;
+let renderState2 = { ef:0, vd:0, hf:0, hern:0, pet:0 };
+let targetBrainState = { ef:0, vd:0, hf:0, hern:0, pet:0 };
+
+const stageData = [
+  { name:'Normal Brain', label:'Sea Level / Low Altitude', labelColor:'#36e09a', altitude:'< 2,500 m', altPct:0.05,
+    findings:[{t:'normal',s:'Normal ICP (~10 mmHg)'},{t:'normal',s:'Intact blood-brain barrier (BBB)'},{t:'normal',s:'Autoregulation maintains CBF'},{t:'info',s:'SpO₂ >96% at sea level'}],
+    mechs:[{h:false,t:'Normal cerebrovascular autoregulation'},{h:false,t:'CO₂/pH balanced ventilatory drive'},{h:false,t:'AQP4 water channels at equilibrium'}],
+    treatment:null,
+    ef:0, vd:0, hf:0, hern:0, pet:0 },
+  { name:'Acute Hypoxia', label:'Ascent Phase', labelColor:'#f0952a', altitude:'2,500–3,500 m', altPct:0.35,
+    findings:[{t:'warn',s:'SpO₂ drops ~85–90%'},{t:'warn',s:'HIF-1α upregulation begins'},{t:'warn',s:'Cerebral vasodilation (↑CBF)'},{t:'info',s:'Compensatory hyperventilation'}],
+    mechs:[{h:true,t:'Hypoxia → HIF-1α ↑ → VEGF release'},{h:false,t:'Vasodilation: ↑NO, ↓PaCO₂ offset'},{h:false,t:'BBB stress; tight junctions affected'}],
+    treatment:null,
+    ef:0.05, vd:0.3, hf:0.3, hern:0, pet:0 },
+  { name:'Early AMS', label:'Acute Mountain Sickness', labelColor:'#f0952a', altitude:'3,000–4,500 m', altPct:0.5,
+    findings:[{t:'warn',s:'Headache (cardinal symptom)'},{t:'warn',s:'Nausea, fatigue, dizziness'},{t:'warn',s:'Mild vasogenic edema'},{t:'info',s:'Lake Louise Score 3–5'}],
+    mechs:[{h:true,t:'VEGF → BBB permeability ↑ (vasogenic edema)'},{h:true,t:'Fluid shifts to brain interstitium'},{h:false,t:'SNS → fluid retention (ADH ↑)'}],
+    treatment:{ label:'WMS: Early AMS Management', items:[
+      {icon:'⬇',t:'Halt ascent or descend 300–500m if symptoms don\'t improve'},
+      {icon:'💊',t:'Acetazolamide 250 mg BID (prophylaxis/treatment)'},
+      {icon:'💊',t:'Ibuprofen 600 mg q8h for headache'},
+      {icon:'🅾',t:'Supplemental O₂ if available'},
+    ]},
+    ef:0.2, vd:0.5, hf:0.45, hern:0, pet:0 },
+  { name:'Moderate AMS', label:'Worsening Cerebral Stress', labelColor:'#f0952a', altitude:'4,000–5,500 m', altPct:0.67,
+    findings:[{t:'warn',s:'Severe pounding headache'},{t:'warn',s:'Persistent vomiting'},{t:'danger',s:'Cytotoxic edema emerging'},{t:'danger',s:'ICP rising, venous outflow compromised'}],
+    mechs:[{h:true,t:'Cytotoxic edema: Na⁺/K⁺-ATPase failure'},{h:true,t:'Interstitial + intracellular fluid'},{h:false,t:'Venous HTN reduces CSF resorption'}],
+    treatment:{ label:'WMS: Moderate AMS', items:[
+      {icon:'⬇',t:'Descend minimum 300–500m'},
+      {icon:'💊',t:'Dexamethasone 8 mg loading, then 4 mg q6h'},
+      {icon:'💊',t:'Acetazolamide 250 mg BID'},
+      {icon:'🅾',t:'Supplemental O₂ 2–4 L/min'},
+    ]},
+    ef:0.5, vd:0.7, hf:0.65, hern:0, pet:0.1 },
+  { name:'HACE', label:'High-Altitude Cerebral Edema', labelColor:'#ff3b5c', altitude:'> 4,500 m', altPct:0.82,
+    findings:[{t:'danger',s:'Ataxia — hallmark of HACE'},{t:'danger',s:'Altered consciousness, confusion'},{t:'danger',s:'T2 signal in corpus callosum (MRI)'},{t:'danger',s:'Markedly elevated ICP; sulci effaced'}],
+    mechs:[{h:true,t:'Vasogenic + cytotoxic edema: both active'},{h:true,t:'Corpus callosum stretch from ↑ICP'},{h:false,t:'Cerebral venous thrombosis possible'}],
+    treatment:{ label:'⚠ HACE Emergency', items:[
+      {icon:'🚨',t:'IMMEDIATE descent ≥300–1000m (life-saving)'},
+      {icon:'💊',t:'Dexamethasone 8 mg IM/IV STAT then 4 mg q6h'},
+      {icon:'🅾',t:'O₂ 2–4 L/min; Gamow bag if descent delayed'},
+      {icon:'🏥',t:'Evacuate to definitive care'},
+    ]},
+    ef:0.78, vd:0.85, hf:0.85, hern:0.3, pet:0.6 },
+  { name:'Severe HACE', label:'Impending Herniation', labelColor:'#ff3b5c', altitude:'> 5,000m (untreated)', altPct:1.0,
+    findings:[{t:'danger',s:'Coma / obtundation'},{t:'danger',s:'Tonsillar/uncal herniation risk'},{t:'danger',s:'Brainstem compression'},{t:'danger',s:'Death without immediate Rx'}],
+    mechs:[{h:true,t:'Transtentorial herniation: CN III compression'},{h:true,t:'Brainstem: Duret hemorrhages possible'},{h:false,t:'Rx: Descent + Dex 8mg + O₂ + Gamow'}],
+    treatment:{ label:'☠ Severe HACE — EMERGENCY', items:[
+      {icon:'🚨',t:'Immediate descent — no delay for anything'},
+      {icon:'💊',t:'Dexamethasone 8mg IV/IM NOW'},
+      {icon:'🅾',t:'Max O₂; Gamow bag continuous'},
+      {icon:'🏥',t:'Medevac / helicopter if available'},
+    ]},
+    ef:1.0, vd:1.0, hf:1.0, hern:1.0, pet:1.0 },
+];
+
+function setStage(i) {
+  currentBrainStage = i;
+  targetBrainState = { ef: stageData[i].ef, vd: stageData[i].vd, hf: stageData[i].hf, hern: stageData[i].hern, pet: stageData[i].pet };
+  document.querySelectorAll('.stage-btn').forEach((b, idx) => {
+    b.classList.toggle('active', idx === i);
+    b.classList.toggle('danger', idx >= 4);
+  });
+  renderBrainInfo(stageData[i]);
+}
+
+function renderBrainInfo(data) {
+  const color = data.labelColor;
+  let findHTML = data.findings.map((f,i) =>
+    `<div class="finding-item" style="animation-delay:${i*0.06}s"><div class="dot ${f.t}"></div><span>${f.s}</span></div>`
+  ).join('');
+  let mechHTML = data.mechs.map((m,i) =>
+    `<div class="mech-step ${m.h?'highlight':''}" style="animation-delay:${0.25+i*0.08}s">${m.t}</div>`
+  ).join('');
+  let treatHTML = '';
+  if (data.treatment) {
+    const isThreat = data.treatment.label.includes('⚠') || data.treatment.label.includes('☠');
+    treatHTML = `<div class="treatment-box" style="${isThreat?'border-color:rgba(255,59,92,0.5)':''}">
+      <div class="treat-label">${data.treatment.label}</div>
+      ${data.treatment.items.map(t=>`<div class="treat-item"><span class="treat-icon">${t.icon}</span><span>${t.t}</span></div>`).join('')}
+    </div>`;
+  }
+
+  document.getElementById('infoPanel').innerHTML = `
+    <div class="stage-title" style="color:${color}">
+      <span class="label">Current Stage</span>${data.name}
+    </div>
+    <div class="altitude-bar">
+      <span>Altitude</span>
+      <div class="alt-track"><div class="alt-fill" style="width:${Math.round(data.altPct*100)}%; background:${color}"></div></div>
+      <span style="font-size: 0.75rem;font-family:'Space Mono'">${data.altitude}</span>
+    </div>
+    <div class="findings">${findHTML}</div>
+    <div class="mechanisms">
+      <div class="mech-label">Pathophysiology</div>
+      <div class="mech-flow">${mechHTML}</div>
+    </div>
+    ${treatHTML}
+  `;
+}
+
+function drawBrain2() {
+  const canvas = document.getElementById('brainCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  brainFrame++;
+
+  const speed = 0.04;
+  renderState2.ef   = lerp(renderState2.ef,   targetBrainState.ef,   speed);
+  renderState2.vd   = lerp(renderState2.vd,   targetBrainState.vd,   speed);
+  renderState2.hf   = lerp(renderState2.hf,   targetBrainState.hf,   speed);
+  renderState2.hern = lerp(renderState2.hern, targetBrainState.hern, speed);
+  renderState2.pet  = lerp(renderState2.pet,  targetBrainState.pet,  speed);
+
+  const { ef, vd, hf, hern, pet } = renderState2;
+  ctx.fillStyle = '#06090f'; ctx.fillRect(0, 0, W, H);
+
+  const bs = 1 + ef * 0.055;
+  const BCX = W * 0.415, BCY = H * 0.44;
+  const hR = Math.round(195), hG = Math.round(193 - hf*8), hB = Math.round(196 - hf*8);
+  const cbR = 185, cbG = 175, cbB = 168;
+  const bsStress = hern > 0.4;
+  const bsR = bsStress ? Math.round(lerp(210,240,hern-0.4)) : 210;
+  const bsG = bsStress ? Math.round(lerp(145,50,hern-0.4)) : 145;
+  const bsB = bsStress ? Math.round(lerp(75,50,hern-0.4)) : 75;
+  const vw = 1.5 + vd*4.5;
+  const vP = 1 + Math.sin(brainFrame*0.07)*0.18*vd;
+  const aCol = `rgba(${Math.round(lerp(210,255,vd))},35,35,${0.88+vd*0.12})`;
+  const vCol = `rgba(45,${Math.round(lerp(72,92,vd))},${Math.round(lerp(200,238,vd))},${0.82+vd*0.18})`;
+
+  // Hemisphere
+  ctx.save(); ctx.translate(BCX,BCY); ctx.scale(bs,bs); ctx.translate(-BCX,-BCY);
+  ctx.beginPath(); ctx.ellipse(BCX,BCY,W*0.38,H*0.25,-0.08,0,Math.PI*2);
+  const hGrad = ctx.createRadialGradient(BCX-28,BCY-28,12,BCX,BCY,W*0.39);
+  hGrad.addColorStop(0,`rgb(${hR+16},${hG+16},${hB+16})`);
+  hGrad.addColorStop(0.55,`rgb(${hR},${hG},${hB})`);
+  hGrad.addColorStop(1,`rgb(${hR-22},${hG-22},${hB-22})`);
+  ctx.fillStyle = hGrad; ctx.fill();
+  if (ef > 0.01) {
+    const edGrad = ctx.createRadialGradient(BCX,BCY,48,BCX,BCY,W*0.4);
+    edGrad.addColorStop(0,'rgba(56,178,255,0)');
+    edGrad.addColorStop(0.5,`rgba(56,178,255,${ef*0.08})`);
+    edGrad.addColorStop(1,`rgba(56,178,255,${ef*0.3})`);
+    ctx.fillStyle = edGrad; ctx.fill();
+  }
+  ctx.strokeStyle=`rgba(${hR-38},${hG-38},${hB-38},0.65)`;ctx.lineWidth=1.6;ctx.stroke();
+  ctx.restore();
+
+  // Vessels
+  ctx.save(); ctx.translate(BCX,BCY); ctx.scale(bs,bs); ctx.translate(-BCX,-BCY);
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); ctx.ellipse(BCX,BCY,W*0.39,H*0.256,-0.08,0,Math.PI*2); ctx.clip();
+  const rW = W*0.38, rH = H*0.25;
+  [[BCX-rW*0.42,BCY+rH*0.38,BCX-rW*0.4,BCY-rH*0.38,BCX-rW*0.16,BCY-rH*0.87],[BCX-rW*0.42,BCY+rH*0.38,BCX+rW*0.32,BCY+rH*0.32,BCX+rW*0.85,BCY+rH*0.54]].forEach(pts => {
+    ctx.beginPath(); ctx.moveTo(pts[0],pts[1]);
+    ctx.bezierCurveTo(pts[0],pts[1]-rH*0.3,pts[2],pts[3]+rH*0.25,pts[4],pts[5]);
+    ctx.strokeStyle=aCol; ctx.lineWidth=vw*vP; ctx.stroke();
+  });
+  [[BCX-rW*0.32,BCY+rH*0.27,BCX-rW*0.36,BCY-rH*0.54],[BCX+rW*0.11,BCY+rH*0.23,BCX+rW*0.05,BCY-rH*0.68],[BCX+rW*0.54,BCY+rH*0.27,BCX+rW*0.48,BCY-rH*0.61]].forEach(([x1,y1,x2,y2]) => {
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.bezierCurveTo(x1-4,y1-rH*0.27,x2+4,y2+rH*0.27,x2,y2);
+    ctx.strokeStyle=vCol; ctx.lineWidth=(vw-0.8)*vP; ctx.stroke();
+  });
+  ctx.beginPath(); ctx.moveTo(BCX-rW*0.89,BCY-rH*0.2); ctx.bezierCurveTo(BCX-rW*0.82,BCY-rH*0.68,BCX-rW*0.53,BCY-rH*1,BCX-rW*0.05,BCY-rH*1); ctx.bezierCurveTo(BCX+rW*0.42,BCY-rH*1,BCX+rW*0.78,BCY-rH*0.74,BCX+rW*0.92,BCY-rH*0.25);
+  ctx.strokeStyle=vCol; ctx.lineWidth=(vw+0.8)*vP; ctx.stroke();
+  ctx.restore();
+
+  // Corpus callosum
+  const ccPet = pet > 0.3;
+  const ccR=ccPet?Math.round(lerp(244,255,pet)):244, ccG=ccPet?Math.round(lerp(236,50,pet)):236, ccB=ccPet?Math.round(lerp(228,50,pet)):228;
+  ctx.save(); ctx.translate(BCX,BCY); ctx.scale(bs,bs); ctx.translate(-BCX,-BCY);
+  ctx.beginPath(); ctx.ellipse(BCX-8,BCY+H*0.105,W*0.16,H*0.028,-0.08,0,Math.PI*2);
+  ctx.fillStyle=`rgba(${ccR},${ccG},${ccB},0.88)`; ctx.fill();
+  if (ccPet) {
+    for (let i=0;i<Math.floor(pet*12);i++) {
+      const px=BCX-W*0.14+(i/12)*W*0.28+Math.sin(i*2.5)*3;
+      const py=BCY+H*0.104+Math.cos(i*3)*H*0.012;
+      const pulse=1+Math.sin(brainFrame*0.07+i)*0.35;
+      ctx.beginPath(); ctx.arc(px,py,2.2*pulse,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,38,62,${0.82*pet})`; ctx.fill();
+    }
+  }
+  ctx.restore();
+
+  // Cerebellum
+  const cbCX=W*0.655, cbCY=H*0.595;
+  ctx.save(); ctx.translate(BCX,BCY); ctx.scale(bs,bs); ctx.translate(-BCX,-BCY);
+  ctx.beginPath(); ctx.ellipse(cbCX,cbCY,W*0.136,H*0.14,0.1,0,Math.PI*2);
+  const cbGr=ctx.createRadialGradient(cbCX-10,cbCY-12,6,cbCX,cbCY,W*0.136);
+  cbGr.addColorStop(0,`rgb(${cbR+18},${cbG+14},${cbB+14})`);
+  cbGr.addColorStop(1,`rgb(${cbR-12},${cbG-14},${cbB-10})`);
+  ctx.fillStyle=cbGr; ctx.fill();
+  if(ef>0.01){ctx.fillStyle=`rgba(56,178,255,${ef*0.2})`;ctx.fill();}
+  const tonsilY=cbCY+H*0.136+hern*H*0.068;
+  ctx.beginPath(); ctx.ellipse(cbCX-W*0.035,tonsilY,W*0.032+hern*W*0.02,H*0.04+hern*H*0.05,0.05,0,Math.PI*2);
+  ctx.fillStyle=hern>0.22?`rgba(${Math.round(lerp(cbR,238,hern))},${Math.round(lerp(cbG,52,hern))},${Math.round(lerp(cbB,52,hern))},0.92)`:`rgb(${cbR},${cbG},${cbB})`;
+  ctx.fill();
+  if(hern>0.18){ctx.strokeStyle=`rgba(255,68,68,${hern*0.8})`;ctx.lineWidth=1.5;ctx.stroke();}
+  ctx.restore();
+
+  // Brainstem
+  const bsCX=W*0.61, bsCY0=H*0.57, bsDrop=hern*H*0.1;
+  const bsTop=bsCY0+bsDrop;
+  ctx.save(); ctx.translate(BCX,BCY); ctx.scale(bs,bs); ctx.translate(-BCX,-BCY);
+  ctx.beginPath();ctx.ellipse(bsCX,bsTop+H*0.05,W*0.044,H*0.05,0.05,0,Math.PI*2);ctx.fillStyle=`rgb(${bsR},${bsG},${bsB})`;ctx.fill();
+  ctx.beginPath();ctx.ellipse(bsCX,bsTop+H*0.14,W*0.054,H*0.054,0.05,0,Math.PI*2);ctx.fillStyle=`rgb(${bsR-4},${bsG-4},${bsB-4})`;ctx.fill();
+  ctx.beginPath();ctx.ellipse(bsCX,bsTop+H*0.228,W*0.04,H*0.05,0.05,0,Math.PI*2);ctx.fillStyle=`rgb(${bsR-9},${bsG-9},${bsB-9})`;ctx.fill();
+  ctx.beginPath();ctx.ellipse(bsCX,bsTop+H*0.14,W*0.06,H*0.14,0.05,0,Math.PI*2);
+  ctx.strokeStyle=bsStress?`rgba(255,80,80,${hern*0.9})`:`rgba(${bsR-38},${bsG-36},${bsB-26},0.4)`;ctx.lineWidth=1;ctx.stroke();
+  ctx.restore();
+
+  // Tentorium
+  ctx.save(); ctx.translate(BCX,BCY); ctx.scale(bs,bs); ctx.translate(-BCX,-BCY);
+  ctx.beginPath(); ctx.moveTo(BCX-W*0.26,BCY+H*0.245);
+  ctx.bezierCurveTo(BCX-W*0.12,BCY+H*0.226,BCX+W*0.04,BCY+H*0.222,BCX+W*0.16,BCY+H*0.231);
+  ctx.bezierCurveTo(BCX+W*0.22,BCY+H*0.238,BCX+W*0.256,BCY+H*0.254,BCX+W*0.26,BCY+H*0.272);
+  ctx.strokeStyle=`rgba(255,200,78,${0.25+hern*0.6})`; ctx.setLineDash([4,3]); ctx.lineWidth=1.5; ctx.stroke(); ctx.setLineDash([]);
+  ctx.restore();
+
+  // Labels
+  function drawLabel(text, x, y) {
+    ctx.save(); ctx.font='bold 13px Outfit, sans-serif'; ctx.textAlign='center';
+    ctx.shadowColor='rgba(6,9,15,0.95)'; ctx.shadowBlur=7;
+    ctx.fillStyle='rgba(232,244,255,0.92)'; ctx.fillText(text, x, y); ctx.shadowBlur=0; ctx.restore();
+  }
+  drawLabel('cerebral hemisphere', BCX, BCY - H*0.205);
+  drawLabel(ccPet?'CC hemorrhage':'corpus callosum', BCX-8, BCY+H*0.1);
+  drawLabel('cerebellum', cbCX, cbCY - H*0.12);
+  drawLabel('brainstem', bsCX, bsCY0+bsDrop+H*0.13);
+  if (hern>0.08) drawLabel('tentorium', BCX+W*0.06, BCY+H*0.222);
+
+  if (hern>0.22) {
+    const tonsilBottom = cbCY+H*0.136+hern*H*0.068+H*0.04+hern*H*0.05;
+    const arrowTip = tonsilBottom+16+hern*16;
+    ctx.save(); ctx.translate(BCX,BCY); ctx.scale(bs,bs); ctx.translate(-BCX,-BCY);
+    ctx.beginPath(); ctx.moveTo(cbCX-W*0.035,tonsilBottom); ctx.lineTo(cbCX-W*0.035,arrowTip);
+    ctx.strokeStyle=`rgba(255,52,72,${hern})`; ctx.lineWidth=2; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cbCX-W*0.052,arrowTip-6); ctx.lineTo(cbCX-W*0.035,arrowTip+8); ctx.lineTo(cbCX-W*0.018,arrowTip-6);
+    ctx.fillStyle=`rgba(255,52,72,${hern})`; ctx.fill();
+    ctx.restore();
+  }
+
+  // ICP & SpO2 gauges
+  const icpVal = Math.round(10 + ef*60), spo2V = Math.round(98 - ef*28);
+  const gY=36, bH2=60;
+  const s2Col = spo2V<80?'#ff3b5c':spo2V<90?'#f0952a':'#36e09a';
+  ctx.font='bold 12px Space Mono, monospace'; ctx.fillStyle=s2Col; ctx.textAlign='center';
+  ctx.fillText('SpO₂',22,gY); ctx.font='bold 16px Space Mono, monospace'; ctx.fillText(`${spo2V}%`,22,gY+16);
+  ctx.fillStyle='rgba(20,30,50,0.85)'; ctx.fillRect(16,gY+22,12,bH2);
+  ctx.fillStyle=s2Col; ctx.fillRect(16,gY+22+bH2*(1-spo2V/100),12,bH2*spo2V/100); ctx.restore?.();
+
+  const icCol = ef>0.5?'#ff3b5c':ef>0.15?'#f0952a':'#36e09a';
+  ctx.font='bold 12px Space Mono, monospace'; ctx.fillStyle=icCol; ctx.textAlign='center';
+  ctx.fillText('ICP',W-22,gY); ctx.font='bold 16px Space Mono, monospace'; ctx.fillText(`${icpVal}`,W-22,gY+16);
+  ctx.fillStyle='rgba(20,30,50,0.85)'; ctx.fillRect(W-28,gY+22,12,bH2);
+  const icF = Math.min(1, ef*1.2);
+  ctx.fillStyle=icCol; ctx.fillRect(W-28,gY+22+bH2*(1-icF),12,bH2*icF);
+
+  ctx.font='bold 13px Space Mono, monospace'; ctx.fillStyle=stageData[currentBrainStage].labelColor; ctx.textAlign='center';
+  ctx.fillText(stageData[currentBrainStage].name.toUpperCase(), W/2, H-18);
+  ctx.font='12px Outfit, sans-serif'; ctx.fillStyle='rgba(78,106,136,0.5)';
+  ctx.fillText(stageData[currentBrainStage].altitude, W/2, H-5);
+
+  if (brainAnimRunning) requestAnimationFrame(drawBrain2);
+}
+
+function startBrainAnim() {
+  brainAnimRunning = true;
+  drawBrain2();
+}
+
+document.addEventListener('keydown', e => {
+  const panel = document.getElementById('panel-amshace');
+  if (!panel.classList.contains('active')) return;
+  if (e.key === 'ArrowRight' && currentBrainStage < 5) setStage(currentBrainStage+1);
+  if (e.key === 'ArrowLeft' && currentBrainStage > 0) setStage(currentBrainStage-1);
+});
+
+renderBrainInfo(stageData[0]);
+
+// ═══════════════════════════════════════════════════════════════════
+//  HAPE MODULE
+// ═══════════════════════════════════════════════════════════════════
+let hapeFrame = 0, currentHapeStage = 0, hapeAnimRunning = false;
+let hapeState = { edema:0, pap:0, flood:0 };
+let hapeTarget = { edema:0, pap:0, flood:0 };
+
+const hapeStages = [
+  { name:'Normal Lungs', edema:0, pap:0, flood:0,
+    symptoms:['Dry breath sounds bilaterally','SpO₂ >96%','Normal exercise tolerance','Normal RR'],
+    mechanism:['PVR normal','HPV minimal','Pulm cap pressure normal','Gas exchange intact'],
+    treatment:['No treatment needed','Standard ascent profile','Consider prophylaxis if HAPE-S hx'],
+    wms:['Ascent rate: ≤500m/day above 3000m','Rest day every 3 days','Acclimatization protocol'] },
+  { name:'Pulm Hypertension', edema:0.05, pap:0.4, flood:0,
+    symptoms:['Exertional dyspnea at altitude','↓ exercise capacity','Dry cough (early)','SpO₂ 88–92%'],
+    mechanism:['Hypoxic pulm vasoconstriction (HPV)','Uneven HPV → ↑ cap stress','Endothelin-1 ↑, NO ↓','Sympathetic activation'],
+    treatment:['Halt or limit ascent','Rest at current altitude','Low-threshold for supplemental O₂'],
+    wms:['HPV is physiologic in all persons','HAPE-S individuals: exaggerated HPV','Nifedipine prophylaxis 30mg ER QD if HAPE-S'] },
+  { name:'Early HAPE', edema:0.3, pap:0.65, flood:0.3,
+    symptoms:['Dyspnea at rest','Dry then wet cough','SpO₂ 75–85%','↓ exercise tolerance; crackles basal'],
+    mechanism:['Elevated PAP → mechanical cap leak','Protein-rich alveolar fluid','Inflammatory cytokines: IL-6, TNF-α','Partial flooding of dependent zones'],
+    treatment:['Immediate descent (priority)','Nifedipine 30mg SR or 10mg IR','Supplemental O₂ 2–4 L/min','Gamow bag if descent not possible'],
+    wms:['WMS Grade: Mild HAPE (SpO₂ 76–85%)','Descent ≥300m typical but any helps','Nifedipine reduces PAP ~30%','Tadalafil/sildenafil as alternatives'] },
+  { name:'Frank HAPE', edema:0.65, pap:0.85, flood:0.6,
+    symptoms:['Severe dyspnea','Pink frothy sputum','SpO₂ <75%','Cyanosis; crackles bilateral'],
+    mechanism:['Flooded alveoli: gas exchange failure','Intrapulm shunting','V/Q mismatch severe','Hypoxemia driving cerebral edema too'],
+    treatment:['Emergency descent NOW','Nifedipine 10mg IR STAT then 30mg SR','O₂ 4–8 L/min','Gamow bag at 2 psi continuously'],
+    wms:['WMS Grade: Moderate-Severe HAPE','Both HACE and HAPE can co-occur','Dex if AMS/HACE signs also present','Portable hyperbaric therapy = descent equivalent'] },
+  { name:'Severe HAPE', edema:1.0, pap:1.0, flood:1.0,
+    symptoms:['Air hunger; unable to speak','SpO₂ <65%','Altered consciousness','Impending cardiopulmonary failure'],
+    mechanism:['Complete alveolar flooding','Right heart failure (cor pulmonale)','Systemic hypoxia → multi-organ failure','HACE co-occurring in many cases'],
+    treatment:['Maximum urgency — immediately descend','Nifedipine 10mg sublingual','O₂ at maximum flow','Intubation if needed; ICU-level care'],
+    wms:['Mortality high without immediate descent','Gamow bag + O₂ can be bridge','Epinephrine if hemodynamic collapse','Hospital-level care required urgently'] },
+];
+
+function setHapeStage(i) {
+  currentHapeStage = i;
+  const s = hapeStages[i];
+  hapeTarget = { edema: s.edema, pap: s.pap, flood: s.flood };
+  document.querySelectorAll('.hape-stage-btn').forEach((b,idx) => b.classList.toggle('active', idx===i));
+  renderHapeInfo(s);
+}
+
+function renderHapeInfo(s) {
+  const mk = items => items.map(t => `<div class="hape-info-item"><span>▸</span><span>${t}</span></div>`).join('');
+  document.getElementById('hapeSymptoms').innerHTML = mk(s.symptoms);
+  document.getElementById('hapeMechanism').innerHTML = mk(s.mechanism);
+  document.getElementById('hapeTreatment').innerHTML = mk(s.treatment);
+  document.getElementById('hapeWMS').innerHTML = mk(s.wms);
+}
+
+function drawHapeMain() {
+  const canvas = document.getElementById('hapeMain');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const { edema, pap, flood } = hapeState;
+  ctx.fillStyle = '#06090f'; ctx.fillRect(0, 0, W, H);
+
+  const cx = W/2, breathPhase = (hapeFrame * (1 + flood) * 0.02) % (Math.PI*2);
+  const breathScale = 1 - flood * 0.06 + Math.sin(breathPhase) * (0.04 - flood*0.03);
+
+  // Lung boundaries
+  function drawLung(lx, ly, isRight) {
+    const w = 90 * breathScale, h = 120 * breathScale;
+    const floodLevel = flood * h * 0.8;
+    ctx.save(); ctx.translate(lx, ly); ctx.rotate(isRight ? 0.08 : -0.08);
+    ctx.beginPath(); ctx.ellipse(0, 0, w, h, 0, 0, Math.PI*2);
+    const papNorm = pap;
+    const lungR = Math.round(lerp(80, 150, papNorm));
+    const lungG = Math.round(lerp(60, 40, papNorm));
+    const lungB = Math.round(lerp(90, 50, papNorm));
+    ctx.fillStyle = `rgba(${lungR}, ${lungG}, ${lungB}, 0.55)`; ctx.fill();
+    ctx.strokeStyle = `rgba(${lungR+40}, ${lungG+20}, ${lungB+20}, 0.4)`; ctx.lineWidth = 1.5; ctx.stroke();
+
+    // Flood fill from bottom
+    if (flood > 0.02) {
+      ctx.save(); ctx.beginPath(); ctx.ellipse(0,0,w,h,0,0,Math.PI*2); ctx.clip();
+      const floodR = Math.round(lerp(100, 255, pap));
+      const wavePts = [];
+      for (let x=-w; x<=w; x+=4) {
+        const waveY = (h-floodLevel)+Math.sin(x/12+hapeFrame*0.08)*4*flood;
+        wavePts.push([x, waveY]);
+      }
+      ctx.beginPath(); ctx.moveTo(-w, h);
+      wavePts.forEach(([x,y]) => ctx.lineTo(x, y));
+      ctx.lineTo(w, h); ctx.closePath();
+      ctx.fillStyle = `rgba(${floodR}, 80, 60, ${0.6*flood})`; ctx.fill();
+
+      // Foam bubbles
+      for (let i=0; i<Math.floor(flood*20); i++) {
+        const bx = -w*0.7 + (i*37.3 % (w*1.4));
+        const by = (h - floodLevel) + (i*13.7 % (floodLevel*0.5)) - 8;
+        ctx.beginPath(); ctx.arc(bx, by, 2.5, 0, Math.PI*2);
+        ctx.fillStyle = `rgba(255,200,180,${0.5*flood})`; ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // Bronchi
+    ctx.beginPath(); ctx.moveTo(0,-h+10); ctx.bezierCurveTo(0,-h*0.4,0,-h*0.1,0,h*0.2);
+    ctx.strokeStyle = 'rgba(140,100,80,0.5)'; ctx.lineWidth = 3; ctx.stroke();
+    for (let i=0; i<4; i++) {
+      const a = isRight ? 0.3+i*0.4 : -0.3-i*0.4;
+      const len = 30 - i*4;
+      const sy = -h*0.2 + i*h*0.22;
+      ctx.beginPath(); ctx.moveTo(0, sy); ctx.lineTo(Math.cos(a)*len, sy + Math.sin(Math.abs(a))*len);
+      ctx.strokeStyle = 'rgba(140,100,80,0.4)'; ctx.lineWidth = 2-i*0.3; ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  drawLung(cx - 95, H/2-10, false);
+  drawLung(cx + 95, H/2-10, true);
+
+  // Central vessels
+  // PA
+  const paR = Math.round(lerp(80,255,pap)), paW = 8 + pap*6;
+  ctx.beginPath(); ctx.moveTo(cx, H*0.2);
+  ctx.bezierCurveTo(cx-20, H*0.25, cx-40, H*0.3, cx-80, H*0.35);
+  ctx.bezierCurveTo(cx+20, H*0.25, cx+40, H*0.3, cx+80, H*0.35);
+  ctx.strokeStyle=`rgba(${paR}, 40, 40, 0.85)`; ctx.lineWidth=paW; ctx.stroke();
+  ctx.font='12px Outfit, sans-serif'; ctx.fillStyle=`rgba(${paR},80,80,0.9)`; ctx.textAlign='center';
+  ctx.fillText(`PAP: ${Math.round(15+pap*35)} mmHg`, cx, H*0.12);
+
+  // SpO2 indicator
+  const spo2Hape = Math.round(98 - edema*40 - flood*20);
+  const so2Col = spo2Hape<75?'#ff3b5c':spo2Hape<85?'#f0952a':'#36e09a';
+  ctx.font='bold 14px Space Mono, monospace'; ctx.fillStyle=so2Col; ctx.textAlign='right';
+  ctx.fillText(`SpO₂: ${Math.max(50,spo2Hape)}%`, W-8, 20);
+
+  ctx.font='12px Outfit, sans-serif'; ctx.fillStyle='#4e6a88'; ctx.textAlign='left';
+  ctx.fillText(hapeStages[currentHapeStage].name, 8, H-8);
+}
+
+function drawHapeCascade() {
+  const canvas = document.getElementById('hapeCascade');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.fillStyle = '#0d1520'; ctx.fillRect(0,0,W,H);
+  const { edema, pap, flood } = hapeState;
+
+  const nodes = [
+    { l:'Hypoxia', x:W/2, y:28, r:24, c:`rgba(${Math.round(100+pap*155)},60,60,0.88)` },
+    { l:'HPV', x:W/2, y:78, r:20, c:`rgba(200,80,60,0.85)` },
+    { l:'↑PAP', x:W/2, y:128, r:20, c:`rgba(${Math.round(180+pap*75)},50,50,0.88)` },
+    { l:'Cap Stress', x:W/2-90, y:180, r:20, c:'rgba(56,140,255,0.8)' },
+    { l:'Inflam', x:W/2+90, y:180, r:20, c:'rgba(240,149,42,0.8)' },
+    { l:'Alveolar Flood', x:W/2, y:240, r:24, c:`rgba(${Math.round(80+flood*175)},${Math.round(40+flood*20)},${Math.round(50+flood*20)},0.9)` },
+    { l:'↑↑ Hypoxia', x:W/2, y:296, r:22, c:'rgba(255,59,92,0.9)' },
+  ];
+  [[0,1],[1,2],[2,3],[2,4],[3,5],[4,5],[5,6]].forEach(([f3,t]) => {
+    const a=nodes[f3], b=nodes[t];
+    const pulse=0.4+Math.sin(hapeFrame*0.05)*0.3*pap;
+    ctx.beginPath(); ctx.moveTo(a.x, a.y+a.r); ctx.lineTo(b.x, b.y-b.r);
+    ctx.strokeStyle=`rgba(100,140,180,${0.2+pulse*0.35})`; ctx.lineWidth=1+pap*1.5; ctx.stroke();
+  });
+  nodes.forEach(n => {
+    ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI*2);
+    ctx.fillStyle=n.c; ctx.fill();
+    ctx.font='12px Outfit,sans-serif'; ctx.fillStyle='white';
+    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(n.l, n.x, n.y);
+  });
+  ctx.textBaseline='alphabetic';
+  ctx.font='12px Space Mono,monospace'; ctx.fillStyle='#a64dff'; ctx.textAlign='left';
+  ctx.fillText('HPV = Hypoxic Pulm Vasoconstriction', 8, H-22);
+  ctx.font='12px Outfit,sans-serif'; ctx.fillStyle='#4e6a88';
+  ctx.fillText('Cap = capillary  Inflam = inflammatory cytokines', 8, H-9);
+}
+
+function startHapeAnim() {
+  hapeAnimRunning = true;
+  function loop() {
+    hapeFrame++;
+    const spd = 0.04;
+    hapeState.edema = lerp(hapeState.edema, hapeTarget.edema, spd);
+    hapeState.pap   = lerp(hapeState.pap,   hapeTarget.pap,   spd);
+    hapeState.flood = lerp(hapeState.flood, hapeTarget.flood, spd);
+    drawHapeMain();
+    if (hapeAnimRunning) requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+renderHapeInfo(hapeStages[0]);
+
+// ═══════════════════════════════════════════════════════════════════
+//  QUIZ MODULE
+// ═══════════════════════════════════════════════════════════════════
+const quizBank = [
+  { cat:'physio', q:'At 5,500m altitude, the inspired O₂ partial pressure (PiO₂) is approximately what fraction of sea-level value?', opts:['~95%','~75%','~55%','~40%'], correct:2, exp:'PiO₂ drops roughly proportionally with barometric pressure. At 5,500m (EBC camp 2 region), PiO₂ is approximately 55% of sea-level values (~85 mmHg vs 150 mmHg at sea level), reflecting the significant hypoxic challenge.' },
+  { cat:'physio', q:'The initial ventilatory response to altitude is driven primarily by which receptor?', opts:['Central chemoreceptors sensing PaCO₂','Peripheral chemoreceptors sensing hypoxemia','Pulmonary stretch receptors','Aortic baroreceptors'], correct:1, exp:'The hypoxic ventilatory response (HVR) is mediated by peripheral chemoreceptors (carotid bodies) sensing low PaO₂. Central chemoreceptors respond to CO₂/pH changes — the subsequent respiratory alkalosis actually partially inhibits ventilation at first.' },
+  { cat:'physio', q:'Which of the following best describes the acid-base pattern seen after 3-5 days at high altitude?', opts:['Compensated metabolic acidosis','Compensated respiratory alkalosis','Uncompensated metabolic alkalosis','Respiratory acidosis'], correct:1, exp:'Hyperventilation causes respiratory alkalosis (high pH, low PaCO₂). Over days, the kidneys compensate by excreting HCO₃⁻ (bicarbonate), resulting in compensated respiratory alkalosis with low PaCO₂, low HCO₃, and near-normal pH.' },
+  { cat:'physio', q:'Which pulmonary vascular change is responsible for HAPE risk?', opts:['Systemic arterial vasoconstriction','Hypoxic pulmonary vasoconstriction (HPV)','Pulmonary vein obstruction','Left heart failure'], correct:1, exp:'HPV is the key mediator. In HAPE-susceptible individuals, an exaggerated, non-uniform HPV leads to patchy over-perfusion of non-constricted vessels, causing high hydrostatic pressure and mechanical capillary leak.' },
+  { cat:'physio', q:'HIF-1α upregulation at altitude triggers which downstream response that increases RBC production?', opts:['Direct bone marrow stimulation','VEGF release causing angiogenesis','Erythropoietin (EPO) secretion from kidney','Transferrin receptor downregulation'], correct:2, exp:'Hypoxia-inducible factor 1-alpha (HIF-1α) directly upregulates EPO gene expression in renal peritubular cells. EPO then stimulates erythropoiesis in bone marrow, increasing RBC mass over weeks to months.' },
+  { cat:'physio', q:'Periodic breathing (Cheyne-Stokes respiration) at altitude is most common at which time?', opts:['During maximal exertion','During sleep','At rest in the afternoon','Immediately upon ascent'], correct:1, exp:'Cheyne-Stokes respiration occurs predominantly during sleep at altitude due to altered chemoreceptor gain and the reduced ventilatory stimulus during non-REM sleep. It causes cyclical apneas and hyperpneas, causing arousals and poor sleep quality.' },
+  { cat:'ams', q:'A climber at 3,800m develops headache, nausea, and fatigue 12 hours after arrival. His Lake Louise score is 4. What is the most appropriate next step?', opts:['Immediate descent to sea level','Administer dexamethasone 8mg IM','Halt ascent, rest, consider ibuprofen or acetazolamide','Emergency Gamow bag treatment'], correct:2, exp:'This is mild-moderate AMS (LLS 3-5). WMS guidelines recommend halting ascent and resting at current altitude. NSAIDs (ibuprofen 600mg q8h) or acetazolamide (250mg BID) treat symptoms. Dexamethasone is reserved for moderate-severe AMS or HACE. Immediate descent is not required for mild AMS.' },
+  { cat:'ams', q:'Which finding is the HALLMARK clinical sign that distinguishes HACE from severe AMS?', opts:['Severe headache unresponsive to NSAIDs','Persistent vomiting for >12 hours','Truncal ataxia on tandem gait testing','Confusion and altered mental status'], correct:2, exp:'Ataxia (specifically truncal ataxia on tandem gait testing) is the hallmark and defining clinical sign of HACE. It indicates cerebellar involvement from cerebral edema. Altered mental status can also occur but ataxia typically comes first and is more specific.' },
+  { cat:'ams', q:'What is the primary pathophysiologic mechanism of vasogenic edema in HACE?', opts:['Cytotoxic sodium pump failure','BBB disruption from VEGF and ↑ICP → protein-rich fluid leak','Osmotic shift due to hyponatremia','Venous thrombosis causing back-pressure'], correct:1, exp:'Vasogenic edema in HACE results from disruption of the blood-brain barrier (BBB), driven by VEGF release (from HIF-1α activation). This allows protein-rich plasma to leak into the brain interstitium. Cytotoxic edema (Na/K-ATPase failure) also contributes but vasogenic is the primary early mechanism.' },
+  { cat:'ams', q:'Lake Louise AMS Score: A climber has a self-reported headache (2), GI upset (1), fatigue/weakness (1), and dizziness/lightheadedness (1). What is the score and diagnosis?', opts:['LLS=3, no AMS','LLS=5, AMS','LLS=6, severe AMS','LLS=4, borderline AMS'], correct:1, exp:'The Lake Louise Score totals 2+1+1+1=5. AMS is diagnosed with a headache AND LLS ≥3 in the context of recent altitude gain. LLS 3-5 indicates mild-moderate AMS. Descent is recommended if symptoms don\'t improve with rest.' },
+  { cat:'ams', q:'Acetazolamide works as AMS prophylaxis primarily by:', opts:['Blocking VEGF receptors in the brain','Inhibiting carbonic anhydrase → metabolic acidosis stimulating ventilation','Directly reducing ICP via diuresis','Blocking HIF-1α gene expression'], correct:1, exp:'Acetazolamide (Diamox) inhibits carbonic anhydrase, causing bicarbonaturia and a mild metabolic acidosis. This acidosis stimulates the peripheral chemoreceptors to increase ventilation, effectively mimicking acclimatization — faster O₂ gain and CO₂ elimination.' },
+  { cat:'ams', q:'MRI in HACE typically shows white matter signal on T2/FLAIR most prominently in which structure?', opts:['Hippocampus','Basal ganglia','Corpus callosum (splenium)','Cerebellar tonsils'], correct:2, exp:'HACE characteristically produces T2/FLAIR hyperintensity in the white matter, most prominently in the corpus callosum — particularly the splenium. This represents vasogenic edema and microhemorrhages from mechanical stretch of white matter tracts due to elevated ICP.' },
+  { cat:'hape', q:'Which clinical feature best distinguishes HAPE from high-altitude pulmonary hypertension?', opts:['Exertional dyspnea','Presence of crackles on auscultation','SpO₂ 88-92%','Dry cough at altitude'], correct:1, exp:'Crackles (rales) on auscultation indicate alveolar fluid — the hallmark of HAPE rather than simple pulmonary hypertension. HPV alone causes exertional dyspnea and mild SpO₂ drop without alveolar flooding. Pink frothy sputum, if present, confirms HAPE.' },
+  { cat:'hape', q:'Which medication is first-line pharmacologic treatment for HAPE when descent is not immediately possible?', opts:['Dexamethasone 8mg IV','Furosemide 40mg IV','Nifedipine 30mg extended-release (SR)','Sildenafil 50mg'], correct:2, exp:'Nifedipine (a calcium channel blocker) reduces pulmonary arterial pressure by 30-50% and is the WMS first-line pharmacologic agent for HAPE. Dose: 10mg IR immediately, then 30mg SR q12h. Tadalafil and sildenafil (PDE5-inhibitors) are alternatives. Dexamethasone is for HACE, not HAPE.' },
+  { cat:'hape', q:'The portable hyperbaric chamber (Gamow bag) treats altitude illness by:', opts:['Delivering concentrated O₂ above atmospheric pressure','Simulating descent by increasing ambient air pressure','Reducing cerebral blood flow via positive pressure','Compressing pulmonary edema fluid'], correct:1, exp:'The Gamow bag (portable hyperbaric bag) inflates to ~2 psi above ambient pressure, which simulates descent of 1,500–2,500m. This dramatically increases PiO₂ and effectively reverses both HACE and HAPE when actual descent is not immediately possible. It is a bridge to descent, not a replacement.' },
+  { cat:'hape', q:'Which of the following is a risk factor for HAPE susceptibility (HAPE-S)?', opts:['Female sex','Age >60','Prior episode of HAPE','Fitness level (VO₂max >50)'], correct:2, exp:'Prior HAPE is the strongest predictor of susceptibility. HAPE-S individuals have an exaggerated HPV response, likely genetic in origin. Male sex, younger age, and high altitude sports participation also increase risk. High fitness level is not protective — in fact, highly fit athletes may ascend too fast.' },
+  { cat:'treat', q:'The WMS guideline recommendation for descent in HACE is:', opts:['Descend immediately ≥500m or until symptoms improve','Take dexamethasone and wait 24 hours for response','Descend only if ataxia is worsening','Apply Gamow bag and reassess in 2 hours'], correct:0, exp:'WMS recommends immediate descent as the definitive treatment for HACE. Any descent is helpful; 300-1000m is typically sufficient for clinical improvement. Dexamethasone (8mg loading then 4mg q6h) is an important adjunct but does NOT replace descent. Gamow bag is a temporizing bridge only.' },
+  { cat:'treat', q:'Dexamethasone mechanism in HACE is best described as:', opts:['Reducing cerebral metabolic demand','Inhibiting HIF-1α gene transcription','Reducing BBB permeability and vasogenic edema','Osmotic diuresis reducing ICP'], correct:2, exp:'Dexamethasone (a glucocorticoid) reduces BBB permeability, decreasing VEGF-mediated vascular leakage and vasogenic edema. It also has anti-inflammatory effects. It does NOT address the underlying cause (altitude hypoxia) and does not replace descent. Dose: 8mg loading, 4mg q6h.' },
+  { cat:'treat', q:'A trekker develops confusion, ataxia, and pink frothy cough at 4,800m. Descent will take 6+ hours. Initial management should include:', opts:['Nifedipine alone; defer dexamethasone','Dexamethasone alone; HAPE is primary concern','Both dexamethasone and nifedipine; HACE + HAPE can co-exist','Furosemide + O₂; avoid steroids at altitude'], correct:2, exp:'HACE and HAPE frequently co-occur. Confusion/ataxia = HACE (treat with dexamethasone 8mg). Pink frothy cough = HAPE (treat with nifedipine 30mg SR + O₂). Both drugs should be given simultaneously. Gamow bag and supplemental O₂ while planning immediate evacuation. WMS guidelines explicitly address co-occurrence.' },
+  { cat:'treat', q:'Acetazolamide prophylaxis is recommended by WMS for which scenario?', opts:['All climbers going above 2,500m','Rapid ascent >500m/day above 3,000m, or history of AMS','Only for HACE-susceptible individuals','Anyone with prior high-altitude exposure'], correct:1, exp:'WMS recommends acetazolamide (125-250mg BID) prophylaxis for: (1) rapid ascent >500m/day sleeping altitude above 3,000m, (2) history of altitude illness, or (3) inability to acclimatize slowly due to operational constraints. It is not needed for gradual ascent profiles in those with no prior altitude illness history.' },
+];
+
+let quizCategory = 'all', quizIdx = 0, answered = {}, filteredQ = [];
+let scoreC = 0, scoreW = 0;
+
+function setQuizCat(cat) {
+  quizCategory = cat;
+  quizIdx = 0; answered = {}; scoreC = 0; scoreW = 0;
+  document.querySelectorAll('.quiz-cat-item').forEach(el => el.classList.toggle('active', el.dataset.cat===cat));
+  filteredQ = cat==='all' ? [...quizBank] : quizBank.filter(q => q.cat===cat);
+  renderQuiz();
+}
+
+function renderQuiz() {
+  if (filteredQ.length === 0) return;
+  const q = filteredQ[quizIdx];
+  const total = filteredQ.length;
+  document.getElementById('quizProgressText').textContent = `Question ${quizIdx+1} of ${total}`;
+  document.getElementById('quizProgressFill').style.width = `${((quizIdx+1)/total*100)}%`;
+  document.getElementById('scoreCorrect').textContent = `✓ ${scoreC}`;
+  document.getElementById('scoreWrong').textContent = `✗ ${scoreW}`;
+  document.getElementById('quizQuestion').innerHTML = `<span class="q-num">${q.cat.toUpperCase()} · Q${quizIdx+1}</span>${q.q}`;
+  const letters = ['A','B','C','D'];
+  const isAnswered = answered[quizIdx] !== undefined;
+  document.getElementById('quizOptions').innerHTML = q.opts.map((o, i) => {
+    let cls = 'quiz-option';
+    if (isAnswered) {
+      if (i === q.correct) cls += ' correct';
+      else if (i === answered[quizIdx]) cls += ' wrong';
+      else cls += ' dimmed';
+    }
+    return `<button class="${cls} ${isAnswered?'answered':''}" onclick="answerQuiz(${i})" ${isAnswered?'disabled':''}>
+      <span class="option-letter">${letters[i]}</span><span>${o}</span></button>`;
+  }).join('');
+  const exp = document.getElementById('quizExplanation');
+  document.getElementById('expText').textContent = q.exp;
+  exp.classList.toggle('show', isAnswered);
+  document.getElementById('btnPrev').disabled = quizIdx === 0;
+  document.getElementById('btnNext').textContent = quizIdx === total-1 ? 'Finish' : 'Next →';
+}
+
+function answerQuiz(choice) {
+  if (answered[quizIdx] !== undefined) return;
+  const q = filteredQ[quizIdx];
+  answered[quizIdx] = choice;
+  if (choice === q.correct) scoreC++; else scoreW++;
+  renderQuiz();
+}
+
+function quizNav(dir) {
+  const total = filteredQ.length;
+  quizIdx = Math.max(0, Math.min(total-1, quizIdx+dir));
+  renderQuiz();
+}
+
+function resetQuiz() {
+  quizIdx = 0; answered = {}; scoreC = 0; scoreW = 0;
+  renderQuiz();
+}
+
+setQuizCat('all');
+
+// ── Viewport scaler ─────────────────────────────────────────────────
+// Keeps the app at a fixed 1200×720 design size and scales it
+// uniformly to fit whatever screen it's on (like a "zoom to fit").
+(function() {
+  const DESIGN_W = 1200, DESIGN_H = 720;
+  const app = document.querySelector('.app');
+  function rescale() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const scale = Math.min(vw / DESIGN_W, vh / DESIGN_H);
+    app.style.transform = `scale(${scale})`;
+    // Centre if viewport is larger than design
+    const offsetX = Math.max(0, (vw - DESIGN_W * scale) / 2);
+    const offsetY = Math.max(0, (vh - DESIGN_H * scale) / 2);
+    app.style.transformOrigin = 'top left';
+    app.style.marginLeft = offsetX + 'px';
+    app.style.marginTop  = offsetY + 'px';
+  }
+  rescale();
+  window.addEventListener('resize', rescale);
+})();
+
+
+</script>
+</body>
+</html>
