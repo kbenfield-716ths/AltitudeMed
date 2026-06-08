@@ -1095,6 +1095,260 @@ input[type=range]::-webkit-slider-thumb {
   .quiz-cat-item { border-left: none; border-bottom: 3px solid transparent; flex-shrink: 0; }
   .quiz-cat-item.active { border-bottom-color: var(--green); border-left-color: transparent; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   MODULE 5 — MEDICATIONS
+═══════════════════════════════════════════════════════════════ */
+.meds-layout {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  padding: 1rem 1.2rem;
+  gap: 1rem;
+}
+
+.meds-section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.1rem;
+}
+.meds-section-sub {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-bottom: 0.6rem;
+}
+
+/* AMS protocol box */
+.ams-protocol {
+  background: var(--surface2);
+  border: 1.5px solid rgba(245,168,64,0.35);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.ams-protocol-header {
+  background: rgba(245,168,64,0.1);
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid rgba(245,168,64,0.25);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.ams-protocol-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--warn);
+}
+.ams-badge {
+  font-size: 0.68rem;
+  font-family: 'Space Mono', monospace;
+  background: var(--warn);
+  color: var(--bg);
+  padding: 0.15rem 0.5rem;
+  font-weight: 700;
+}
+.ams-protocol-body {
+  padding: 0.75rem 1rem;
+}
+.ams-diag-note {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  font-style: italic;
+  margin-bottom: 0.65rem;
+  border-left: 2px solid var(--warn);
+  padding-left: 0.6rem;
+}
+.ams-steps { list-style: none; padding: 0; margin: 0 0 0.75rem; }
+.ams-step {
+  font-size: 0.85rem;
+  color: var(--text-mid);
+  padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(30,45,66,0.5);
+  display: flex;
+  gap: 0.5rem;
+}
+.ams-step:last-child { border-bottom: none; }
+.ams-step.urgent { color: var(--warn); font-weight: 600; }
+.ams-wms {
+  background: rgba(92,197,255,0.06);
+  border: 1px solid rgba(92,197,255,0.2);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  display: flex;
+  gap: 0.5rem;
+}
+.wms-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 0.05rem;
+}
+
+/* Drug cards */
+.drug-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.drug-card-header {
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+.drug-card-header:hover { background: rgba(255,255,255,0.03); }
+.drug-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.drug-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.drug-badge {
+  font-size: 0.65rem;
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  color: var(--bg);
+  padding: 0.12rem 0.45rem;
+}
+.drug-class {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+.drug-uses {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+}
+.drug-use-chip {
+  font-size: 0.7rem;
+  background: rgba(92,197,255,0.08);
+  border: 1px solid rgba(92,197,255,0.18);
+  color: var(--text-dim);
+  padding: 0.1rem 0.45rem;
+}
+.drug-expand-arrow {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.drug-expand-arrow.open { transform: rotate(90deg); }
+
+.drug-body {
+  border-top: 1px solid var(--border);
+  padding: 0.75rem 1rem;
+  background: rgba(6,9,15,0.5);
+  display: none;
+}
+.drug-body.show { display: block; }
+
+.drug-dosing-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+.drug-dose-row {
+  display: flex;
+  gap: 0.75rem;
+  background: var(--surface2);
+  padding: 0.45rem 0.7rem;
+  flex-wrap: wrap;
+}
+.dose-indication {
+  font-size: 0.75rem;
+  font-weight: 600;
+  min-width: 140px;
+}
+.dose-value {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.dose-timing {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-top: 0.12rem;
+}
+
+.drug-section-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  margin-bottom: 0.35rem;
+  margin-top: 0.6rem;
+}
+.drug-section-label:first-child { margin-top: 0; }
+.drug-mech-text {
+  font-size: 0.82rem;
+  color: var(--text-mid);
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+.drug-pills-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.4rem;
+}
+.drug-pearl-box {
+  flex: 1;
+  min-width: 200px;
+  background: rgba(245,168,64,0.06);
+  border: 1px solid rgba(245,168,64,0.2);
+  padding: 0.5rem 0.7rem;
+  border-radius: 2px;
+}
+.drug-ci-box {
+  flex: 1;
+  min-width: 200px;
+  background: rgba(255,77,106,0.06);
+  border: 1px solid rgba(255,77,106,0.2);
+  padding: 0.5rem 0.7rem;
+  border-radius: 2px;
+}
+.drug-pearl-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--warn);
+  margin-bottom: 0.3rem;
+}
+.drug-ci-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--danger);
+  margin-bottom: 0.3rem;
+}
+.drug-pearl-text, .drug-ci-text {
+  font-size: 0.78rem;
+  color: var(--text-mid);
+  line-height: 1.5;
+}
+
 </style>
 </head>
 <body>
@@ -1140,6 +1394,9 @@ input[type=range]::-webkit-slider-thumb {
   <div class="mod-tab" data-mod="hape" onclick="activateMod('hape')">
     <span class="tab-dot" style="background:var(--hape)"></span>🫁 HAPE
   </div>
+  <div class="mod-tab" data-mod="meds" onclick="activateMod('meds')">
+    <span class="tab-dot" style="background:#e879f9"></span>💊 Medications
+  </div>
   <div class="mod-tab" data-mod="quiz" onclick="activateMod('quiz')">
     <span class="tab-dot" style="background:var(--green)"></span>✎ Self-Assessment
   </div>
@@ -1168,6 +1425,12 @@ input[type=range]::-webkit-slider-thumb {
   </div>
   <div class="left-nav-item" data-mod="hape" onclick="activateMod('hape')">
     <span class="left-nav-dot" style="background:var(--hape)"></span>🫁 HAPE
+  </div>
+
+  <div class="left-nav-divider"></div>
+  <div class="left-nav-section-label">Reference</div>
+  <div class="left-nav-item" data-mod="meds" onclick="activateMod('meds')">
+    <span class="left-nav-dot" style="background:#e879f9"></span>💊 Medications
   </div>
 
   <div class="left-nav-divider"></div>
@@ -1393,6 +1656,16 @@ input[type=range]::-webkit-slider-thumb {
 </div>
 </div>
 
+
+<!-- ══════════════════════════════════════
+     MODULE 5: MEDICATIONS
+══════��═══════════════════════════════ -->
+<div class="module-panel" id="panel-meds">
+<div class="meds-layout" id="medsLayout">
+  <!-- content injected by JS -->
+</div>
+</div>
+
 </div><!-- content-area -->
 
 </div><!-- main-body -->
@@ -1432,6 +1705,7 @@ function activateMod(mod) {
   document.querySelector(`.left-nav-item[data-mod="${mod}"]`)?.classList.add('active');
   if (mod === 'amshace' && !brainAnimRunning) startBrainAnim();
   if (mod === 'hape' && !hapeAnimRunning) startHapeAnim();
+  if (mod === 'meds') renderMeds();
 }
 
 // Keep switchModule for any internal calls
@@ -2545,52 +2819,88 @@ let targetBrainState = { ef:0, vd:0, hf:0, hern:0, pet:0 };
 const stageData = [
   { name:'Normal Brain', label:'Sea Level / Low Altitude', labelColor:'#36e09a', altitude:'< 2,500 m', altPct:0.05,
     findings:[{t:'normal',s:'Normal ICP (~10 mmHg)'},{t:'normal',s:'Intact blood-brain barrier (BBB)'},{t:'normal',s:'Autoregulation maintains CBF'},{t:'info',s:'SpO₂ >96% at sea level'}],
-    mechs:[{h:false,t:'Normal cerebrovascular autoregulation'},{h:false,t:'CO₂/pH balanced ventilatory drive'},{h:false,t:'AQP4 water channels at equilibrium'}],
+    mechs:[
+      {h:false,t:'BBB tight junctions between endothelial cells prevent fluid leakage into parenchyma'},
+      {h:false,t:'Rigid skull: any volume increase directly raises ICP — critical concept for altitude pathology'},
+      {h:false,t:'Normal CBF autoregulation maintains perfusion across wide range of BP'},
+      {h:false,t:'AQP4 water channels at equilibrium — no net fluid movement'}
+    ],
     treatment:null,
     ef:0, vd:0, hf:0, hern:0, pet:0 },
   { name:'Acute Hypoxia', label:'Ascent Phase', labelColor:'#f0952a', altitude:'2,500–3,500 m', altPct:0.35,
-    findings:[{t:'warn',s:'SpO₂ drops ~85–90%'},{t:'warn',s:'HIF-1α upregulation begins'},{t:'warn',s:'Cerebral vasodilation (↑CBF)'},{t:'info',s:'Compensatory hyperventilation'}],
-    mechs:[{h:true,t:'Hypoxia → HIF-1α ↑ → VEGF release'},{h:false,t:'Vasodilation: ↑NO, ↓PaCO₂ offset'},{h:false,t:'BBB stress; tight junctions affected'}],
+    findings:[{t:'warn',s:'SpO₂ drops ~85–90%'},{t:'warn',s:'HIF-1α upregulation begins'},{t:'warn',s:'Cerebral vasodilation (↑CBF 20–40%)'},{t:'info',s:'Compensatory hyperventilation starts'}],
+    mechs:[
+      {h:true,t:'Hypoxia triggers cerebral vasodilation — a protective reflex to maintain O₂ delivery'},
+      {h:true,t:'↑CBF by 20–40% elevates ICP slightly — the primary driver of altitude headache'},
+      {h:false,t:'Note: headache at this stage is from vasodilation, NOT edema'},
+      {h:false,t:'HIF-1α activates VEGF — early signal for downstream BBB stress'}
+    ],
     treatment:null,
     ef:0.05, vd:0.3, hf:0.3, hern:0, pet:0 },
   { name:'Early AMS', label:'Acute Mountain Sickness', labelColor:'#f0952a', altitude:'3,000–4,500 m', altPct:0.5,
-    findings:[{t:'warn',s:'Headache (cardinal symptom)'},{t:'warn',s:'Nausea, fatigue, dizziness'},{t:'warn',s:'Mild vasogenic edema'},{t:'info',s:'Lake Louise Score 3–5'}],
-    mechs:[{h:true,t:'VEGF → BBB permeability ↑ (vasogenic edema)'},{h:true,t:'Fluid shifts to brain interstitium'},{h:false,t:'SNS → fluid retention (ADH ↑)'}],
+    findings:[{t:'warn',s:'Headache — cardinal symptom (LL Score ≥3)'},{t:'warn',s:'Nausea, fatigue, dizziness'},{t:'warn',s:'Mild vasogenic edema beginning'},{t:'info',s:'No ataxia — not yet HACE'}],
+    mechs:[
+      {h:true,t:'Vasodilation + early BBB disruption → slight interstitial fluid accumulation'},
+      {h:true,t:'VEGF-mediated ↑ capillary permeability — protein-rich fluid enters interstitium'},
+      {h:false,t:'Individuals with intrinsically lower intracranial compliance more susceptible'},
+      {h:false,t:'SNS activation → ADH release → fluid retention worsens edema tendency'}
+    ],
     treatment:{ label:'WMS: Early AMS Management', items:[
-      {icon:'⬇',t:'Halt ascent or descend 300–500m if symptoms don\'t improve'},
-      {icon:'💊',t:'Acetazolamide 250 mg BID (prophylaxis/treatment)'},
-      {icon:'💊',t:'Ibuprofen 600 mg q8h for headache'},
-      {icon:'🅾',t:'Supplemental O₂ if available'},
+      {icon:'⛔',t:'Halt ascent — do not go higher until symptom-free for 24h'},
+      {icon:'💊',t:'Ibuprofen 400–600 mg q6–8h or acetaminophen for headache'},
+      {icon:'💊',t:'Acetazolamide 250 mg BID — speeds acclimatization via forced HCO₃⁻ excretion'},
+      {icon:'🤢',t:'Ondansetron or prochlorperazine for nausea/vomiting'},
+      {icon:'⬇',t:'Descend if no improvement in 24h, or if any ataxia develops'},
     ]},
     ef:0.2, vd:0.5, hf:0.45, hern:0, pet:0 },
   { name:'Moderate AMS', label:'Worsening Cerebral Stress', labelColor:'#f0952a', altitude:'4,000–5,500 m', altPct:0.67,
-    findings:[{t:'warn',s:'Severe pounding headache'},{t:'warn',s:'Persistent vomiting'},{t:'danger',s:'Cytotoxic edema emerging'},{t:'danger',s:'ICP rising, venous outflow compromised'}],
-    mechs:[{h:true,t:'Cytotoxic edema: Na⁺/K⁺-ATPase failure'},{h:true,t:'Interstitial + intracellular fluid'},{h:false,t:'Venous HTN reduces CSF resorption'}],
-    treatment:{ label:'WMS: Moderate AMS', items:[
-      {icon:'⬇',t:'Descend minimum 300–500m'},
-      {icon:'💊',t:'Dexamethasone 8 mg loading, then 4 mg q6h'},
-      {icon:'💊',t:'Acetazolamide 250 mg BID'},
-      {icon:'🅾',t:'Supplemental O₂ 2–4 L/min'},
+    findings:[{t:'warn',s:'Severe headache unresponsive to analgesics'},{t:'warn',s:'Persistent vomiting'},{t:'danger',s:'Sulci visibly narrowing on imaging'},{t:'danger',s:'ICP rising; venous outflow compromised'}],
+    mechs:[
+      {h:true,t:'Progressive vasogenic edema from BBB disruption — predominantly white matter'},
+      {h:true,t:'VEGF-mediated permeability increase allows protein-rich fluid into interstitium'},
+      {h:false,t:'Sulci narrow as brain swells against the rigid skull'},
+      {h:false,t:'Venous hypertension reduces CSF resorption — positive feedback loop'}
+    ],
+    treatment:{ label:'WMS: Moderate AMS / Pre-HACE', items:[
+      {icon:'⬇',t:'Descend minimum 300–500 m — definitive treatment'},
+      {icon:'💊',t:'Dexamethasone 4–8 mg loading (IV/IM/PO), then 4 mg q6h during descent'},
+      {icon:'💊',t:'Acetazolamide 250 mg BID — continue to support acclimatization'},
+      {icon:'🅾',t:'Supplemental O₂ 2–4 L/min — reduces cerebral vasodilation'},
+      {icon:'🚫',t:'Do NOT use dexamethasone to push ascent — "dex rebound" is real'},
     ]},
     ef:0.5, vd:0.7, hf:0.65, hern:0, pet:0.1 },
   { name:'HACE', label:'High-Altitude Cerebral Edema', labelColor:'#ff3b5c', altitude:'> 4,500 m', altPct:0.82,
-    findings:[{t:'danger',s:'Ataxia — hallmark of HACE'},{t:'danger',s:'Altered consciousness, confusion'},{t:'danger',s:'T2 signal in corpus callosum (MRI)'},{t:'danger',s:'Markedly elevated ICP; sulci effaced'}],
-    mechs:[{h:true,t:'Vasogenic + cytotoxic edema: both active'},{h:true,t:'Corpus callosum stretch from ↑ICP'},{h:false,t:'Cerebral venous thrombosis possible'}],
-    treatment:{ label:'⚠ HACE Emergency', items:[
-      {icon:'🚨',t:'IMMEDIATE descent ≥300–1000m (life-saving)'},
-      {icon:'💊',t:'Dexamethasone 8 mg IM/IV STAT then 4 mg q6h'},
-      {icon:'🅾',t:'O₂ 2–4 L/min; Gamow bag if descent delayed'},
-      {icon:'🏥',t:'Evacuate to definitive care'},
+    findings:[{t:'danger',s:'Ataxia — hallmark field test: failed tandem gait'},{t:'danger',s:'Altered consciousness, confusion, drowsiness'},{t:'danger',s:'MRI: T2/FLAIR signal in corpus callosum splenium'},{t:'danger',s:'Petechiae in white matter; sulci effaced'}],
+    mechs:[
+      {h:true,t:'MRI hallmark: T2 hyperintensity in white matter — especially the corpus callosum splenium'},
+      {h:true,t:'Microhemorrhages (petechiae) from mechanical stress on small vessels'},
+      {h:true,t:'Despite severity, these changes are often REVERSIBLE with prompt descent (vasogenic mechanism)'},
+      {h:false,t:'Corpus callosal stretch from ↑ICP — explains ataxia and altered mentation'}
+    ],
+    treatment:{ label:'⚠ HACE EMERGENCY', items:[
+      {icon:'🚨',t:'IMMEDIATE descent ≥300–1,000 m — even small descent can be life-saving'},
+      {icon:'💊',t:'Dexamethasone 8 mg IV/IM loading dose — administer NOW, before or during descent'},
+      {icon:'💊',t:'Dexamethasone 8 mg IV/IM loading dose — administer NOW, before or during descent'},
+      {icon:'🅾',t:'O₂ 2–4 L/min — target SpO₂ ≥90%; directly reduces cerebral vasodilation'},
+      {icon:'🎒',t:'Gamow bag if immediate descent impossible — simulates ~1,500 m descent'},
+      {icon:'💊',t:'Dex maintenance: 4 mg q6h during entire evacuation'},
+      {icon:'🚫',t:'Do NOT leave patient alone — altered consciousness risks airway compromise'},
     ]},
     ef:0.78, vd:0.85, hf:0.85, hern:0.3, pet:0.6 },
   { name:'Severe HACE', label:'Impending Herniation', labelColor:'#ff3b5c', altitude:'> 5,000m (untreated)', altPct:1.0,
-    findings:[{t:'danger',s:'Coma / obtundation'},{t:'danger',s:'Tonsillar/uncal herniation risk'},{t:'danger',s:'Brainstem compression'},{t:'danger',s:'Death without immediate Rx'}],
-    mechs:[{h:true,t:'Transtentorial herniation: CN III compression'},{h:true,t:'Brainstem: Duret hemorrhages possible'},{h:false,t:'Rx: Descent + Dex 8mg + O₂ + Gamow'}],
-    treatment:{ label:'☠ Severe HACE — EMERGENCY', items:[
+    findings:[{t:'danger',s:'Coma / obtundation'},{t:'danger',s:'Tonsillar or uncal herniation signs'},{t:'danger',s:'Extensive petechiae and midline shift'},{t:'danger',s:'Death without immediate treatment'}],
+    mechs:[
+      {h:true,t:'Massive vasogenic edema causing uncal or transtentorial herniation'},
+      {h:true,t:'Extensive microhemorrhages throughout white matter'},
+      {h:true,t:'Despite severity, MRI changes often reversible if treated rapidly (vasogenic, not cytotoxic)'},
+      {h:false,t:'Rx: Immediate descent + Dex 8mg IV + max O₂ + Gamow bag'}
+    ],
+    treatment:{ label:'☠ Severe HACE — IMMEDIATE EVACUATION', items:[
       {icon:'🚨',t:'Immediate descent — no delay for anything'},
-      {icon:'💊',t:'Dexamethasone 8mg IV/IM NOW'},
-      {icon:'🅾',t:'Max O₂; Gamow bag continuous'},
-      {icon:'🏥',t:'Medevac / helicopter if available'},
+      {icon:'💊',t:'Dexamethasone 8 mg IV/IM NOW; 4 mg q6h throughout'},
+      {icon:'🅾',t:'Maximum O₂; Gamow bag continuous if descent delayed'},
+      {icon:'🏥',t:'Airway protection — altered consciousness risks aspiration'},
+      {icon:'🚁',t:'Medevac / helicopter evacuation if available'},
     ]},
     ef:1.0, vd:1.0, hf:1.0, hern:1.0, pet:1.0 },
 ];
@@ -2828,30 +3138,59 @@ let hapeTarget = { edema:0, pap:0, flood:0 };
 
 const hapeStages = [
   { name:'Normal Lungs', edema:0, pap:0, flood:0,
-    symptoms:['Dry breath sounds bilaterally','SpO₂ >96%','Normal exercise tolerance','Normal RR'],
-    mechanism:['PVR normal','HPV minimal','Pulm cap pressure normal','Gas exchange intact'],
-    treatment:['No treatment needed','Standard ascent profile','Consider prophylaxis if HAPE-S hx'],
-    wms:['Ascent rate: ≤500m/day above 3000m','Rest day every 3 days','Acclimatization protocol'] },
+    symptoms:['Dry breath sounds bilaterally','SpO₂ >96%','Normal exercise tolerance','Normal RR, normal CXR'],
+    mechanism:[
+      'Normal pulmonary vasculature — HPV is minimal at sea level',
+      'Alveolar-capillary interface intact: efficient O₂/CO₂ exchange',
+      'Normal mean PAP ~15 mmHg; no excess fluid in alveoli',
+      'AQP5 water channels regulate minimal alveolar fluid normally'
+    ],
+    treatment:['No treatment needed at sea level','Standard ascent protocol: ≤500 m/day above 3,000 m','Consider nifedipine 30 mg XR prophylaxis if known HAPE-susceptible history'],
+    wms:['Ascent rate ≤500m/day above 3,000m; rest day every 3 days','Physical fitness is NOT protective — HAPE occurs in elite athletes','Prior HAPE history is the strongest single risk factor'] },
+
   { name:'Pulm Hypertension', edema:0.05, pap:0.4, flood:0,
-    symptoms:['Exertional dyspnea at altitude','↓ exercise capacity','Dry cough (early)','SpO₂ 88–92%'],
-    mechanism:['Hypoxic pulm vasoconstriction (HPV)','Uneven HPV → ↑ cap stress','Endothelin-1 ↑, NO ↓','Sympathetic activation'],
-    treatment:['Halt or limit ascent','Rest at current altitude','Low-threshold for supplemental O₂'],
-    wms:['HPV is physiologic in all persons','HAPE-S individuals: exaggerated HPV','Nifedipine prophylaxis 30mg ER QD if HAPE-S'] },
+    symptoms:['Exertional dyspnea at altitude','↓ exercise tolerance vs. peers','Dry cough beginning','SpO₂ 88–92%; hilar vessels enlarged on CXR'],
+    mechanism:[
+      'Hypoxic pulmonary vasoconstriction (HPV) — physiologic in everyone, but exaggerated in HAPE-susceptible (HAPE-S) individuals',
+      'Central (hilar) vessels enlarge — seen on CXR before any infiltrates appear',
+      'Heterogeneous HPV: under-constricted vascular beds will receive dangerously high flow',
+      'Endothelin-1 ↑, NO ↓ — vasoconstrictor-vasodilator imbalance drives pressure up'
+    ],
+    treatment:['Halt or slow ascent in HAPE-S individuals','Low-threshold for supplemental O₂ — directly reverses HPV','Nifedipine 30 mg XR prophylactically if HAPE-S and ascent required'],
+    wms:['WMS: HAPE-susceptible defined by ≥1 prior episode','Nifedipine 30 mg XR daily is first-line prophylaxis for HAPE-S','Tadalafil 10 mg BID or salmeterol 125 mcg BID are alternatives'] },
+
   { name:'Early HAPE', edema:0.3, pap:0.65, flood:0.3,
-    symptoms:['Dyspnea at rest','Dry then wet cough','SpO₂ 75–85%','↓ exercise tolerance; crackles basal'],
-    mechanism:['Elevated PAP → mechanical cap leak','Protein-rich alveolar fluid','Inflammatory cytokines: IL-6, TNF-α','Partial flooding of dependent zones'],
-    treatment:['Immediate descent (priority)','Nifedipine 30mg SR or 10mg IR','Supplemental O₂ 2–4 L/min','Gamow bag if descent not possible'],
-    wms:['WMS Grade: Mild HAPE (SpO₂ 76–85%)','Descent ≥300m typical but any helps','Nifedipine reduces PAP ~30%','Tadalafil/sildenafil as alternatives'] },
+    symptoms:['Dyspnea at rest (key symptom)','Dry cough progressing to productive','SpO₂ 76–85%; crackles at bases','SpO₂ disproportionately lower than altitude peers — red flag'],
+    mechanism:[
+      'Heterogeneous HPV: under-constricted beds receive high-pressure flow → mechanical "stress failure" of alveolar-capillary membrane',
+      'Right lung affected first — anatomical distribution of blood flow',
+      'Protein-rich (non-cardiogenic) fluid leaks into alveoli — PCWP is normal/low',
+      'Inflammatory cytokines (IL-6, TNF-α) are secondary, not the primary driver'
+    ],
+    treatment:['Descent immediately — first priority even before medications','Nifedipine 10 mg IR now → 30 mg XR maintenance — reduces PAP ~30%','Supplemental O₂ 2–4 L/min — most critical intervention','Gamow bag at 2 PSI if immediate descent impossible; strict rest'],
+    wms:['WMS Grade: Mild HAPE (SpO₂ 76–85%)','O₂ and descent are definitive treatments','Nifedipine preferred; tadalafil 10 mg BID or salmeterol 125 mcg BID are alternatives','REST is mandatory — exertion dramatically worsens pulmonary hemodynamics'] },
+
   { name:'Frank HAPE', edema:0.65, pap:0.85, flood:0.6,
-    symptoms:['Severe dyspnea','Pink frothy sputum','SpO₂ <75%','Cyanosis; crackles bilateral'],
-    mechanism:['Flooded alveoli: gas exchange failure','Intrapulm shunting','V/Q mismatch severe','Hypoxemia driving cerebral edema too'],
-    treatment:['Emergency descent NOW','Nifedipine 10mg IR STAT then 30mg SR','O₂ 4–8 L/min','Gamow bag at 2 psi continuously'],
-    wms:['WMS Grade: Moderate-Severe HAPE','Both HACE and HAPE can co-occur','Dex if AMS/HACE signs also present','Portable hyperbaric therapy = descent equivalent'] },
+    symptoms:['Pink frothy sputum — classic finding','Bilateral crackles on auscultation','SpO₂ <75%; cyanosis','Bilateral "bat wing" infiltrates on CXR, often right-predominant'],
+    mechanism:[
+      'Widespread capillary stress failure — BAL: high protein, few WBCs (non-cardiogenic)',
+      'Classic CXR: bilateral patchy infiltrates, asymmetric, often right-predominant',
+      'V/Q mismatch severe — intrapulmonary shunting drives hypoxemia',
+      'Inflammation is secondary to mechanical stress failure, not the primary mechanism'
+    ],
+    treatment:['EMERGENCY descent by any means available','Nifedipine 10 mg IR STAT → 30 mg XR; continuous O₂ 4–8 L/min','Gamow bag continuously at 2 PSI while awaiting or during descent','Assess for co-occurring HACE — check tandem gait and mental status'],
+    wms:['WMS Grade: Moderate–Severe HAPE (SpO₂ <75%)','Do NOT give furosemide — HAPE patients are often volume-depleted','HACE may co-occur in up to 14% of HAPE cases','Dexamethasone only if altered mentation suggests concurrent HACE'] },
+
   { name:'Severe HAPE', edema:1.0, pap:1.0, flood:1.0,
-    symptoms:['Air hunger; unable to speak','SpO₂ <65%','Altered consciousness','Impending cardiopulmonary failure'],
-    mechanism:['Complete alveolar flooding','Right heart failure (cor pulmonale)','Systemic hypoxia → multi-organ failure','HACE co-occurring in many cases'],
-    treatment:['Maximum urgency — immediately descend','Nifedipine 10mg sublingual','O₂ at maximum flow','Intubation if needed; ICU-level care'],
-    wms:['Mortality high without immediate descent','Gamow bag + O₂ can be bridge','Epinephrine if hemodynamic collapse','Hospital-level care required urgently'] },
+    symptoms:['Severe dyspnea at rest; unable to speak in sentences','SpO₂ <65% on room air; cyanosis','Altered consciousness — assess for concurrent HACE','Near-complete opacification on CXR'],
+    mechanism:[
+      'Massive alveolar flooding — despite severity, HAPE resolves faster than other ARDS causes with descent + O₂',
+      'Right heart strain from massive PAP elevation → risk of cor pulmonale',
+      'HACE co-occurring in many cases — tandem gait test critical even now',
+      'Mortality: <5% treated promptly; ~50% without treatment'
+    ],
+    treatment:['Maximum urgency — immediate evacuation by any means','Continuous high-flow O₂; nifedipine 10 mg sublingual if severe hypotension not present','Gamow bag + O₂ as bridge if descent unavailable','Dexamethasone 8 mg if altered mentation suggests HACE; airway protection'],
+    wms:['Evacuation is the single most critical intervention','HAPE is fully reversible with prompt descent + O₂ in most cases','Hospital-level care required for severe cases','Epinephrine for hemodynamic collapse; intubation if airway compromised'] },
 ];
 
 function setHapeStage(i) {
@@ -3005,6 +3344,189 @@ function startHapeAnim() {
 }
 
 renderHapeInfo(hapeStages[0]);
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  MEDICATIONS MODULE
+// ═══════════════════════════════════════════════════════════════════
+
+const AMS_STEPS = [
+  { text: 'Halt ascent — do not go higher until symptom-free for 24 h', urgent: false },
+  { text: 'Rest at current altitude', urgent: false },
+  { text: 'Ibuprofen 400–600 mg q6–8h or acetaminophen for headache', urgent: false },
+  { text: 'Ondansetron or prochlorperazine for nausea/vomiting', urgent: false },
+  { text: 'Acetazolamide 250 mg BID — speeds acclimatization', urgent: false },
+  { text: 'Supplemental O₂ if available (low flow 1–2 L/min)', urgent: false },
+  { text: 'Descend if no improvement in 24h, or if any ataxia or AMS develops', urgent: true },
+];
+
+const DRUGS_REF = [
+  {
+    name: 'Acetazolamide', cls: 'Carbonic anhydrase inhibitor',
+    color: '#5cc5ff', badge: 'AMS',
+    uses: ['AMS prophylaxis', 'AMS treatment', 'Accelerated acclimatization'],
+    dosing: [
+      { ind: 'Prophylaxis', dose: '125–250 mg BID', timing: 'Start 1–2 days before ascent; continue 2 days past highest point' },
+      { ind: 'AMS Treatment', dose: '250 mg BID', timing: 'Continue until symptoms fully resolve' },
+    ],
+    mechanism: 'Inhibits carbonic anhydrase → forced HCO₃⁻ excretion in urine → mild metabolic acidosis → sustained ventilatory drive without alkalosis feedback. Effectively accelerates the renal acclimatization that normally takes 1–2 days.',
+    pearls: '125 mg BID is equally effective with fewer side effects (polyuria, paresthesias, flat-tasting carbonated drinks). Does NOT treat HACE or HAPE.',
+    ci: 'Sulfonamide allergy, severe renal impairment, pregnancy (relative). Stevens-Johnson risk is very low but real.',
+    wms: 'Grade A for AMS prophylaxis in rapid ascent. Preferred over dexamethasone as first-line. Start 1–2 days before ascent.',
+  },
+  {
+    name: 'Dexamethasone', cls: 'Glucocorticoid',
+    color: '#f5a840', badge: 'HACE',
+    uses: ['HACE treatment — first-line', 'Severe AMS bridge to descent', 'AMS prophylaxis — 2nd line only'],
+    dosing: [
+      { ind: 'HACE loading', dose: '8 mg IV/IM/PO', timing: 'Immediately on diagnosis — before or during descent' },
+      { ind: 'HACE maintenance', dose: '4 mg q6h', timing: 'Continue through descent and until symptoms resolve' },
+      { ind: 'Severe AMS bridge', dose: '4 mg q6h', timing: 'Bridge to descent only — NOT to push ascent' },
+      { ind: 'Prophylaxis (2nd line)', dose: '2 mg q6h or 4 mg q12h', timing: 'Only when acetazolamide contraindicated' },
+    ],
+    mechanism: 'Stabilizes BBB tight junctions, downregulates VEGF expression, reduces vasogenic edema fluid. Does NOT treat underlying hypoxia — descent remains mandatory.',
+    pearls: '⚠ "Dex rebound": symptoms recur when drug wears off if patient stays at altitude. NEVER use to enable continued ascent after HACE. Not effective for HAPE.',
+    ci: 'Active untreated infection (relative). Caution with uncontrolled diabetes. Short courses generally safe.',
+    wms: 'WMS 2019: 8 mg loading dose, then 4 mg q6h. Descent is mandatory regardless of clinical response to dexamethasone.',
+  },
+  {
+    name: 'Nifedipine', cls: 'Calcium channel blocker',
+    color: '#ff4d6a', badge: 'HAPE',
+    uses: ['HAPE treatment — first-line when descent delayed', 'HAPE prophylaxis in susceptible individuals'],
+    dosing: [
+      { ind: 'HAPE treatment', dose: '10 mg IR → 30 mg XR', timing: '10 mg IR for rapid onset, then 30 mg XR q12–24h for sustained effect' },
+      { ind: 'HAPE prophylaxis', dose: '30 mg XR daily', timing: 'Start day before ascent; for HAPE-susceptible individuals only' },
+    ],
+    mechanism: 'Blocks voltage-gated Ca²⁺ channels in pulmonary vascular smooth muscle → inhibits hypoxic pulmonary vasoconstriction (HPV) → reduces pulmonary artery pressure → reduces capillary stress failure. Reduces PAP ~30%.',
+    pearls: 'Monitor blood pressure — can cause systemic hypotension. Most effective drug specifically targeting the PAP mechanism. NOT indicated for HACE.',
+    ci: 'Significant systemic hypotension. Concurrent use of strong CYP3A4 inhibitors.',
+    wms: 'WMS 2019: First-line pharmacotherapy for HAPE when descent cannot be immediate. Preferred prophylactic agent for HAPE-susceptible individuals.',
+  },
+  {
+    name: 'Tadalafil / Sildenafil', cls: 'PDE-5 inhibitor',
+    color: '#b466ff', badge: 'HAPE',
+    uses: ['HAPE prophylaxis — alternative to nifedipine', 'HAPE treatment — alternative when nifedipine unavailable'],
+    dosing: [
+      { ind: 'Tadalafil prophylaxis', dose: '10 mg BID', timing: 'Start 1 day before ascent' },
+      { ind: 'Sildenafil prophylaxis', dose: '50 mg TID', timing: 'Start 1 day before ascent' },
+    ],
+    mechanism: 'Inhibits PDE-5 → ↑cGMP → NO-mediated pulmonary vasodilation → reduces PAP. Same downstream effect as nifedipine but via the nitric oxide / cGMP pathway rather than Ca²⁺ blockade.',
+    pearls: 'Growing evidence for tadalafil specifically. Alternative when nifedipine is not tolerated or unavailable. Avoid with concurrent nitrate use (severe hypotension risk).',
+    ci: 'Concurrent nitrate therapy (absolute — risk of severe hypotension). Retinal disease. Significant hypotension.',
+    wms: 'WMS 2019: Alternative to nifedipine for HAPE prophylaxis. Less published evidence than nifedipine but clinically used.',
+  },
+  {
+    name: 'Salmeterol (inhaled)', cls: 'β₂-agonist (long-acting)',
+    color: '#3eeaa8', badge: 'HAPE',
+    uses: ['HAPE prophylaxis — alternative/adjunct', 'Enhanced alveolar fluid clearance'],
+    dosing: [
+      { ind: 'Prophylaxis / adjunct', dose: '125 mcg BID inhaled', timing: 'Start before ascent; for HAPE-susceptible individuals' },
+    ],
+    mechanism: 'β₂ receptor stimulation activates Na⁺/K⁺-ATPase and epithelial Na⁺ channels (ENaC) in alveolar epithelium → enhanced active transport of Na⁺ (and water) out of alveolar space → improved alveolar fluid clearance.',
+    pearls: 'Unique mechanism — targets fluid clearance rather than PAP directly. Can be used alongside nifedipine for susceptible individuals. Less evidence than nifedipine as primary prophylaxis.',
+    ci: 'QT prolongation risk when combined with other QT-prolonging agents. Tachycardia.',
+    wms: 'WMS 2019: Alternative prophylactic agent. Particularly useful as adjunct or when nifedipine/tadalafil are contraindicated.',
+  },
+];
+
+let _drugOpen = {};
+
+function renderMeds() {
+  const container = document.getElementById('medsLayout');
+  if (!container) return;
+
+  const stepsHTML = AMS_STEPS.map((s, i) =>
+    `<li class="ams-step${s.urgent ? ' urgent' : ''}"><span>${i+1}.</span><span>${s.text}</span></li>`
+  ).join('');
+
+  const drugsHTML = DRUGS_REF.map((d, i) => {
+    const dosing = d.dosing.map(row => `
+      <div class="drug-dose-row">
+        <div style="min-width:160px">
+          <div class="dose-indication" style="color:${d.color}">${row.ind}</div>
+        </div>
+        <div>
+          <div class="dose-value">${row.dose}</div>
+          <div class="dose-timing">${row.timing}</div>
+        </div>
+      </div>`).join('');
+
+    const chips = d.uses.map(u => `<span class="drug-use-chip">${u}</span>`).join('');
+    const isOpen = !!_drugOpen[i];
+
+    return `<div class="drug-card" id="drugcard-${i}">
+      <div class="drug-card-header" onclick="toggleDrug(${i})">
+        <div>
+          <div class="drug-name-row">
+            <span class="drug-name">${d.name}</span>
+            <span class="drug-badge" style="background:${d.color}">${d.badge}</span>
+            <span class="drug-class">${d.cls}</span>
+          </div>
+          <div class="drug-uses">${chips}</div>
+        </div>
+        <span class="drug-expand-arrow${isOpen ? ' open' : ''}">▶</span>
+      </div>
+      <div class="drug-body${isOpen ? ' show' : ''}" id="drugbody-${i}">
+        <div class="drug-section-label">Dosing</div>
+        <div class="drug-dosing-grid">${dosing}</div>
+        <div class="drug-section-label">Mechanism</div>
+        <div class="drug-mech-text">${d.mechanism}</div>
+        <div class="drug-pills-row">
+          <div class="drug-pearl-box">
+            <div class="drug-pearl-label">Clinical Pearls</div>
+            <div class="drug-pearl-text">${d.pearls}</div>
+          </div>
+          <div class="drug-ci-box">
+            <div class="drug-ci-label">Contraindications</div>
+            <div class="drug-ci-text">${d.ci}</div>
+          </div>
+        </div>
+        <div class="drug-section-label" style="margin-top:0.5rem">WMS Guideline</div>
+        <div class="ams-wms" style="margin-top:0">
+          <span class="wms-tag">WMS</span>
+          <span style="font-size:0.78rem;color:var(--text-mid)">${d.wms}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="meds-section-title">Clinical Protocols &amp; Drug Reference</div>
+    <div class="meds-section-sub">WMS 2019 guidelines · Click any drug to expand dosing, mechanism, and pearls</div>
+
+    <div class="ams-protocol">
+      <div class="ams-protocol-header">
+        <span class="ams-protocol-title">Acute Mountain Sickness (AMS) Protocol</span>
+        <span class="ams-badge">Non-Emergency</span>
+      </div>
+      <div class="ams-protocol-body">
+        <div class="ams-diag-note"><strong>Diagnose when:</strong> Lake Louise Score ≥3 with headache after ascent, in the absence of ataxia or altered consciousness.</div>
+        <ol class="ams-steps">${stepsHTML}</ol>
+        <div class="ams-wms">
+          <span class="wms-tag">WMS</span>
+          <span>Halt ascent for AMS. Descent indicated if symptoms worsen or do not improve within 24h. Do not ascend with AMS. Acetazolamide speeds recovery but is not a substitute for descent if symptoms are progressing.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="meds-section-title" style="margin-top:0.5rem">Drug Reference</div>
+    <div class="meds-section-sub">Altitude medicine pharmacology — mechanism, dosing, WMS guidance</div>
+    <div style="display:flex;flex-direction:column;gap:0.5rem">${drugsHTML}</div>
+
+    <div style="height:1rem"></div>
+  `;
+}
+
+function toggleDrug(i) {
+  _drugOpen[i] = !_drugOpen[i];
+  const body = document.getElementById('drugbody-' + i);
+  const arrow = document.querySelector('#drugcard-' + i + ' .drug-expand-arrow');
+  if (body) body.classList.toggle('show', !!_drugOpen[i]);
+  if (arrow) arrow.classList.toggle('open', !!_drugOpen[i]);
+}
+
+// Render on first activation — called from activateMod('meds')
+
 
 // ═══════════════════════════════════════════════════════════════════
 //  QUIZ MODULE
