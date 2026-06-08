@@ -1702,7 +1702,7 @@ function activateMod(mod) {
   document.querySelectorAll('.left-nav-item').forEach(el => el.classList.remove('active'));
   document.querySelector(`.left-nav-item[data-mod="${mod}"]`)?.classList.add('active');
   if (mod === 'amshace' && !brainAnimRunning) startBrainAnim();
-  if (mod === 'hape' && !hapeAnimRunning) // startHapeAnim(); // replaced by SVG diagram
+  if (mod === 'hape') { /* SVG already rendered by setHapeStage init */ }
   if (mod === 'meds') renderMeds();
 }
 

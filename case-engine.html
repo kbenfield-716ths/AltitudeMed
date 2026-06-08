@@ -704,6 +704,7 @@ const CASES = [
     topic: 'AMS',
     difficulty: 'Beginner',
     location: '3,440 m · Namche',
+    blurb: '28F trekker — headache and fatigue after arriving at altitude',
     system: `You are an attending physician running a Socratic clinical case simulation for a medical student learning altitude medicine. Your role is to present a case, answer their questions as a clinical data source, and guide them to arrive at the diagnosis and treatment plan themselves — without telling them directly.
 
 CASE DETAILS (do not volunteer all at once — reveal as the student asks):
@@ -737,6 +738,7 @@ INTERACTION RULES:
     topic: 'HACE',
     difficulty: 'Intermediate',
     location: '4,800 m · Lobuche',
+    blurb: '34M mountaineer found confused and unsteady by tentmates at 4 AM',
     system: `You are an attending physician running a Socratic clinical case simulation for a medical student learning altitude medicine. Your role is to present a case, answer their questions as a clinical data source, and guide them to arrive at the diagnosis and treatment plan themselves — without telling them directly.
 
 CASE DETAILS (do not volunteer all at once — reveal as the student asks):
@@ -767,6 +769,7 @@ INTERACTION RULES:
     topic: 'HAPE',
     difficulty: 'Intermediate',
     location: '4,200 m · Manang',
+    blurb: '31M trail runner — dry cough and dyspnea halting him during an acclimatisation hike',
     system: `You are an attending physician running a Socratic clinical case simulation for a medical student learning altitude medicine. Your role is to present a case, answer their questions as a clinical data source, and guide them to arrive at the diagnosis and treatment plan themselves — without telling them directly.
 
 CASE DETAILS (do not volunteer all at once — reveal as the student asks):
@@ -794,10 +797,11 @@ INTERACTION RULES:
   },
   {
     id: 'diamox-dilemma',
-    title: 'The Diamox Dilemma',
+    title: 'Tingling at Tengboche',
     topic: 'Pharm',
     difficulty: 'Advanced',
     location: '3,800 m · Tengboche',
+    blurb: '38M trekker — bilateral hand and foot tingling since last night, wondering if he should descend',
     system: `You are an attending physician running a Socratic clinical case simulation for a medical student learning altitude medicine. Your role is to present a case, answer their questions as a clinical data source, and guide them to arrive at the correct assessment without telling them directly.
 
 CASE DETAILS (do not volunteer all at once — reveal as the student asks):
@@ -828,10 +832,11 @@ INTERACTION RULES:
   },
   {
     id: 'hape-susceptible',
-    title: 'The HAPE-Susceptible Return',
+    title: 'Overnight Chest Tightness',
     topic: 'HAPE',
     difficulty: 'Advanced',
     location: '3,600 m · Val d\'Isère',
+    blurb: '45F ski guide — woke at 2 AM with chest tightness, SpO₂ lower than expected',
     system: `You are an attending physician running a Socratic clinical case simulation for a medical student learning altitude medicine. Your role is to present a case, answer their questions as a clinical data source, and guide them to arrive at the diagnosis and treatment plan themselves — without telling them directly.
 
 CASE DETAILS (do not volunteer all at once — reveal as the student asks):
@@ -887,10 +892,10 @@ function renderCaseList() {
   list.innerHTML = CASES.map(c => `
     <div class="case-card" id="card-${c.id}" onclick="startCase('${c.id}')">
       <div class="case-card-topic">
-        <span class="topic-badge ${c.topic.toLowerCase()}">${c.topic}</span>
         <span class="diff-badge ${c.difficulty.toLowerCase()}">${c.difficulty}</span>
       </div>
       <div class="case-card-title">${c.title}</div>
+      <div class="case-card-blurb">${c.blurb || ''}</div>
       <div class="case-card-meta">${c.location}</div>
     </div>
     ${c.id !== CASES[CASES.length-1].id ? '' : ''}
