@@ -747,13 +747,55 @@ input[type=range]::-webkit-slider-thumb {
    MODULE 3 — HAPE
 ═══════════════════════════════════════════ */
 .hape-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
   overflow: hidden;
 }
+.hape-main-row {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  min-height: 0;
+  overflow: hidden;
+}
+.hape-svg-col {
+  width: 280px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+.hape-svg-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0.75rem;
+  width: 100%;
+}
+.hape-info-col {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 0;
+  overflow: hidden;
+  min-height: 0;
+}
+.hape-info-col .hape-info-section {
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.hape-info-col .hape-info-section:nth-child(2n) { border-right: none; }
+.hape-info-col .hape-info-section:nth-child(n+3) { border-bottom: none; }
 
 .hape-ctrl {
   grid-column: 1 / 3;
@@ -781,20 +823,7 @@ input[type=range]::-webkit-slider-thumb {
 .hape-stage-btn:hover { border-color: var(--hape); color: var(--hape); }
 .hape-stage-btn.active { background: var(--hape); color: var(--bg); border-color: var(--hape); }
 
-.hape-canvas-left {
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  min-height: 0;
-}
-
-.hape-canvas-right {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  min-height: 0;
-}
+/* hape-canvas-left / hape-canvas-right replaced by hape-svg-col */
 
 .hape-canvas-title {
   font-family: 'Space Mono', monospace;
@@ -808,34 +837,7 @@ input[type=range]::-webkit-slider-thumb {
   flex-shrink: 0;
 }
 
-.hape-canvas-wrap {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  min-height: 0;
-  padding: 0.3rem;
-}
-
-.hape-canvas-wrap canvas {
-  max-width: 100%;
-  max-height: 100%;
-}
-
-.hape-info-bar {
-  grid-column: 1 / 3;
-  border-top: 1px solid var(--border);
-  background: var(--surface);
-  padding: 0.6rem 1rem;
-  display: flex;
-  gap: 1.5rem;
-  overflow-x: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-  flex-shrink: 0;
-  min-height: 0;
-}
+/* hape-canvas-wrap / hape-info-bar replaced by hape-svg-wrap / hape-info-col */
 
 .hape-info-section {
   display: flex;
@@ -1373,10 +1375,7 @@ input[type=range]::-webkit-slider-thumb {
     <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M7 1h4v4M11 1L5.5 6.5M2 3h3v6H2V3z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <span>WMS Practice Guidelines</span>
   </a>
-  <div class="ncme-badge">
-    <svg width="9" height="9" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="#4e6a88" stroke-width="1.2"/><text x="5" y="7.5" font-size="12" text-anchor="middle" fill="#4e6a88" font-family="sans-serif">i</text></svg>
-    NCME Questions — Coming Soon
-  </div>
+
   <a class="wms-link" href="case-engine.html" style="margin-left:0.5rem; border-color:var(--green); color:var(--green);">
     ← Case Engine
   </a>
@@ -1569,29 +1568,28 @@ input[type=range]::-webkit-slider-thumb {
     </span>
   </div>
 
-  <div class="hape-canvas-left" style="grid-column:1/3">
-    <div class="hape-canvas-title">Pulmonary Vasculature &amp; Edema</div>
-    <div class="hape-canvas-wrap">
-      <canvas id="hapeMain" width="720" height="320"></canvas>
+  <div class="hape-main-row">
+    <div class="hape-svg-col">
+      <div class="hape-canvas-title">Pulmonary Vasculature &amp; Edema</div>
+      <div id="hapeLungSVG" class="hape-svg-wrap"></div>
     </div>
-  </div>
-
-  <div class="hape-info-bar">
-    <div class="hape-info-section">
-      <div class="hape-info-section-title">Key Symptoms</div>
-      <div id="hapeSymptoms"></div>
-    </div>
-    <div class="hape-info-section">
-      <div class="hape-info-section-title">Pathophysiology</div>
-      <div id="hapeMechanism"></div>
-    </div>
-    <div class="hape-info-section">
-      <div class="hape-info-section-title">Treatment</div>
-      <div id="hapeTreatment"></div>
-    </div>
-    <div class="hape-info-section">
-      <div class="hape-info-section-title">WMS Guideline Highlights</div>
-      <div id="hapeWMS"></div>
+    <div class="hape-info-col">
+      <div class="hape-info-section">
+        <div class="hape-info-section-title">Key Symptoms</div>
+        <div id="hapeSymptoms"></div>
+      </div>
+      <div class="hape-info-section">
+        <div class="hape-info-section-title">Pathophysiology</div>
+        <div id="hapeMechanism"></div>
+      </div>
+      <div class="hape-info-section">
+        <div class="hape-info-section-title">Treatment</div>
+        <div id="hapeTreatment"></div>
+      </div>
+      <div class="hape-info-section">
+        <div class="hape-info-section-title">WMS Guideline Highlights</div>
+        <div id="hapeWMS"></div>
+      </div>
     </div>
   </div>
 
@@ -1704,7 +1702,7 @@ function activateMod(mod) {
   document.querySelectorAll('.left-nav-item').forEach(el => el.classList.remove('active'));
   document.querySelector(`.left-nav-item[data-mod="${mod}"]`)?.classList.add('active');
   if (mod === 'amshace' && !brainAnimRunning) startBrainAnim();
-  if (mod === 'hape' && !hapeAnimRunning) startHapeAnim();
+  if (mod === 'hape' && !hapeAnimRunning) // startHapeAnim(); // replaced by SVG diagram
   if (mod === 'meds') renderMeds();
 }
 
@@ -3137,7 +3135,7 @@ let hapeState = { edema:0, pap:0, flood:0 };
 let hapeTarget = { edema:0, pap:0, flood:0 };
 
 const hapeStages = [
-  { name:'Normal Lungs', edema:0, pap:0, flood:0,
+  { name:'Normal Lungs', edema:0, pap:0, flood:0, rightOpacity:0, leftOpacity:0, vesselWidth:1, hilarSize:1,
     symptoms:['Dry breath sounds bilaterally','SpO₂ >96%','Normal exercise tolerance','Normal RR, normal CXR'],
     mechanism:[
       'Normal pulmonary vasculature — HPV is minimal at sea level',
@@ -3148,7 +3146,7 @@ const hapeStages = [
     treatment:['No treatment needed at sea level','Standard ascent protocol: ≤500 m/day above 3,000 m','Consider nifedipine 30 mg XR prophylaxis if known HAPE-susceptible history'],
     wms:['Ascent rate ≤500m/day above 3,000m; rest day every 3 days','Physical fitness is NOT protective — HAPE occurs in elite athletes','Prior HAPE history is the strongest single risk factor'] },
 
-  { name:'Pulm Hypertension', edema:0.05, pap:0.4, flood:0,
+  { name:'Pulm Hypertension', edema:0.05, pap:0.4, flood:0, rightOpacity:0, leftOpacity:0, vesselWidth:1.9, hilarSize:1.6,
     symptoms:['Exertional dyspnea at altitude','↓ exercise tolerance vs. peers','Dry cough beginning','SpO₂ 88–92%; hilar vessels enlarged on CXR'],
     mechanism:[
       'Hypoxic pulmonary vasoconstriction (HPV) — physiologic in everyone, but exaggerated in HAPE-susceptible (HAPE-S) individuals',
@@ -3159,7 +3157,7 @@ const hapeStages = [
     treatment:['Halt or slow ascent in HAPE-S individuals','Low-threshold for supplemental O₂ — directly reverses HPV','Nifedipine 30 mg XR prophylactically if HAPE-S and ascent required'],
     wms:['WMS: HAPE-susceptible defined by ≥1 prior episode','Nifedipine 30 mg XR daily is first-line prophylaxis for HAPE-S','Tadalafil 10 mg BID or salmeterol 125 mcg BID are alternatives'] },
 
-  { name:'Early HAPE', edema:0.3, pap:0.65, flood:0.3,
+  { name:'Early HAPE', edema:0.3, pap:0.65, flood:0.3, rightOpacity:0.38, leftOpacity:0.06, vesselWidth:2.1, hilarSize:1.8,
     symptoms:['Dyspnea at rest (key symptom)','Dry cough progressing to productive','SpO₂ 76–85%; crackles at bases','SpO₂ disproportionately lower than altitude peers — red flag'],
     mechanism:[
       'Heterogeneous HPV: under-constricted beds receive high-pressure flow → mechanical "stress failure" of alveolar-capillary membrane',
@@ -3170,7 +3168,7 @@ const hapeStages = [
     treatment:['Descent immediately — first priority even before medications','Nifedipine 10 mg IR now → 30 mg XR maintenance — reduces PAP ~30%','Supplemental O₂ 2–4 L/min — most critical intervention','Gamow bag at 2 PSI if immediate descent impossible; strict rest'],
     wms:['WMS Grade: Mild HAPE (SpO₂ 76–85%)','O₂ and descent are definitive treatments','Nifedipine preferred; tadalafil 10 mg BID or salmeterol 125 mcg BID are alternatives','REST is mandatory — exertion dramatically worsens pulmonary hemodynamics'] },
 
-  { name:'Frank HAPE', edema:0.65, pap:0.85, flood:0.6,
+  { name:'Frank HAPE', edema:0.65, pap:0.85, flood:0.6, rightOpacity:0.66, leftOpacity:0.52, vesselWidth:2.3, hilarSize:1.95,
     symptoms:['Pink frothy sputum — classic finding','Bilateral crackles on auscultation','SpO₂ <75%; cyanosis','Bilateral "bat wing" infiltrates on CXR, often right-predominant'],
     mechanism:[
       'Widespread capillary stress failure — BAL: high protein, few WBCs (non-cardiogenic)',
@@ -3181,7 +3179,7 @@ const hapeStages = [
     treatment:['EMERGENCY descent by any means available','Nifedipine 10 mg IR STAT → 30 mg XR; continuous O₂ 4–8 L/min','Gamow bag continuously at 2 PSI while awaiting or during descent','Assess for co-occurring HACE — check tandem gait and mental status'],
     wms:['WMS Grade: Moderate–Severe HAPE (SpO₂ <75%)','Do NOT give furosemide — HAPE patients are often volume-depleted','HACE may co-occur in up to 14% of HAPE cases','Dexamethasone only if altered mentation suggests concurrent HACE'] },
 
-  { name:'Severe HAPE', edema:1.0, pap:1.0, flood:1.0,
+  { name:'Severe HAPE', edema:1.0, pap:1.0, flood:1.0, rightOpacity:0.88, leftOpacity:0.83, vesselWidth:2.5, hilarSize:2.05,
     symptoms:['Severe dyspnea at rest; unable to speak in sentences','SpO₂ <65% on room air; cyanosis','Altered consciousness — assess for concurrent HACE','Near-complete opacification on CXR'],
     mechanism:[
       'Massive alveolar flooding — despite severity, HAPE resolves faster than other ARDS causes with descent + O₂',
@@ -3193,11 +3191,52 @@ const hapeStages = [
     wms:['Evacuation is the single most critical intervention','HAPE is fully reversible with prompt descent + O₂ in most cases','Hospital-level care required for severe cases','Epinephrine for hemodynamic collapse; intubation if airway compromised'] },
 ];
 
+function buildLungSVG(idx) {
+  const s = hapeStages[idx];
+  const r = s.rightOpacity, l = s.leftOpacity, vw = s.vesselWidth, hs = s.hilarSize;
+  const bgFill = '#0d1520', bgStroke = '#1e2d42';
+  const spineFill = '#2a3a52', bronchFill = '#3a5580';
+  // Lung fill: dark reddish-pink, gets cooler/grayer as edema fills
+  const rFill = `rgb(${Math.round(145-r*80)},${Math.round(55-r*40)},${Math.round(65-r*45)})`;
+  const lFill = `rgb(${Math.round(145-l*80)},${Math.round(55-l*40)},${Math.round(65-l*45)})`;
+  // Opacification overlay: pale blue-white (consolidation)
+  const rOpac = r > 0 ? `<path d="M 90,32 Q 60,32 40,50 Q 22,70 22,100 Q 22,140 38,160 Q 55,178 80,178 Q 90,178 90,165 Z" fill="rgba(170,195,230,${(r*0.72).toFixed(2)})"/>` : '';
+  const lOpac = l > 0 ? `<path d="M 110,32 Q 140,32 160,50 Q 178,70 178,100 Q 178,135 165,158 Q 150,178 125,178 Q 112,178 110,165 Z" fill="rgba(170,195,230,${(l*0.72).toFixed(2)})"/>` : '';
+  const vStr = (opacity) => `rgba(220,90,90,${opacity.toFixed(2)})`;
+  const rightVessels = [[90,50,55,90],[90,62,42,100],[90,74,38,120],[90,86,44,140],[90,100,56,155]]
+    .map(([x1,y1,x2,y2],i) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${vStr(0.4+vw*0.1)}" stroke-width="${(vw*(0.8+i*0.08)).toFixed(1)}" stroke-linecap="round"/>`).join('');
+  const leftVessels = [[110,50,145,90],[110,62,158,100],[110,74,162,120],[110,86,156,140],[110,100,144,155]]
+    .map(([x1,y1,x2,y2],i) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${vStr(0.4+vw*0.1)}" stroke-width="${(vw*(0.8+i*0.08)).toFixed(1)}" stroke-linecap="round"/>`).join('');
+  const hilarStroke = `rgba(200,80,80,${(0.45+vw*0.1).toFixed(2)})`;
+  // SpO2 calculated from stage
+  const spo2 = Math.max(50, Math.round(98 - s.edema*40 - s.flood*20));
+  const spo2Col = spo2 < 75 ? '#ff3b5c' : spo2 < 85 ? '#f0952a' : '#36e09a';
+  const papVal = Math.round(15 + s.pap * 35);
+  return `<svg viewBox="0 0 200 230" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:240px;display:block;margin:0 auto">
+    <rect x="10" y="10" width="180" height="190" rx="18" fill="${bgFill}" stroke="${bgStroke}" stroke-width="1.5"/>
+    <rect x="93" y="30" width="14" height="160" rx="4" fill="${spineFill}" opacity="0.7"/>
+    <path d="M 90,32 Q 60,32 40,50 Q 22,70 22,100 Q 22,140 38,160 Q 55,178 80,178 Q 90,178 90,165 Z" fill="${rFill}" stroke="#5a3a3a" stroke-width="1.5"/>
+    <path d="M 110,32 Q 140,32 160,50 Q 178,70 178,100 Q 178,135 165,158 Q 150,178 125,178 Q 112,178 110,165 Z" fill="${lFill}" stroke="#5a3a3a" stroke-width="1.5"/>
+    ${rOpac}${lOpac}
+    ${rightVessels}${leftVessels}
+    <circle cx="90" cy="88" r="${(8*hs).toFixed(1)}" fill="none" stroke="${hilarStroke}" stroke-width="${(vw*1.2).toFixed(1)}"/>
+    <circle cx="110" cy="88" r="${(8*hs).toFixed(1)}" fill="none" stroke="${hilarStroke}" stroke-width="${(vw*1.2).toFixed(1)}"/>
+    <rect x="96" y="15" width="8" height="28" rx="3" fill="${bronchFill}"/>
+    <path d="M 100,42 Q 90,50 90,56" stroke="${bronchFill}" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M 100,42 Q 110,50 110,56" stroke="${bronchFill}" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <text x="100" y="215" text-anchor="middle" font-size="9" fill="#4e6a88" font-family="Outfit,sans-serif">Stage ${idx+1} of 5</text>
+    <text x="190" y="25" text-anchor="end" font-size="9.5" font-weight="bold" fill="${spo2Col}" font-family="Space Mono,monospace">SpO₂ ${spo2}%</text>
+    <text x="100" y="228" text-anchor="middle" font-size="9" fill="rgba(180,100,100,0.8)" font-family="Space Mono,monospace">PAP ~${papVal} mmHg</text>
+  </svg>`;
+}
+
 function setHapeStage(i) {
   currentHapeStage = i;
   const s = hapeStages[i];
   hapeTarget = { edema: s.edema, pap: s.pap, flood: s.flood };
   document.querySelectorAll('.hape-stage-btn').forEach((b,idx) => b.classList.toggle('active', idx===i));
+  const svgEl = document.getElementById('hapeLungSVG');
+  if (svgEl) svgEl.innerHTML = buildLungSVG(i);
   renderHapeInfo(s);
 }
 
@@ -3344,6 +3383,11 @@ function startHapeAnim() {
 }
 
 renderHapeInfo(hapeStages[0]);
+// Initialize SVG diagram for stage 0
+(function() {
+  const svgEl = document.getElementById('hapeLungSVG');
+  if (svgEl) svgEl.innerHTML = buildLungSVG(0);
+})();
 
 
 // ═══════════════════════════════════════════════════════════════════
